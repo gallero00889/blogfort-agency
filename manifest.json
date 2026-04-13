@@ -1,0 +1,39 @@
+{
+  "name": "BlogFort Agency",
+  "short_name": "BlogFort",
+  "description": "Plataforma profesional de contenido SEO con IA — BlogFort Agency",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#1a56db",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nuevo artículo",
+      "url": "/?action=new",
+      "description": "Crear un nuevo artículo SEO"
+    },
+    {
+      "name": "Traductor",
+      "url": "/?tool=translator",
+      "description": "Abrir el traductor profesional"
+    }
+  ]
+}

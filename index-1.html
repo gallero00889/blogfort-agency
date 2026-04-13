@@ -1,0 +1,2797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a56db">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BlogFort">
+<meta name="description" content="Plataforma profesional de contenido SEO con IA — BlogFort Agency">
+<link rel="manifest" href="manifest.json">
+<title>BlogFort</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --ink:#0d0d0d; --paper:#ffffff; --cream:#f5f7fa; --gold:#f59e0b;
+  --gold-l:#fef3c7; --blue:#1a56db; --blue-l:#eff6ff; --blue-m:#3b82f6;
+  --teal:#0d9488; --teal-l:#f0fdfa; --rust:#dc2626;
+  --mist:#e5e7eb; --mid:#6b7280; --border:#e2e8f0; --white:#fff;
+  --success:#059669; --warning:#d97706;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--ink);}
+
+/* ── SHELL ── */
+.shell{display:flex;flex-direction:column;height:100svh;min-height:100%;overflow:hidden;}
+
+/* TOP NAV */
+.topnav{
+  background:linear-gradient(135deg,#0d0d0d 0%,#1a1a2e 100%);
+  padding:calc(8px + var(--safe-top)) 14px 8px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+.brand{font-family:'Playfair Display',serif;font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;}
+.brand-icon{font-size:20px;}
+.brand-name{color:#fff;}
+.brand-name em{color:var(--gold);font-style:normal;}
+.brand-tag{font-size:9px;background:linear-gradient(135deg,var(--blue),var(--blue-m));color:#fff;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:1px;margin-left:2px;vertical-align:middle;}
+.nav-spacer{flex:1;}
+.nav-actions{display:flex;align-items:center;gap:8px;}
+.api-key-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.65);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.api-key-btn:hover{background:rgba(255,255,255,0.14);color:#fff;}
+.api-key-btn.set{border-color:rgba(245,158,11,0.6);color:var(--gold);}
+.plan-badge{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#000;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;letter-spacing:.5px;transition:all .2s;}
+.plan-badge:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(245,158,11,.35);}
+
+/* TAB BAR */
+.tabbar{
+  display:flex;background:#e8edf2;border-bottom:2px solid #c8d4e0;
+  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.tabbar::-webkit-scrollbar{display:none;}
+.tab{
+  flex-shrink:0;padding:9px 13px;font-size:11.5px;font-weight:600;color:#4b5563;
+  border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;
+  transition:all .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;gap:5px;
+}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);background:rgba(26,86,219,.06);}
+.tab:hover:not(.active){color:#1e293b;background:rgba(0,0,0,.04);}
+
+/* CONTENT */
+.content{flex:1;overflow:hidden;background:var(--paper);}
+.screen{display:none;height:100%;overflow-y:auto;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── EDITOR ── */
+.editor-wrap{display:flex;flex:1;overflow:hidden;height:100%;}
+.editor-main{flex:1;overflow-y:auto;padding:24px 24px 60px;scrollbar-width:thin;background:#fff;}
+
+.doc-toolbar{
+  background:#f8fafc;border-bottom:1px solid var(--border);
+  padding:7px 12px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;
+  flex-shrink:0;
+}
+.tb{background:none;border:none;width:30px;height:28px;border-radius:5px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--mid);
+  font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.tb:hover{background:#e2e8f0;color:var(--ink);}
+.tb-sep{width:1px;height:18px;background:var(--border);margin:0 2px;}
+.tb-spacer{flex:1;}
+
+/* Action bar */
+.action-bar{
+  display:flex;align-items:center;gap:4px;padding:6px 12px;
+  background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;
+  flex-wrap:wrap;
+}
+.act-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;
+  font-size:11px;font-weight:600;border:1px solid var(--border);cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .15s;background:#fff;color:var(--ink);}
+.act-btn:hover{background:#f1f5f9;border-color:#94a3b8;}
+.act-btn.danger{color:var(--rust);border-color:#fecaca;}
+.act-btn.danger:hover{background:#fef2f2;}
+.act-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.act-btn.primary:hover{background:#1d4ed8;}
+.act-btn.success{background:var(--success);color:#fff;border-color:var(--success);}
+.act-btn.success:hover{background:#047857;}
+
+.seo-pill{
+  display:flex;align-items:center;gap:5px;background:var(--teal-l);
+  border:1px solid rgba(13,148,136,0.25);border-radius:7px;padding:4px 10px;cursor:pointer;
+}
+.seo-pill-lbl{font-size:10px;color:var(--teal);font-weight:700;}
+.seo-pill-num{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--teal);}
+
+.lang-select-wrap{display:flex;align-items:center;gap:5px;}
+.lang-select{font-family:'DM Sans',sans-serif;font-size:11px;border:1px solid var(--border);
+  border-radius:6px;padding:4px 8px;background:white;color:var(--ink);outline:none;cursor:pointer;}
+
+.cat-badge{
+  display:inline-block;background:var(--gold-l);color:#92400e;
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 9px;border-radius:4px;margin-bottom:10px;cursor:pointer;border:1px solid rgba(245,158,11,.2);
+}
+.cat-badge-select{
+  background:var(--gold-l);color:#92400e;
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 10px;border-radius:6px;border:1px solid rgba(245,158,11,.35);
+  cursor:pointer;font-family:'DM Sans',sans-serif;outline:none;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2392400e'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+  padding-right:24px;
+}
+.cat-badge-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,.15);}
+.title-input{
+  width:100%;font-family:'Playfair Display',serif;font-size:30px;font-weight:900;
+  color:#0d0d0d;border:none;background:#fff;outline:none;
+  line-height:1.2;resize:none;overflow:hidden;letter-spacing:-0.5px;
+}
+.title-input::placeholder{color:#cbd5e1;}
+.meta-row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;}
+.meta-f{flex:1;min-width:120px;}
+.meta-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:3px;}
+.meta-inp{
+  width:100%;background:#fff;border:1px solid var(--border);border-radius:6px;
+  padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);outline:none;
+}
+.meta-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1);}
+.divider{height:1px;background:var(--border);margin:14px 0;position:relative;}
+.divider::after{content:'§';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:#fff;color:#cbd5e1;padding:0 8px;font-family:'Playfair Display',serif;}
+.body-input{
+  width:100%;min-height:400px;font-family:'DM Sans',sans-serif;font-size:15.5px;
+  line-height:1.9;color:#0d0d0d;border:none;background:#fff;outline:none;
+  resize:none;letter-spacing:0.1px;
+}
+.body-input::placeholder{color:#cbd5e1;}
+.wcount{text-align:right;font-size:10px;color:var(--mid);margin-top:10px;font-family:'DM Mono',monospace;}
+.wcount span{color:var(--blue);font-weight:600;}
+
+/* AI DRAWER */
+.ai-drawer{
+  width:275px;min-width:275px;background:#f8fafc;border-left:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+@media(max-width:700px){.ai-drawer{display:none;}}
+.drawer-tabs{display:flex;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:5;}
+.dtab{flex:1;padding:10px 4px;font-size:10px;font-weight:700;color:var(--mid);border:none;
+  background:none;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.3px;font-family:'DM Sans',sans-serif;}
+.dtab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.dpanel{padding:14px;display:none;}
+.dpanel.active{display:block;}
+.ds-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);
+  font-weight:700;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+
+/* AI prompt box */
+.ai-box{background:white;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ai-box-head{background:linear-gradient(135deg,var(--ink),#1a1a2e);color:var(--gold);font-size:9px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;padding:7px 10px;}
+.ai-ta{width:100%;border:none;outline:none;padding:9px 10px;font-family:'DM Sans',sans-serif;
+  font-size:12px;color:var(--ink);resize:none;min-height:70px;background:white;line-height:1.5;}
+.ai-ta::placeholder{color:#bbb;}
+.ai-foot{border-top:1px solid var(--border);padding:6px 8px;display:flex;justify-content:space-between;align-items:center;background:#fafafa;}
+.ai-sel{font-family:'DM Sans',sans-serif;font-size:10px;border:1px solid var(--border);border-radius:5px;padding:3px 5px;background:white;color:var(--mid);outline:none;}
+.ai-go{background:linear-gradient(135deg,var(--blue),var(--blue-m));color:#fff;border:none;border-radius:6px;padding:5px 12px;
+  font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;
+  display:flex;align-items:center;gap:4px;}
+.ai-go:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,86,219,.3);}
+.ai-go:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.spin{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.spin.on{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.ai-result{background:white;border:1px solid var(--border);border-radius:9px;padding:10px;
+  font-size:12px;line-height:1.6;display:none;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ai-result.on{display:block;}
+.ar-acts{display:flex;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.ar-btn{flex:1;font-size:10px;font-weight:600;padding:5px;border-radius:6px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;border:none;transition:all .15s;}
+.ar-btn.ins{background:var(--blue);color:#fff;}
+.ar-btn.cp{background:var(--mist);color:var(--ink);}
+
+/* Human score badge */
+.human-score{display:flex;align-items:center;gap:6px;padding:6px 10px;background:linear-gradient(135deg,var(--teal-l),#f0fdf4);
+  border:1px solid rgba(13,148,136,.2);border-radius:8px;margin-bottom:8px;}
+.human-score-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--teal);}
+.human-score-lbl{font-size:9px;color:var(--teal);font-weight:600;letter-spacing:.5px;}
+
+/* SEO checks */
+.seo-check{display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;line-height:1.4;}
+.seo-check:last-child{border:none;}
+.ci{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px;}
+.ci.ok{background:#d1fae5;color:#065f46;} .ci.warn{background:#fef3c7;color:#92400e;} .ci.bad{background:#fee2e2;color:#991b1b;}
+
+/* Quick actions */
+.qa-btn{width:100%;text-align:left;padding:7px 9px;font-size:11px;font-weight:500;
+  background:white;border:1px solid var(--border);border-radius:7px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .15s;margin-bottom:5px;color:var(--ink);}
+.qa-btn:hover{background:var(--blue-l);border-color:var(--blue);color:var(--blue);}
+
+/* ── TOOLS SCREENS ── */
+.tool-screen{padding:20px;max-width:720px;margin:0 auto;padding-bottom:60px;}
+.tool-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.tool-card-head{background:linear-gradient(135deg,var(--ink),#1a1a2e);color:var(--gold);padding:12px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.tool-card-body{padding:18px;}
+.field-group{margin-bottom:12px;}
+.field-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:4px;}
+.field-inp{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;
+  font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:white;color:var(--ink);transition:.15s;}
+.field-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1);}
+.field-ta{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;
+  font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:100px;background:white;color:var(--ink);transition:.15s;}
+.field-ta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1);}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-m));color:#fff;border:none;border-radius:8px;padding:10px 20px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,86,219,.35);}
+.btn-secondary{background:var(--mist);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:9px 16px;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-secondary:hover{background:#e2e8f0;}
+.btn-danger{background:#fee2e2;color:var(--rust);border:1px solid #fecaca;border-radius:8px;padding:9px 16px;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-danger:hover{background:#fecaca;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.result-box{background:var(--teal-l);border:1px solid rgba(13,148,136,.2);border-radius:8px;padding:10px 12px;
+  font-size:12px;color:var(--teal);margin-top:10px;display:none;}
+.result-box.on{display:block;}
+
+/* Image tool */
+.drop-zone{border:2px dashed var(--border);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--blue);background:var(--blue-l);}
+.drop-icon{font-size:36px;margin-bottom:8px;}
+.drop-text{font-size:13px;color:var(--mid);}
+.drop-hint{font-size:11px;color:#cbd5e1;margin-top:4px;}
+#imgInput{display:none;}
+.img-preview{max-width:100%;border-radius:10px;border:1px solid var(--border);margin:10px 0;max-height:220px;object-fit:contain;}
+.slider-row{display:flex;align-items:center;gap:10px;margin:6px 0;}
+.slider-row label{font-size:11px;color:var(--mid);font-weight:600;min-width:80px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--blue);height:4px;}
+.slider-val{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;min-width:42px;text-align:right;color:var(--blue);}
+.size-info{font-size:11px;color:var(--mid);font-family:'DM Mono',monospace;}
+
+/* Spell checker */
+.correction-list{list-style:none;font-size:12px;display:flex;flex-direction:column;gap:4px;}
+.correction-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f8fafc;border-radius:7px;border:1px solid var(--border);}
+.correction-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;}
+.cb-error{background:#fee2e2;color:#991b1b;}
+.cb-seo{background:#fef3c7;color:#92400e;}
+.cb-human{background:var(--teal-l);color:var(--teal);}
+
+/* Translator */
+.translator-wrap{display:flex;flex-direction:column;height:100%;}
+.dialect-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;
+  background:linear-gradient(135deg,var(--teal-l),var(--blue-l));
+  border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.dialect-badge{display:flex;align-items:center;gap:5px;background:white;
+  border:1px solid rgba(13,148,136,.25);border-radius:8px;padding:4px 9px;
+  font-size:11px;color:var(--teal);font-weight:600;flex-shrink:0;}
+.mic-btn{background:none;border:2px solid var(--border);border-radius:50%;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;transition:all .2s;flex-shrink:0;}
+.mic-btn:hover{border-color:var(--blue);background:var(--blue-l);}
+.mic-btn.recording{border-color:var(--rust);background:#fee2e2;animation:pulse-mic .8s infinite;}
+@keyframes pulse-mic{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+.voice-status{font-size:10px;color:var(--mid);font-style:italic;}
+.dialect-info{font-size:10px;color:var(--teal);background:white;
+  border:1px solid rgba(13,148,136,.2);border-radius:6px;padding:3px 8px;flex-shrink:0;}
+.lang-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#f8fafc;border-bottom:1px solid var(--border);}
+.lang-pill{flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 12px;
+  font-family:'DM Sans',sans-serif;font-size:12px;background:white;outline:none;color:var(--ink);}
+.swap-btn{background:var(--mist);border:1px solid var(--border);border-radius:8px;padding:7px 11px;cursor:pointer;font-size:14px;transition:all .2s;}
+.swap-btn:hover{background:#e2e8f0;}
+.trans-panels{display:flex;flex:1;overflow:hidden;}
+.trans-panel{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);}
+.trans-panel:last-child{border:none;}
+.trans-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:600;padding:8px 14px;background:#f8fafc;border-bottom:1px solid var(--border);}
+.trans-ta{flex:1;width:100%;border:none;outline:none;padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.7;resize:none;background:#fff;color:var(--ink);}
+.trans-ta::placeholder{color:#cbd5e1;}
+.trans-actions{padding:8px 12px;background:#f8fafc;border-top:1px solid var(--border);display:flex;gap:6px;align-items:center;}
+
+/* Articles grid */
+.articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;padding:18px;}
+.art-card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;position:relative;}
+.art-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.1);}
+.art-card-cat{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px;}
+.art-card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1.3;margin-bottom:8px;color:#0d0d0d;}
+.art-card-meta{font-size:11px;color:var(--mid);display:flex;align-items:center;gap:8px;}
+.art-card-actions{display:flex;gap:5px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.card-act-btn{flex:1;font-size:10px;font-weight:600;padding:5px 4px;border-radius:6px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:white;color:var(--mid);transition:.15s;text-align:center;}
+.card-act-btn:hover{background:#f1f5f9;color:var(--ink);}
+.card-act-btn.del:hover{background:#fee2e2;color:var(--rust);border-color:#fecaca;}
+.card-act-btn.send:hover{background:var(--blue-l);color:var(--blue);border-color:var(--blue);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--border);display:inline-block;}
+.status-dot.pub{background:var(--success);} .status-dot.draft{background:var(--warning);}
+.new-art-card{background:transparent;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:140px;border-radius:14px;}
+.new-art-card:hover{border-color:var(--blue);background:var(--blue-l);}
+.new-art-icon{font-size:28px;color:#cbd5e1;}
+.new-art-lbl{font-size:12px;color:var(--mid);font-weight:600;}
+
+/* Settings */
+.settings-wrap{padding:24px;max-width:560px;margin:0 auto;}
+.setting-group{margin-bottom:24px;}
+.setting-group-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--mid);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;
+  background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;}
+.setting-name{font-size:13px;font-weight:600;}
+.setting-desc{font-size:11px;color:var(--mid);margin-top:2px;}
+.toggle{width:42px;height:23px;background:#d1d5db;border-radius:99px;position:relative;cursor:pointer;transition:.2s;border:none;}
+.toggle.on{background:var(--teal);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:22px;}
+
+/* Monetization */
+.plan-card{border:2px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;background:white;transition:.2s;}
+.plan-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(26,86,219,.1);}
+.plan-card.featured{border-color:var(--blue);background:var(--blue-l);}
+.plan-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:4px;}
+.plan-price{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;color:var(--blue);}
+.plan-period{font-size:12px;color:var(--mid);}
+.plan-features{list-style:none;margin:12px 0;font-size:12px;display:flex;flex-direction:column;gap:5px;}
+.plan-features li::before{content:'✓ ';color:var(--teal);font-weight:700;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.modal-overlay.on{display:flex;}
+.modal{background:#fff;border-radius:18px;padding:26px;max-width:400px;width:100%;animation:fadeUp .2s ease;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal h3{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:6px;}
+.modal p{font-size:12px;color:var(--mid);margin-bottom:14px;line-height:1.6;}
+.modal input,.modal textarea,.modal select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;margin-bottom:10px;}
+.modal input:focus,.modal textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.1);}
+.modal-btns{display:flex;gap:8px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* Send modal */
+.send-options{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.send-opt{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:.15s;}
+.send-opt:hover{border-color:var(--blue);background:var(--blue-l);}
+.send-opt-icon{font-size:22px;}
+.send-opt-name{font-size:13px;font-weight:600;}
+.send-opt-desc{font-size:11px;color:var(--mid);}
+
+/* toast */
+.toast{position:fixed;bottom:calc(20px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(135deg,var(--ink),#1a1a2e);color:var(--gold);padding:10px 20px;border-radius:99px;font-size:12px;font-weight:700;
+  opacity:0;transition:all .3s;z-index:200;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* density bar */
+.d-bar{height:5px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:3px;}
+.d-fill{height:100%;background:linear-gradient(90deg,var(--teal),#34d399);border-radius:99px;transition:width .5s;}
+
+/* scrollbars */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
+
+/* ── MÓVIL — diseño completo ── */
+@media(max-width:600px){
+
+  /* Tabbar */
+  .tabbar .tab-label{display:none;}
+  .tab{padding:9px 10px;}
+
+  /* Topnav móvil — compacto */
+  .security-badge{display:none;}
+  .brand-tag{display:none;}
+  .brand-icon{font-size:16px;}
+  .brand-name{font-size:17px;}
+  .plan-badge{font-size:9px;padding:3px 7px;letter-spacing:0;}
+  .api-key-btn{font-size:10px;padding:4px 8px;}
+  .topnav{padding:6px 12px 6px;}
+
+  /* Action bar — scroll horizontal en móvil */
+  .action-bar{
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    scrollbar-width:none;
+    gap:3px;
+    padding:5px 8px;
+  }
+  .action-bar::-webkit-scrollbar{display:none;}
+  .act-btn{
+    flex-shrink:0;
+    font-size:11px;
+    padding:5px 8px;
+    white-space:nowrap;
+  }
+  .act-btn span{display:none;}
+  .wcount{display:none;}
+
+  /* Editor móvil — área de escritura */
+  .editor-main{
+    padding:14px 14px 120px !important;
+  }
+  .title-input{font-size:22px;}
+  .body-input{
+    font-size:15px;
+    line-height:1.8;
+    min-height:200px;
+    padding-bottom:80px;
+  }
+
+  /* Meta row compacta */
+  .meta-row{gap:6px;}
+  .meta-f{min-width:100%;}
+
+  /* AI drawer oculto en móvil (ya existía) */
+  .ai-drawer{display:none;}
+
+  /* Doc toolbar scroll horizontal */
+  .doc-toolbar{
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    scrollbar-width:none;
+    padding:6px 8px;
+    gap:2px;
+  }
+  .doc-toolbar::-webkit-scrollbar{display:none;}
+
+  /* Footer compacto */
+  .app-footer{
+    padding:5px 10px;
+    gap:6px;
+  }
+  .footer-security{display:none;}
+  .footer-legal-btn{font-size:9px;}
+  .footer-brand{font-size:9px;}
+}
+
+/* Teclado virtual Android — evitar que tape el editor */
+@supports(height: 100dvh){
+  .shell{height:100dvh;}
+}
+
+/* print */
+@media print{
+  .topnav,.tabbar,.action-bar,.doc-toolbar,.ai-drawer,.toast{display:none!important;}
+  .shell{height:auto;overflow:visible;}
+  .content,.screen,.screen.active,.editor-wrap,.editor-main{overflow:visible;height:auto;}
+  .body-input,.title-input{color:#000;}
+}
+
+/* ── WELCOME SCREEN ── */
+.welcome-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:linear-gradient(160deg,#0d0d0d 0%,#1a1a2e 50%,#0d2a4a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow-y:auto;padding:0 0 40px;
+}
+.welcome-overlay.hiding{animation:fadeOutUp .5s ease forwards;}
+@keyframes fadeOutUp{to{opacity:0;transform:translateY(-30px);pointer-events:none;}}
+.welcome-hero{
+  width:100%;padding:48px 28px 32px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.welcome-castle{font-size:80px;margin-bottom:12px;animation:castlePop .7s cubic-bezier(.34,1.56,.64,1) .1s both;}
+@keyframes castlePop{from{transform:scale(0) rotate(-10deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+.welcome-logo{font-family:'Playfair Display',serif;font-size:44px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;}
+.welcome-logo em{color:var(--gold);font-style:normal;}
+.welcome-tag{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:6px;}
+.welcome-tagline{font-size:16px;color:rgba(255,255,255,.8);margin-top:14px;line-height:1.7;font-weight:400;max-width:340px;}
+.welcome-tagline strong{color:var(--gold);}
+.welcome-features{width:100%;max-width:480px;padding:0 20px;margin-top:4px;display:flex;flex-direction:column;gap:10px;}
+.wf-card{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;
+  animation:slideIn .4s ease both;
+}
+.wf-card:nth-child(1){animation-delay:.2s;}
+.wf-card:nth-child(2){animation-delay:.32s;}
+.wf-card:nth-child(3){animation-delay:.44s;}
+.wf-card:nth-child(4){animation-delay:.56s;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-18px);}to{opacity:1;transform:translateX(0);}}
+.wf-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
+.wf-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;}
+.wf-desc{font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.5;}
+.welcome-demo{width:100%;max-width:480px;padding:0 20px;margin-top:14px;animation:slideIn .4s ease .65s both;}
+.welcome-demo-card{background:rgba(255,255,255,.04);border:1px solid rgba(245,158,11,.18);border-radius:14px;overflow:hidden;}
+.welcome-demo-head{
+  background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(26,86,219,.12));
+  padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--gold);border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;gap:6px;
+}
+.welcome-demo-body{padding:14px;}
+.welcome-demo-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:7px;}
+.welcome-demo-text{font-size:12px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:10px;}
+.welcome-demo-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.wdb{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.wdb.seo{background:rgba(13,148,136,.2);color:#34d399;border:1px solid rgba(13,148,136,.3);}
+.wdb.human{background:rgba(26,86,219,.2);color:#93c5fd;border:1px solid rgba(26,86,219,.3);}
+.wdb.ai{background:rgba(245,158,11,.2);color:var(--gold);border:1px solid rgba(245,158,11,.3);}
+.welcome-cta{width:100%;max-width:480px;padding:20px 20px 0;animation:slideIn .4s ease .75s both;}
+.welcome-btn{
+  width:100%;background:linear-gradient(135deg,var(--blue),var(--blue-m));
+  color:#fff;border:none;border-radius:14px;padding:18px;
+  font-size:17px;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 8px 32px rgba(26,86,219,.4);transition:all .2s;letter-spacing:.3px;
+}
+.welcome-btn:active{transform:scale(.97);}
+.welcome-skip{text-align:center;font-size:11px;color:rgba(255,255,255,.3);margin-top:12px;cursor:pointer;letter-spacing:.5px;}
+.welcome-skip:hover{color:rgba(255,255,255,.6);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══════════ WELCOME SCREEN ══════════ -->
+  <div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-hero">
+      <div class="welcome-castle">🏰</div>
+      <div class="welcome-logo">Blog<em>Fort</em></div>
+      <div class="welcome-tag">Agency · Content Platform</div>
+      <div class="welcome-tagline">
+        La plataforma profesional que transforma tu forma de crear contenido.<br>
+        <strong>IA + SEO + Humanización</strong> — todo en uno.
+      </div>
+    </div>
+
+    <div class="welcome-features">
+      <div class="wf-card">
+        <div class="wf-icon">✍️</div>
+        <div>
+          <div class="wf-title">Editor SEO Inteligente</div>
+          <div class="wf-desc">Escribe artículos optimizados con análisis en tiempo real de keywords, densidad y estructura H1/H2/H3.</div>
+        </div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-icon">🤖</div>
+        <div>
+          <div class="wf-title">Asistente IA Médico/Científico</div>
+          <div class="wf-desc">Genera contenido con fuentes verificadas (OMS, NIH, PubMed) y un Human Score que supera los detectores de IA.</div>
+        </div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-icon">🌐</div>
+        <div>
+          <div class="wf-title">Traductor con 22 Dialectos</div>
+          <div class="wf-desc">Traduce en 11 idiomas adaptando el tono al dialecto local: México, Argentina, US Southern, British English y más.</div>
+        </div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-icon">🖼</div>
+        <div>
+          <div class="wf-title">Editor & Compresor de Imágenes</div>
+          <div class="wf-desc">Optimiza tus imágenes para web con ajustes de brillo, contraste, calidad y exportación en WebP, JPEG o PNG.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-demo">
+      <div class="welcome-demo-card">
+        <div class="welcome-demo-head">
+          🦷 Ejemplo real — Artículo generado con BlogFort
+        </div>
+        <div class="welcome-demo-body">
+          <div class="welcome-demo-title">Mitos de las carillas dentales: la verdad que nadie te cuenta</div>
+          <div class="welcome-demo-text">
+            ¿Las carillas dañan tus dientes? Es uno de los miedos más comunes. La realidad hoy es muy diferente a lo que se creía hace años. Las carillas modernas de porcelana ultrafina requieren un desgaste mínimo del esmalte — y en muchos casos, con las opciones "no-prep", no se toca el diente en absoluto...
+          </div>
+          <div class="welcome-demo-badges">
+            <span class="wdb seo">✓ SEO Optimizado</span>
+            <span class="wdb human">✓ 100% Human Grade</span>
+            <span class="wdb ai">✓ Fuentes verificadas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-cta">
+      <button class="welcome-btn" onclick="startBlogFort()">
+        🚀 Comenzar a crear contenido
+      </button>
+      <div class="welcome-skip" onclick="startBlogFort()">Entrar directamente al editor →</div>
+    </div>
+  </div>
+
+  <!-- BANNER PAUSA API -->
+  <div class="api-pause-banner" id="apiBanner" style="display:none;">
+    <span style="font-size:16px;">⏸</span>
+    <span class="api-pause-txt"><strong>Conexión con Anthropic Pausada</strong> — Revisa el saldo de tu API Key o la conexión. Las funciones PDF e Imágenes siguen activas.</span>
+    <button class="api-pause-close" onclick="hideBanner()">✕</button>
+  </div>
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="brand">
+      <span class="brand-icon">🏰</span>
+      <span class="brand-name">Blog<em>Fort</em></span>
+      <span class="brand-tag">AGENCY</span>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-actions">
+      <button class="plan-badge" onclick="showModal('planModal')">⚡ PLANES</button>
+      <button class="api-key-btn" id="apiKeyBtn" onclick="openApiModal()">🔑 API Key 🔒</button>
+    </div>
+  </nav>
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <button class="tab active" onclick="showScreen('editor')" id="tab-editor">✍️ <span class="tab-label">Editor</span></button>
+    <button class="tab" onclick="showScreen('articles')" id="tab-articles">📚 <span class="tab-label">Artículos</span></button>
+    <button class="tab" onclick="showScreen('pdf')" id="tab-pdf">📄 <span class="tab-label">PDF</span></button>
+    <button class="tab" onclick="showScreen('images')" id="tab-images">🖼 <span class="tab-label">Imágenes</span></button>
+    <button class="tab" onclick="showScreen('spell')" id="tab-spell">✅ <span class="tab-label">Corrector</span></button>
+    <button class="tab" onclick="showScreen('translator')" id="tab-translator">🌐 <span class="tab-label">Traductor</span></button>
+    <button class="tab" onclick="showScreen('settings')" id="tab-settings">⚙️ <span class="tab-label">Config</span></button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════ EDITOR ══════════ -->
+    <div class="screen active" id="screen-editor">
+      <!-- Formatting toolbar -->
+      <div class="doc-toolbar">
+        <button class="tb" onclick="fmt('bold')" title="Negrita"><b>B</b></button>
+        <button class="tb" onclick="fmt('italic')" title="Cursiva"><i>I</i></button>
+        <button class="tb" onclick="fmt('underline')" title="Subrayado"><u>U</u></button>
+        <div class="tb-sep"></div>
+        <button class="tb" onclick="insTag('H1')" style="font-size:10px;font-weight:800;">H1</button>
+        <button class="tb" onclick="insTag('H2')" style="font-size:10px;font-weight:800;">H2</button>
+        <button class="tb" onclick="insTag('H3')" style="font-size:10px;font-weight:800;">H3</button>
+        <div class="tb-sep"></div>
+        <button class="tb" onclick="insList()" title="Lista">☰</button>
+        <button class="tb" onclick="insLink()" title="Enlace">🔗</button>
+        <button class="tb" onclick="insQuote()" title="Cita">❝</button>
+        <div class="tb-sep"></div>
+        <div class="lang-select-wrap">
+          <span style="font-size:10px;color:var(--mid);">🌐</span>
+          <select class="lang-select" id="editorLang" onchange="updateEditorLang()">
+            <option value="es" selected>🇪🇸 ES</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="pt">🇧🇷 PT</option>
+            <option value="fr">🇫🇷 FR</option>
+            <option value="de">🇩🇪 DE</option>
+          </select>
+        </div>
+        <div class="tb-spacer"></div>
+        <div class="seo-pill" onclick="showDrawerTab('seo')">
+          <span class="seo-pill-lbl">SEO</span>
+          <span class="seo-pill-num" id="seoNum">--</span>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button class="act-btn" onclick="copyArticle()" title="Copiar artículo">📋 <span>Copiar</span></button>
+        <button class="act-btn" onclick="pasteToEditor()" title="Pegar texto">📌 <span>Pegar</span></button>
+        <button class="act-btn success" onclick="saveAndConfirm()" title="Guardar">💾 <span>Guardar</span></button>
+        <button class="act-btn primary" onclick="showModal('sendModal')" title="Enviar">📤 <span>Enviar</span></button>
+        <button class="act-btn" onclick="printArticle()" title="Imprimir">🖨️ <span>Imprimir</span></button>
+        <button class="act-btn" onclick="publishCurrent()" title="Publicar">🚀 <span>Publicar</span></button>
+        <button class="act-btn danger" onclick="deleteCurrentArticle()" title="Eliminar">🗑 <span>Eliminar</span></button>
+        <button class="act-btn" onclick="copyCleanHTML()" title="Copiar HTML limpio para WordPress" style="background:#f0f9ff;border-color:#bae6fd;color:#0369a1;">🟢 <span>WordPress</span></button>
+        <div style="flex:1;"></div>
+        <div class="wcount" id="wcWrap">Palabras: <span id="wc">0</span> · <span id="cc">0</span> car · <input class="meta-inp" id="readInp" readonly style="width:55px;display:inline;padding:2px 5px;font-size:10px;"></div>
+      </div>
+
+      <div class="editor-wrap">
+        <div class="editor-main">
+          <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <select id="catBadge" class="cat-badge-select" onchange="updateCat(this.value)">
+              <option value="SALUD DENTAL">🦷 Salud Dental</option>
+              <option value="SALUD GENERAL">❤️ Salud General</option>
+              <option value="ODONTOLOGÍA">🦷 Odontología</option>
+              <option value="NUTRICIÓN">🥗 Nutrición</option>
+              <option value="BIENESTAR">🌿 Bienestar</option>
+              <option value="PSICOLOGÍA">🧠 Psicología</option>
+              <option value="FISIOTERAPIA">💪 Fisioterapia</option>
+              <option value="DERMATOLOGÍA">✨ Dermatología</option>
+              <option value="CARDIOLOGÍA">❤️ Cardiología</option>
+              <option value="PEDIATRÍA">👶 Pediatría</option>
+              <option value="EMPRESAS">🏢 Empresas</option>
+              <option value="MARKETING">📣 Marketing</option>
+              <option value="GENERAL">📝 General</option>
+            </select>
+          </div>
+          <textarea class="title-input" id="titleInp" placeholder="Título del artículo..." rows="1" oninput="ar(this);upd();"></textarea>
+          <div class="meta-row">
+            <div class="meta-f">
+              <div class="meta-lbl">Keyword principal</div>
+              <input class="meta-inp" id="kwInp" type="text" placeholder="ej. carillas dentales" oninput="upd()">
+            </div>
+            <div class="meta-f">
+              <div class="meta-lbl">Slug URL</div>
+              <input class="meta-inp" id="slugInp" type="text" placeholder="carillas-dentales-mitos">
+            </div>
+          </div>
+          <!-- Panel Meta SEO Automático -->
+          <div class="meta-seo-panel" id="metaSeoPanel" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:1px;">📊 METADATOS SEO AUTOMÁTICOS</div>
+              <button onclick="copyMetaSeo()" style="font-size:10px;background:var(--blue-l);border:1px solid var(--blue);color:var(--blue);border-radius:5px;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;">⎘ Copiar todo</button>
+            </div>
+            <div style="margin-bottom:8px;">
+              <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Meta descripción <span id="metaCount" style="font-family:'DM Mono',monospace;font-weight:600;">0/155</span></div>
+              <div id="metaDescAuto" style="font-size:12px;color:var(--ink);background:white;border:1px solid var(--border);border-radius:6px;padding:6px 9px;line-height:1.5;">—</div>
+            </div>
+            <div style="margin-bottom:8px;">
+              <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Alt Text sugerido para imágenes</div>
+              <div id="altTextAuto" style="font-size:12px;color:var(--ink);background:white;border:1px solid var(--border);border-radius:6px;padding:6px 9px;line-height:1.5;">—</div>
+            </div>
+            <div>
+              <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Slug URL sugerido</div>
+              <div id="slugAuto" style="font-size:12px;color:var(--blue);background:white;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:'DM Mono',monospace;">—</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <textarea class="body-input" id="bodyInp" placeholder="Comienza a escribir tu artículo aquí..." oninput="upd()"></textarea>
+        </div>
+
+        <!-- AI Drawer -->
+        <aside class="ai-drawer">
+          <div class="drawer-tabs">
+            <button class="dtab active" id="dtab-ai" onclick="showDrawerTab('ai')">✦ IA</button>
+            <button class="dtab" id="dtab-seo" onclick="showDrawerTab('seo')">SEO</button>
+            <button class="dtab" id="dtab-struct" onclick="showDrawerTab('struct')">Struct</button>
+          </div>
+
+          <!-- AI panel -->
+          <div class="dpanel active" id="dpanel-ai">
+            <!-- Human Score -->
+            <div class="human-score">
+              <div>
+                <div class="human-score-num" id="humanScore">--</div>
+                <div class="human-score-lbl">HUMAN SCORE</div>
+              </div>
+              <div style="flex:1;font-size:10px;color:var(--mid);line-height:1.4;" id="humanScoreDesc">Escribe contenido para ver tu puntuación.</div>
+            </div>
+
+            <!-- Toggle Modo Médico -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:white;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--ink);">🔬 Modo Médico/Científico</div>
+                <div style="font-size:9px;color:var(--mid);margin-top:1px;">Cita fuentes: OMS · NIH · PubMed · ADA</div>
+              </div>
+              <button class="toggle on" id="tog-medico" onclick="toggleMedico(this)"></button>
+            </div>
+
+            <!-- Caja IA -->
+            <div class="ai-box">
+              <div class="ai-box-head" id="aiBoxHead">🔬 Asistente Médico/SEO — BlogFort</div>
+              <textarea class="ai-ta" id="aiPr" placeholder="Ej: Escribe una intro sobre los beneficios clínicos del flúor en esmalte dental..." rows="3"></textarea>
+              <div class="ai-foot">
+                <select class="ai-sel" id="aiMode">
+                  <option value="escribir">✍ Escribir</option>
+                  <option value="mejorar">✨ Mejorar</option>
+                  <option value="seo">📈 SEO</option>
+                  <option value="humanizar">💬 Humanizar 100%</option>
+                  <option value="cientifico">🔬 Científico</option>
+                  <option value="titulo">📌 Títulos</option>
+                  <option value="meta">🏷 Meta</option>
+                  <option value="conclusion">📝 Conclusión</option>
+                  <option value="eeat">⭐ E-E-A-T Médico</option>
+                  <option value="disclaimer">⚕️ Disclaimer</option>
+                </select>
+                <button class="ai-go" id="aiGoBtn" onclick="runAI()">
+                  <span id="aiGoLbl">Generar</span>
+                  <div class="spin" id="aiSpin"></div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Resultado IA -->
+            <div class="ai-result" id="aiRes">
+              <div id="aiResText" style="white-space:pre-wrap;font-size:11.5px;"></div>
+              <div class="ar-acts">
+                <button class="ar-btn ins" onclick="insertAI()">↩ Insertar</button>
+                <button class="ar-btn cp" onclick="copyAI()">⎘ Copiar</button>
+              </div>
+            </div>
+
+            <!-- Acciones rápidas generales -->
+            <div class="ds-title" style="margin-top:8px;">✍ Redacción</div>
+            <button class="qa-btn" onclick="qa('Genera 3 títulos SEO atractivos con la keyword principal. Tono humano, empático y profesional.')">📌 Títulos SEO</button>
+            <button class="qa-btn" onclick="qa('Escribe una meta descripción SEO de exactamente 155 caracteres con la keyword. Sin comillas ni puntos al final.')">🏷 Meta descripción</button>
+            <button class="qa-btn" onclick="qa('Sugiere 5 keywords LSI semánticamente relacionadas con el tema y la keyword principal.')">🔑 Keywords LSI</button>
+            <button class="qa-btn" onclick="qa('Reescribe este texto con tono 100% humano: frases cortas y variadas, primera persona cuando sea natural, lenguaje cálido y profesional. Sin clichés de IA.')">💬 Humanizar 100%</button>
+            <button class="qa-btn" onclick="qa('Escribe una conclusión empática con CTA sutil. Tono cálido y personal. Máximo 3 párrafos.')">📝 Conclusión</button>
+            <button class="qa-btn" onclick="qa('Analiza este contenido y dame: 1) Puntuación de humanización del 1 al 100. 2) Las 3 frases más robóticas. 3) Cómo reescribirlas.')">🧠 Evaluar humanización</button>
+
+            <!-- Acciones rápidas médicas -->
+            <div class="ds-title" style="margin-top:10px;">🔬 Modo Médico</div>
+            <button class="qa-btn" onclick="qaMedico('Revisa el texto e integra fuentes científicas reales. Para cada afirmación clínica añade [Fuente: Organismo, Año]. Usa: OMS, NIH, PubMed, ADA, Cochrane, MedlinePlus, Mayo Clinic. Solo cita fuentes que existan realmente.')">📚 Citar fuentes reales</button>
+            <button class="qa-btn" onclick="qaMedico('Optimiza este artículo para E-E-A-T médico de Google: añade señales de experiencia clínica real, cita al menos 2 fuentes científicas, mejora la autoridad del texto y añade un párrafo de expertise del autor.')">⭐ E-E-A-T Médico</button>
+            <button class="qa-btn" onclick="qaMedico('Añade al texto 2 estadísticas o datos científicos relevantes con su fuente real entre corchetes [Fuente: Organismo, Año]. Los datos deben ser verídicos y recientes.')">📊 Dato científico</button>
+            <button class="qa-btn" onclick="qaMedico('Escribe un disclaimer médico profesional en 2-3 líneas para añadir al final del artículo. Debe indicar que el contenido es informativo, no sustituye consulta médica, y recomienda acudir a un profesional de salud.')">⚕️ Disclaimer médico</button>
+            <button class="qa-btn" onclick="qaMedico('Revisa la terminología médica de este texto. Corrige cualquier término incorrecto, añade la explicación accesible entre paréntesis donde sea necesario, y confirma que los conceptos clínicos son precisos.')">🏥 Revisar terminología</button>
+          </div>
+
+          <!-- SEO panel -->
+          <div class="dpanel" id="dpanel-seo">
+            <div class="ds-title">Puntuación SEO</div>
+            <div style="text-align:center;padding:8px 0 14px;">
+              <div id="bigSeo" style="font-family:'DM Mono',monospace;font-size:52px;font-weight:700;line-height:1;color:var(--teal);">--</div>
+              <div style="font-size:10px;color:var(--mid);">de 100 puntos</div>
+            </div>
+            <div class="ds-title">Revisión</div>
+            <div id="seoChecks"></div>
+            <div class="ds-title" style="margin-top:10px;">Densidad keyword</div>
+            <div id="densDiv"></div>
+          </div>
+
+          <!-- Estructura panel -->
+          <div class="dpanel" id="dpanel-struct">
+            <div class="ds-title">Legibilidad</div>
+            <div id="readStats"></div>
+            <div class="ds-title" style="margin-top:10px;">Esquema</div>
+            <div id="outline" style="font-size:12px;"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ══════════ ARTICLES ══════════ -->
+    <div class="screen" id="screen-articles">
+      <div style="padding:16px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:#f8fafc;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;">Mis Artículos</div>
+        <div style="flex:1;"></div>
+        <button class="btn-secondary" style="font-size:11px;padding:6px 12px;" onclick="exportData()">⬇ Exportar</button>
+        <button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="newArt()">+ Nuevo</button>
+      </div>
+      <div class="articles-grid" id="artGrid"></div>
+    </div>
+
+    <!-- ══════════ PDF ══════════ -->
+    <div class="screen" id="screen-pdf">
+      <div style="overflow-y:auto;height:100%;">
+      <div class="tool-screen">
+        <div class="tool-card">
+          <div class="tool-card-head">📄 Crear y Exportar PDF</div>
+          <div class="tool-card-body">
+            <div class="field-group">
+              <div class="field-lbl">Título del documento</div>
+              <input class="field-inp" id="pdfTitle" placeholder="Título del PDF..." value="">
+            </div>
+            <div class="field-group">
+              <div class="field-lbl">Subtítulo / Autor</div>
+              <input class="field-inp" id="pdfAuthor" placeholder="Por Aníbal — BlogFort Agency">
+            </div>
+            <div class="field-group">
+              <div class="field-lbl">Contenido</div>
+              <textarea class="field-ta" id="pdfBody" placeholder="Escribe o pega el contenido aquí..." style="min-height:160px;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <div style="flex:1;min-width:120px;">
+                <div class="field-lbl">Color de encabezado</div>
+                <input type="color" id="pdfColor" value="#0d0d0d" style="width:100%;height:38px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:white;">
+              </div>
+              <div style="flex:1;min-width:120px;">
+                <div class="field-lbl">Tamaño de fuente</div>
+                <select class="field-inp" id="pdfSize" style="height:38px;">
+                  <option value="12">Normal (12pt)</option>
+                  <option value="14">Grande (14pt)</option>
+                  <option value="10">Compacto (10pt)</option>
+                </select>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-primary" onclick="exportPDF()">⬇ Descargar PDF</button>
+              <button class="btn-secondary" onclick="printPDF()">🖨️ Imprimir</button>
+              <button class="btn-secondary" onclick="loadArticleToPDF()">↩ Cargar artículo</button>
+            </div>
+            <div class="result-box on" id="pdfInfo" style="background:var(--cream);border-color:var(--border);color:var(--mid);">
+              Completa los campos y presiona "Descargar PDF" para generar tu documento.
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-head">🤖 Generar PDF con IA</div>
+          <div class="tool-card-body">
+            <div class="field-group">
+              <div class="field-lbl">Describe el documento que necesitas</div>
+              <textarea class="field-ta" id="pdfAiPrompt" placeholder="Ej: Crea un informe profesional sobre los beneficios de las carillas dentales para clínica. Tono empático, 3 secciones, conclusión y CTA." style="min-height:90px;"></textarea>
+            </div>
+            <div class="btn-row">
+              <button class="btn-primary" id="pdfAiBtn" onclick="generatePDFWithAI()">
+                <span id="pdfAiLbl">✦ Generar con IA</span>
+                <div class="spin" id="pdfAiSpin"></div>
+              </button>
+            </div>
+            <div class="result-box" id="pdfAiResult"></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- ══════════ IMAGES ══════════ -->
+    <div class="screen" id="screen-images">
+      <div style="overflow-y:auto;height:100%;">
+      <div class="tool-screen">
+        <div class="tool-card">
+          <div class="tool-card-head">🖼 Editor & Compresor de Imágenes</div>
+          <div class="tool-card-body">
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('imgInput').click()" ondragover="dragOver(event)" ondrop="dropImg(event)" ondragleave="dragLeave(event)">
+              <div class="drop-icon">📸</div>
+              <div class="drop-text" style="font-weight:700;color:#1a56db;">Toca aquí para seleccionar una imagen</div>
+              <div class="drop-hint" style="margin-top:6px;">JPG, PNG, WebP · Máx 20MB</div>
+              <div style="margin-top:10px;background:linear-gradient(135deg,#eff6ff,#f0fdfa);border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:11px;color:#1e40af;font-weight:600;line-height:1.5;">
+                ✅ Al cargar la imagen aparecerán los controles:<br>
+                <span style="font-weight:400;color:#374151;">📐 Tamaño &nbsp;·&nbsp; 🗜 Calidad &nbsp;·&nbsp; 🎨 Brillo / Contraste / Saturación</span>
+              </div>
+            </div>
+            <input type="file" id="imgInput" accept="image/*" onchange="loadImg(event)">
+
+            <div id="imgPreviewWrap" style="display:none;">
+              <!-- Botón cambiar imagen — visible en móvil -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px 10px;background:var(--blue-l);border:1px solid #bfdbfe;border-radius:8px;">
+                <span style="font-size:13px;">🖼</span>
+                <span id="imgFileName" style="flex:1;font-size:11px;font-weight:600;color:#1e40af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Imagen cargada</span>
+                <button onclick="changeImg()" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">📁 Cambiar</button>
+              </div>
+              <canvas id="imgCanvas" style="max-width:100%;border-radius:10px;border:1px solid var(--border);margin:10px 0;max-height:220px;object-fit:contain;display:block;"></canvas>
+
+              <!-- Stats -->
+              <div style="display:flex;gap:16px;margin:8px 0;flex-wrap:wrap;">
+                <div><div class="meta-lbl">Original</div><div class="size-info" id="origSize">--</div></div>
+                <div><div class="meta-lbl">Resultado</div><div class="size-info" id="compSize">--</div></div>
+                <div><div class="meta-lbl">Reducción</div><div class="size-info" id="reduction" style="color:var(--success);font-weight:700;">--</div></div>
+                <div><div class="meta-lbl">Dimensiones</div><div class="size-info" id="imgDims">--</div></div>
+              </div>
+
+              <!-- Tamaño -->
+              <div class="field-group">
+                <div class="field-lbl">📐 Tamaño</div>
+                <div style="display:flex;gap:8px;margin-bottom:6px;">
+                  <div style="flex:1;">
+                    <div style="font-size:10px;color:var(--mid);margin-bottom:3px;">Ancho (px)</div>
+                    <input class="field-inp" id="imgW" type="number" placeholder="Auto" oninput="syncDims('w')" style="padding:6px 10px;">
+                  </div>
+                  <div style="display:flex;align-items:flex-end;padding-bottom:6px;"><span style="color:var(--mid);font-size:14px;">×</span></div>
+                  <div style="flex:1;">
+                    <div style="font-size:10px;color:var(--mid);margin-bottom:3px;">Alto (px)</div>
+                    <input class="field-inp" id="imgH" type="number" placeholder="Auto" oninput="syncDims('h')" style="padding:6px 10px;">
+                  </div>
+                  <div style="display:flex;align-items:flex-end;padding-bottom:6px;">
+                    <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;">
+                      <input type="checkbox" id="aspectLock" checked> 🔗
+                    </label>
+                  </div>
+                </div>
+                <div class="slider-row">
+                  <label>Escala</label>
+                  <input type="range" id="scaleSlider" min="10" max="200" value="100" oninput="applyScale()">
+                  <span class="slider-val" id="scaleVal">100%</span>
+                </div>
+              </div>
+
+              <!-- Calidad -->
+              <div class="field-group">
+                <div class="field-lbl">🗜 Calidad & Formato</div>
+                <div class="slider-row">
+                  <label>Calidad</label>
+                  <input type="range" id="qualitySlider" min="10" max="100" value="80" oninput="renderPreview()">
+                  <span class="slider-val" id="qualityVal">80%</span>
+                </div>
+                <select class="field-inp" id="imgFormat" onchange="renderPreview()" style="margin-top:6px;">
+                  <option value="jpeg">JPEG (menor tamaño)</option>
+                  <option value="webp" selected>WebP (recomendado web)</option>
+                  <option value="png">PNG (sin pérdida)</option>
+                </select>
+              </div>
+
+              <!-- Ajustes visuales -->
+              <div class="field-group">
+                <div class="field-lbl">🎨 Ajustes Visuales</div>
+                <div class="slider-row">
+                  <label>Brillo</label>
+                  <input type="range" id="brightnessSlider" min="0" max="200" value="100" oninput="renderPreview()">
+                  <span class="slider-val" id="brightnessVal">100%</span>
+                </div>
+                <div class="slider-row">
+                  <label>Contraste</label>
+                  <input type="range" id="contrastSlider" min="0" max="200" value="100" oninput="renderPreview()">
+                  <span class="slider-val" id="contrastVal">100%</span>
+                </div>
+                <div class="slider-row">
+                  <label>Saturación</label>
+                  <input type="range" id="saturationSlider" min="0" max="200" value="100" oninput="renderPreview()">
+                  <span class="slider-val" id="saturationVal">100%</span>
+                </div>
+                <div class="slider-row">
+                  <label>Nitidez</label>
+                  <input type="range" id="sharpnessSlider" min="0" max="10" value="0" oninput="renderPreview()">
+                  <span class="slider-val" id="sharpnessVal">0</span>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn-primary" onclick="compressImg()">⬇ Descargar</button>
+                <button class="btn-secondary" onclick="printImg()">🖨️ Imprimir</button>
+                <button class="btn-secondary" onclick="resetImgSliders()">↺ Reset</button>
+                <button class="btn-danger" onclick="resetImg()">✕ Limpiar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SPELL / SEO-HUMAN ══════════ -->
+    <div class="screen" id="screen-spell">
+      <div style="overflow-y:auto;height:100%;">
+      <div class="tool-screen">
+        <div class="tool-card">
+          <div class="tool-card-head">✅ Corrector SEO / Humanizador 100% Human</div>
+          <div class="tool-card-body">
+            <div class="field-group">
+              <div class="field-lbl">Texto a analizar</div>
+              <textarea class="field-ta" id="spellText" placeholder="Pega aquí el texto que quieres corregir y humanizar..." style="min-height:140px;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <div style="flex:1;min-width:120px;">
+                <div class="field-lbl">Idioma</div>
+                <select class="field-inp" id="spellLang">
+                  <option value="español">🇪🇸 Español</option>
+                  <option value="inglés">🇬🇧 English</option>
+                  <option value="portugués">🇧🇷 Português</option>
+                  <option value="francés">🇫🇷 Français</option>
+                  <option value="alemán">🇩🇪 Deutsch</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:120px;">
+                <div class="field-lbl">Keyword SEO (opcional)</div>
+                <input class="field-inp" id="spellKw" type="text" placeholder="ej. carillas dentales">
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-primary" id="spellBtn" onclick="runSpell()">
+                <span id="spellBtnLbl">✦ Analizar y humanizar</span>
+                <div class="spin" id="spellSpin"></div>
+              </button>
+              <button class="btn-secondary" onclick="loadBodyToSpell()">↩ Desde editor</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-card" id="spellResultCard" style="display:none;">
+          <div class="tool-card-head">📋 Resultado del análisis</div>
+          <div class="tool-card-body">
+            <div id="spellResultContent"></div>
+            <div class="btn-row" style="margin-top:12px;">
+              <button class="btn-primary" onclick="applySpellResult()">↩ Aplicar al editor</button>
+              <button class="btn-secondary" onclick="copySpellResult()">⎘ Copiar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TRANSLATOR ══════════ -->
+    <div class="screen" id="screen-translator">
+      <div class="translator-wrap">
+        <div class="lang-bar" style="flex-wrap:wrap;gap:6px;">
+          <select class="lang-pill" id="srcLang" onchange="updateTransLabels()">
+            <option value="español" selected>🇪🇸 Español</option>
+            <option value="inglés americano">🇺🇸 English (US)</option>
+            <option value="inglés británico">🇬🇧 English (UK)</option>
+            <option value="portugués">🇧🇷 Português</option>
+            <option value="francés">🇫🇷 Français</option>
+            <option value="alemán">🇩🇪 Deutsch</option>
+            <option value="italiano">🇮🇹 Italiano</option>
+            <option value="chino mandarín">🇨🇳 中文</option>
+            <option value="japonés">🇯🇵 日本語</option>
+            <option value="árabe">🇸🇦 العربية</option>
+            <option value="ruso">🇷🇺 Русский</option>
+          </select>
+          <button class="swap-btn" onclick="swapLangs()">⇄</button>
+          <select class="lang-pill" id="tgtLang" onchange="updateTransLabels()">
+            <option value="inglés americano" selected>🇺🇸 English (US)</option>
+            <option value="español">🇪🇸 Español</option>
+            <option value="inglés británico">🇬🇧 English (UK)</option>
+            <option value="portugués">🇧🇷 Português</option>
+            <option value="francés">🇫🇷 Français</option>
+            <option value="alemán">🇩🇪 Deutsch</option>
+            <option value="italiano">🇮🇹 Italiano</option>
+            <option value="chino mandarín">🇨🇳 中文</option>
+            <option value="japonés">🇯🇵 日本語</option>
+            <option value="árabe">🇸🇦 العربية</option>
+            <option value="ruso">🇷🇺 Русский</option>
+          </select>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mid);">
+            <span>🏢</span>
+            <select id="transMode" class="lang-select" style="font-size:10px;">
+              <option value="empresarial">Empresarial</option>
+              <option value="tecnico">Técnico</option>
+              <option value="marketing">Marketing</option>
+              <option value="medico">Médico</option>
+              <option value="legal">Legal</option>
+              <option value="informal">Informal</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="transBtn" onclick="runTranslate()" style="padding:7px 16px;font-size:12px;">
+            <span id="transBtnLbl">Traducir</span>
+            <div class="spin" id="transSpin"></div>
+          </button>
+        </div>
+        <!-- Barra de Dialecto Local -->
+        <div class="dialect-bar">
+          <div class="dialect-badge">🌍 Dialecto Local</div>
+          <select id="dialectRegion" class="lang-select" style="font-size:11px;" onchange="updateDialectInfo()">
+            <optgroup label="🌎 América Latina">
+              <option value="mexico">🇲🇽 México</option>
+              <option value="colombia">🇨🇴 Colombia</option>
+              <option value="argentina">🇦🇷 Argentina</option>
+              <option value="chile">🇨🇱 Chile</option>
+              <option value="peru">🇵🇪 Perú</option>
+              <option value="venezuela">🇻🇪 Venezuela</option>
+              <option value="cuba">🇨🇺 Cuba</option>
+            </optgroup>
+            <optgroup label="🌍 España">
+              <option value="espana_castellano" selected>🇪🇸 España (Castellano)</option>
+              <option value="espana_catalan">🇪🇸 Cataluña</option>
+              <option value="espana_andaluz">🇪🇸 Andalucía</option>
+            </optgroup>
+            <optgroup label="🇺🇸 English">
+              <option value="usa_general">🇺🇸 US English (General)</option>
+              <option value="usa_southern">🇺🇸 US Southern</option>
+              <option value="uk_british">🇬🇧 British English</option>
+              <option value="australia">🇦🇺 Australian</option>
+            </optgroup>
+            <optgroup label="🌍 Europa">
+              <option value="brasil">🇧🇷 Brasil (Português)</option>
+              <option value="portugal">🇵🇹 Portugal</option>
+              <option value="francia">🇫🇷 France</option>
+              <option value="alemania">🇩🇪 Deutschland</option>
+              <option value="italia">🇮🇹 Italia</option>
+            </optgroup>
+            <optgroup label="🌏 Asia & Otros">
+              <option value="china">🇨🇳 China (Mandarín)</option>
+              <option value="japon">🇯🇵 Japón</option>
+              <option value="arabia">🇸🇦 Arabia Saudita</option>
+            </optgroup>
+          </select>
+          <div class="dialect-info" id="dialectInfo">Castellano neutro · Formal empresarial</div>
+          <div style="flex:1;"></div>
+          <button class="mic-btn" id="micBtn" onclick="toggleVoice()" title="Hablar para traducir">🎤</button>
+          <span class="voice-status" id="voiceStatus">Toca para hablar</span>
+        </div>
+
+        <div class="trans-panels">
+          <div class="trans-panel">
+            <div class="trans-lbl" id="srcLbl">🇪🇸 Español — Texto original</div>
+            <textarea class="trans-ta" id="transSource" placeholder="Escribe, pega o habla para traducir..."></textarea>
+            <div class="trans-actions">
+              <button class="btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="loadBodyToTrans()">↩ Desde editor</button>
+              <button class="btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="clearTrans()">✕ Limpiar</button>
+            </div>
+          </div>
+          <div class="trans-panel">
+            <div class="trans-lbl" id="tgtLbl">🇬🇧 Inglés — Traducción</div>
+            <textarea class="trans-ta" id="transTarget" placeholder="La traducción aparecerá aquí..." readonly></textarea>
+            <div class="trans-actions">
+              <button class="btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="copyTrans()">⎘ Copiar</button>
+              <button class="btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="insertTransToEditor()">↩ Al editor</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SETTINGS ══════════ -->
+    <div class="screen" id="screen-settings">
+      <div style="overflow-y:auto;height:100%;">
+      <div class="settings-wrap">
+        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:20px;">⚙️ Configuración</div>
+
+        <div class="setting-group">
+          <div class="setting-group-title">API & Cuenta</div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-name">API Key de Anthropic</div>
+              <div class="setting-desc" id="apiStatusDesc">No configurada — necesaria para funciones de IA</div>
+            </div>
+            <button class="btn-secondary" style="font-size:11px;padding:6px 12px;" onclick="openApiModal()">Configurar</button>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-group-title">Preferencias de escritura</div>
+          <div class="setting-row">
+            <div><div class="setting-name">Idioma por defecto</div><div class="setting-desc">Para nuevos documentos</div></div>
+            <select class="lang-select" id="defaultLang" onchange="saveSetting('defaultLang',this.value)">
+              <option value="es" selected>🇪🇸 Español</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="pt">🇧🇷 Português</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="de">🇩🇪 Deutsch</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Sector por defecto</div><div class="setting-desc">Categoría de nuevos artículos</div></div>
+            <select class="lang-select" id="defaultSector" onchange="saveSetting('defaultSector',this.value)">
+              <option value="SALUD DENTAL" selected>🦷 Salud Dental</option>
+              <option value="SALUD GENERAL">❤️ Salud General</option>
+              <option value="BIENESTAR">🌿 Bienestar</option>
+              <option value="NUTRICIÓN">🥗 Nutrición</option>
+              <option value="TECNOLOGÍA">💻 Tecnología</option>
+              <option value="FINANZAS">💰 Finanzas</option>
+              <option value="LEGAL">⚖️ Legal</option>
+              <option value="INMOBILIARIO">🏠 Inmobiliario</option>
+              <option value="EDUCACIÓN">📚 Educación</option>
+              <option value="MARKETING">📣 Marketing</option>
+              <option value="ECOMMERCE">🛒 eCommerce</option>
+              <option value="TURISMO">✈️ Turismo</option>
+              <option value="GENERAL">📝 General</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Autoguardado</div><div class="setting-desc">Guarda cada 30 segundos</div></div>
+            <button class="toggle on" id="tog-autosave" onclick="toggleSetting('autosave',this)"></button>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-name">Tono 100% humano</div><div class="setting-desc">IA prioriza humanización máxima</div></div>
+            <button class="toggle on" id="tog-empathy" onclick="toggleSetting('empathy',this)"></button>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-group-title">Sobre BlogFort</div>
+          <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:16px;font-size:12px;color:var(--mid);line-height:1.8;">
+            <strong style="color:var(--ink);font-size:14px;">🏰 BlogFort Agency v3.0</strong><br>
+            Plataforma profesional de contenido SEO con IA · PWA instalable<br><br>
+            Herramientas: Editor SEO · Asistente IA · PDF · Editor de imágenes · Corrector Humanizador · Traductor multiidioma<br><br>
+            Desarrollado por <strong style="color:var(--blue);">Aníbal Juan Alonso Sesma</strong> — BlogFort Content Agency · Sector Salud & Empresas<br><br>
+            <span style="color:var(--teal);font-weight:600;">Contenido 100% human-grade · SEO optimizado · Listo para monetizar</span>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <div class="setting-group-title">Datos</div>
+          <div class="btn-row">
+            <button class="btn-secondary" onclick="exportData()">⬇ Exportar artículos</button>
+            <button class="btn-danger" onclick="clearData()">🗑 Borrar todo</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-brand"><strong>BlogFort</strong> Agency v3.0</div>
+    <button class="footer-legal-btn" onclick="showModal('legalModal')">📋 Términos de Seguridad y Privacidad</button>
+    <div class="footer-security">🔒 Serverless · Local</div>
+  </footer>
+
+</div><!-- /shell -->
+
+<!-- ── MODALS ── -->
+
+<!-- API Key -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <h3>🔑 API Key de Anthropic</h3>
+    <p>Obtén tu clave gratuita en <strong>console.anthropic.com</strong></p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off">
+    <div style="background:#f0fdf9;border:1px solid rgba(13,148,136,.25);border-radius:8px;padding:10px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;">
+      <span style="font-size:16px;flex-shrink:0;">🔒</span>
+      <div style="font-size:11px;color:var(--teal);line-height:1.6;"><strong>Seguridad y Privacidad:</strong> Tu API Key se almacena localmente en tu navegador mediante cifrado de sesión. BlogFort Agency <strong>nunca</strong> tiene acceso a tus claves ni almacena el contenido de tus artículos en servidores externos. La conexión es directa entre tu equipo y los servidores oficiales de Anthropic.</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="saveApiKey()" style="flex:1;">Guardar</button>
+      <button class="btn-secondary" onclick="closeModal('apiModal')" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send modal -->
+<div class="modal-overlay" id="sendModal">
+  <div class="modal">
+    <h3>📤 Enviar artículo</h3>
+    <p>Elige cómo quieres compartir este artículo:</p>
+    <div class="send-options">
+      <div class="send-opt" onclick="sendByEmail()">
+        <div class="send-opt-icon">📧</div>
+        <div><div class="send-opt-name">Correo electrónico</div><div class="send-opt-desc">Abre tu cliente de email con el contenido</div></div>
+      </div>
+      <div class="send-opt" onclick="copyForSend()">
+        <div class="send-opt-icon">📋</div>
+        <div><div class="send-opt-name">Copiar al portapapeles</div><div class="send-opt-desc">Listo para pegar en cualquier plataforma</div></div>
+      </div>
+      <div class="send-opt" onclick="sendWhatsApp()">
+        <div class="send-opt-icon">💬</div>
+        <div><div class="send-opt-name">WhatsApp</div><div class="send-opt-desc">Comparte el resumen por WhatsApp</div></div>
+      </div>
+      <div class="send-opt" onclick="exportPDFAndSend()">
+        <div class="send-opt-icon">📄</div>
+        <div><div class="send-opt-name">Descargar como PDF</div><div class="send-opt-desc">Genera PDF listo para enviar a clientes</div></div>
+      </div>
+    </div>
+    <button class="btn-secondary" onclick="closeModal('sendModal')" style="width:100%;margin-top:4px;">Cancelar</button>
+  </div>
+</div>
+
+<!-- Delete confirmation -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>🗑 Eliminar artículo</h3>
+    <p>¿Estás seguro de que quieres eliminar <strong id="deleteArtTitle"></strong>? Esta acción no se puede deshacer.</p>
+    <div class="modal-btns">
+      <button class="btn-danger" onclick="confirmDelete()" style="flex:1;">Sí, eliminar</button>
+      <button class="btn-secondary" onclick="closeModal('deleteModal')" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit article from grid -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ Editar artículo</h3>
+    <input type="text" id="editTitle" placeholder="Título...">
+    <input type="text" id="editCategory" placeholder="Categoría...">
+    <select id="editStatus" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;margin-bottom:10px;">
+      <option value="draft">Borrador</option>
+      <option value="published">Publicado</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="saveEditModal()" style="flex:1;">Guardar cambios</button>
+      <button class="btn-secondary" onclick="closeModal('editModal')" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Plans / Monetization -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal" style="max-width:500px;max-height:90vh;overflow-y:auto;">
+    <h3>⚡ BlogFort Agency — Planes</h3>
+    <p style="margin-bottom:8px;">Plataforma de contenido empresarial con IA. Elige tu plan:</p>
+
+    <!-- Toggle mensual/anual -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;background:#f8fafc;border-radius:10px;padding:8px;">
+      <span id="planLblMes" style="font-size:12px;font-weight:700;color:var(--blue);">Mensual</span>
+      <button class="toggle" id="tog-anual" onclick="toggleAnual(this)" style="margin:0;"></button>
+      <span id="planLblAnual" style="font-size:12px;font-weight:600;color:var(--mid);">Anual <span style="background:#d1fae5;color:#065f46;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;">−20%</span></span>
+    </div>
+
+    <!-- Plan Starter -->
+    <div class="plan-card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="plan-name" style="font-size:16px;">🚀 Starter</div>
+        <div style="text-align:right;">
+          <span class="plan-price" id="price-starter" style="font-size:24px;">$39</span>
+          <span class="plan-period" id="period-starter"> / mes</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--mid);margin-bottom:8px;">Para freelancers y profesionales independientes</div>
+      <ul class="plan-features">
+        <li>Editor SEO + IA con tu API Key</li>
+        <li>Corrector Humanizador 100% Human</li>
+        <li>Exportación PDF + HTML WordPress</li>
+        <li>Traductor 11 idiomas empresariales</li>
+        <li>1 usuario · Soporte por email</li>
+      </ul>
+      <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="selectPlan('starter', document.getElementById('price-starter').textContent)">Empezar con Starter</button>
+    </div>
+
+    <!-- Plan Business — destacado -->
+    <div class="plan-card featured" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="plan-name" style="font-size:16px;">🏢 Business</div>
+          <div style="font-size:10px;background:var(--blue);color:#fff;padding:2px 8px;border-radius:4px;display:inline-block;font-weight:700;letter-spacing:.5px;margin-top:2px;">MÁS POPULAR</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="plan-price" id="price-business">$97</span>
+          <span class="plan-period" id="period-business"> / mes</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#1e40af;margin-bottom:8px;margin-top:6px;">Para agencias y equipos de contenido</div>
+      <ul class="plan-features">
+        <li>Todo lo de Starter incluido</li>
+        <li>Modo Médico/Científico avanzado</li>
+        <li>Editor de imágenes profesional</li>
+        <li>Gestión de hasta 10 clientes</li>
+        <li>Metadatos SEO automáticos</li>
+        <li>Soporte prioritario 48h</li>
+      </ul>
+      <button class="btn-primary" style="width:100%;margin-top:8px;" onclick="selectPlan('business', document.getElementById('price-business').textContent)">Empezar con Business</button>
+    </div>
+
+    <!-- Plan Enterprise -->
+    <div class="plan-card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="plan-name" style="font-size:16px;">🌐 Enterprise</div>
+        <div style="text-align:right;">
+          <span class="plan-price" id="price-enterprise" style="font-size:24px;">$249</span>
+          <span class="plan-period" id="period-enterprise"> / mes</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--mid);margin-bottom:8px;">Para corporaciones y white-label</div>
+      <ul class="plan-features">
+        <li>Todo lo de Business incluido</li>
+        <li>Marca blanca personalizada (white-label)</li>
+        <li>Clientes y usuarios ilimitados</li>
+        <li>Onboarding dedicado + formación</li>
+        <li>SLA 99.9% · Soporte 24/7</li>
+        <li>Integración WordPress/CMS a medida</li>
+      </ul>
+      <button class="btn-secondary" style="width:100%;margin-top:8px;background:var(--ink);color:var(--gold);border-color:var(--ink);" onclick="selectPlan('enterprise', document.getElementById('price-enterprise').textContent)">Contactar ventas</button>
+    </div>
+
+    <div style="text-align:center;font-size:10px;color:var(--mid);margin-top:4px;">
+      💳 Pagos seguros · Cancela cuando quieras · Soporte en español
+    </div>
+    <button class="btn-secondary" onclick="closeModal('planModal')" style="width:100%;margin-top:10px;">Cerrar</button>
+  </div>
+</div>
+
+<!-- Plan Confirm Modal -->
+<div class="modal-overlay" id="planConfirmModal">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;">🎉</div>
+    <h3>¡Gracias por elegir BlogFort!</h3>
+    <p id="planConfirmMsg" style="margin-bottom:16px;font-size:13px;color:var(--ink);line-height:1.7;"></p>
+    <div style="background:var(--blue-l);border:1px solid var(--blue);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--blue);line-height:1.6;">
+      💡 Mientras tanto, sigue usando BlogFort Agency con tu API Key de Anthropic. Todas las funciones están disponibles ahora mismo.
+    </div>
+    <button class="btn-primary" onclick="closeModal('planConfirmModal')" style="width:100%;">Continuar usando BlogFort</button>
+  </div>
+</div>
+
+<!-- MODAL LEGAL -->
+<div class="modal-overlay" id="legalModal">
+  <div class="modal" style="max-width:540px;max-height:85vh;overflow-y:auto;">
+    <h3>📋 Aviso Legal y Privacidad</h3>
+    <p>BlogFort Agency · v3.0 · Todos los derechos reservados</p>
+    <div style="margin:14px 0;display:flex;flex-direction:column;gap:12px;">
+      <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
+        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">01 · NATURALEZA DEL SERVICIO</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Aplicación Local Autónoma</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.6;">BlogFort es una interfaz de software autónoma que se ejecuta localmente en el navegador del usuario. La aplicación facilita la edición de contenidos y la conexión técnica con servicios de terceros (Anthropic PBC).</div>
+      </div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
+        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">02 · RESPONSABILIDAD DE LA API KEY</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Custodia y Uso de Claves</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.6;">El usuario es el único responsable de la obtención, custodia y uso de su propia clave de API. BlogFort Agency no almacena, accede ni distribuye dichas claves. Cualquier cargo facturado por el proveedor de IA es responsabilidad exclusiva del usuario.</div>
+      </div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
+        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">03 · VERACIDAD DEL CONTENIDO</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Revisión en Sectores YMYL</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.6;">El usuario asume la responsabilidad total de revisar, verificar y editar los textos antes de su publicación, especialmente en sectores críticos como Salud y Bienestar (YMYL). BlogFort no se hace responsable de imprecisiones técnicas o médicas generadas por los modelos de lenguaje.</div>
+      </div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
+        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">04 · PROPIEDAD INTELECTUAL</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Código y Contenido Generado</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.6;">El código fuente de la interfaz BlogFort es propiedad exclusiva de <strong style="color:var(--ink);">Aníbal Juan Alonso Sesma</strong> · BlogFort Agency. Todos los derechos reservados © 2025. El contenido generado mediante la herramienta pertenece íntegramente al usuario, sujeto a los términos de servicio del proveedor de la API utilizada.</div>
+      </div>
+      <div style="padding-bottom:4px;">
+        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">05 · PRIVACIDAD LOCAL</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Aplicación Serverless · Máxima Privacidad</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.6;">Al ser una aplicación sin servidor (serverless), los datos procesados no se almacenan en bases de datos externas de BlogFort, garantizando la máxima privacidad bajo los estándares de protección de datos internacionales.</div>
+      </div>
+    </div>
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">06 · JURISDICCIÓN</div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Ley Aplicable</div>
+      <div style="font-size:12px;color:var(--mid);line-height:1.6;">El presente aviso legal se rige por la legislación española y europea en materia de protección de datos (RGPD), propiedad intelectual y comercio electrónico. Para cualquier disputa, las partes se someten a los juzgados y tribunales de España.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--teal-l);border:1px solid rgba(13,148,136,.2);border-radius:8px;padding:10px 12px;margin-bottom:14px;">
+      <span style="font-size:20px;">🔒</span>
+      <div style="font-size:11px;color:var(--teal);font-weight:600;line-height:1.5;">© 2025 Aníbal Juan Alonso Sesma · BlogFort Agency · Conexión directa y exclusiva con Anthropic PBC · Sin servidores intermedios · Datos 100% locales</div>
+    </div>
+    <button class="btn-primary" onclick="closeModal('legalModal')" style="width:100%;">Entendido</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════ STATE ═══════════
+const DB = 'blogfort_agency_v2';
+let articles = [], activeId = null, apiKey = '', settings = {};
+let pendingDeleteId = null, editingCardId = null;
+let origImgNaturalW = 0, origImgNaturalH = 0, origImgData = null;
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DB) || '{}');
+    articles = d.articles || defaultArticles();
+    apiKey = decodeKey(d.apiKey || '');
+    settings = d.settings || { autosave: true, empathy: true, defaultLang: 'es', defaultSector: 'SALUD DENTAL' };
+  } catch(e) { articles = defaultArticles(); }
+  if (apiKey) { document.getElementById('apiKeyBtn').classList.add('set'); document.getElementById('apiKeyBtn').textContent = '🔑 API ✓'; }
+  updateApiStatus();
+}
+
+// ── CIFRADO LOCAL API KEY ──
+function encodeKey(k) {
+  if (!k) return '';
+  try { return btoa(unescape(encodeURIComponent(k + '|bf2025'))); } catch(e) { return k; }
+}
+function decodeKey(k) {
+  if (!k) return '';
+  try {
+    const dec = decodeURIComponent(escape(atob(k)));
+    return dec.endsWith('|bf2025') ? dec.slice(0,-7) : dec;
+  } catch(e) { return k; }
+}
+function save() {
+  try {
+    localStorage.setItem(DB, JSON.stringify({ articles, apiKey: encodeKey(apiKey), settings }));
+  } catch(e) {}
+}
+
+function defaultArticles() {
+  return [{
+    id: 1, title: 'Mitos de las carillas dentales', category: 'SALUD DENTAL',
+    keyword: 'carillas dentales', slug: 'mitos-carillas-dentales', lang: 'es',
+    body: `## ¿Las carillas dentales dañan tus dientes?\n\nEs uno de los miedos más comunes, y lo entiendo perfectamente. Cuando alguien me pregunta esto, siempre le digo lo mismo: la realidad hoy es muy diferente a lo que se creía hace años.\n\nLas carillas modernas de porcelana ultrafina requieren un desgaste mínimo del esmalte. En muchos casos, con las opciones de composite o las "no-prep", no se toca el diente en absoluto.\n\n## ¿Cuánto duran realmente?\n\nLas carillas de porcelana de alta calidad pueden durar entre 10 y 20 años con el cuidado adecuado. Son resistentes, no se manchan con café ni vino, y lucen tan naturales que nadie notará que no son tus propios dientes.\n\n## ¿El proceso es doloroso?\n\nEl procedimiento se realiza con anestesia local y es prácticamente indoloro. La mayoría de mis pacientes me dicen que fue mucho más sencillo de lo que esperaban.`,
+    tags: ['Odontología', 'Estética Dental'], status: 'draft', date: 'hoy'
+  }];
+}
+
+// ═══════════ NAVIGATION ═══════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'articles') renderGrid();
+}
+
+// ═══════════ MODALS ═══════════
+function showModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); });
+});
+
+// ═══════════ EDITOR ═══════════
+function loadArt(id) {
+  saveCurrent();
+  activeId = id;
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('titleInp').value = a.title || '';
+  const catSel = document.getElementById('catBadge');
+  if (catSel) {
+    // Busca la opción que coincida, si no, selecciona GENERAL
+    const opts = Array.from(catSel.options).map(o=>o.value);
+    catSel.value = opts.includes(a.category) ? a.category : 'GENERAL';
+  }
+  document.getElementById('kwInp').value = a.keyword || '';
+  document.getElementById('slugInp').value = a.slug || '';
+  document.getElementById('bodyInp').value = a.body || '';
+  document.getElementById('editorLang').value = a.lang || 'es';
+  ar(document.getElementById('titleInp'));
+  upd();
+  showScreen('editor');
+}
+
+function saveCurrent() {
+  if (!activeId) return;
+  const idx = articles.findIndex(x => x.id === activeId);
+  if (idx < 0) return;
+  const catEl = document.getElementById('catBadge');
+  if (catEl) articles[idx].category = catEl.value || catEl.textContent || 'GENERAL';
+  articles[idx].title = document.getElementById('titleInp').value;
+  articles[idx].keyword = document.getElementById('kwInp').value;
+  articles[idx].slug = document.getElementById('slugInp').value;
+  articles[idx].body = document.getElementById('bodyInp').value;
+  articles[idx].lang = document.getElementById('editorLang').value;
+  articles[idx].date = new Date().toLocaleDateString('es-ES', {day:'2-digit',month:'short'});
+  save();
+}
+
+function saveAndConfirm() {
+  saveCurrent();
+  toast('💾 Artículo guardado correctamente');
+}
+
+function newArt() {
+  saveCurrent();
+  const id = Date.now();
+  articles.unshift({ id, title: '', category: settings.defaultSector || 'SALUD DENTAL', keyword: '', slug: '', body: '', lang: settings.defaultLang || 'es', tags: [], status: 'draft', date: new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short'}) });
+  save(); loadArt(id);
+}
+
+function publishCurrent() {
+  saveCurrent();
+  const idx = articles.findIndex(x => x.id === activeId);
+  if (idx >= 0) { articles[idx].status = 'published'; save(); toast('🚀 Artículo publicado'); }
+}
+
+function editCat() {
+  // Mantenido por compatibilidad — ahora usamos el select
+}
+function updateCat(val) {
+  saveCurrent();
+  toast('🏷 Categoría: ' + val);
+}
+
+function updateEditorLang() { saveCurrent(); }
+
+// ── EXPORTACIÓN LIMPIA WORDPRESS ──
+function escHtml(t) {
+  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function markdownToCleanHTML(md, title) {
+  let html = title ? '<h1>'+escHtml(title)+'</h1>\n' : '';
+  const lines = md.split('\n');
+  let inUL = false;
+  lines.forEach(line => {
+    if (line.startsWith('# ')) {
+      if(inUL){html+='</ul>\n';inUL=false;}
+      html += '<h1>'+escHtml(line.replace(/^# /,''))+'</h1>\n';
+    } else if (line.startsWith('## ')) {
+      if(inUL){html+='</ul>\n';inUL=false;}
+      html += '<h2>'+escHtml(line.replace(/^## /,''))+'</h2>\n';
+    } else if (line.startsWith('### ')) {
+      if(inUL){html+='</ul>\n';inUL=false;}
+      html += '<h3>'+escHtml(line.replace(/^### /,''))+'</h3>\n';
+    } else if (line.startsWith('- ')||line.startsWith('* ')) {
+      if(!inUL){html+='<ul>\n';inUL=true;}
+      let li = escHtml(line.substring(2)).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
+      html += '<li>'+li+'</li>\n';
+    } else if (line.startsWith('> ')) {
+      if(inUL){html+='</ul>\n';inUL=false;}
+      html += '<p><em>'+escHtml(line.replace(/^> /,''))+'</em></p>\n';
+    } else if (line.trim()==='') {
+      if(inUL){html+='</ul>\n';inUL=false;}
+    } else {
+      if(inUL){html+='</ul>\n';inUL=false;}
+      let p = escHtml(line)
+        .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g,'<em>$1</em>')
+        .replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2">$1</a>');
+      html += '<p>'+p+'</p>\n';
+    }
+  });
+  if(inUL) html+='</ul>\n';
+  return html;
+}
+function copyCleanHTML() {
+  const title = document.getElementById('titleInp').value;
+  const body = document.getElementById('bodyInp').value;
+  if (!body) { toast('⚠️ El editor está vacío'); return; }
+  navigator.clipboard.writeText(markdownToCleanHTML(body, title))
+    .then(() => toast('🟢 HTML limpio copiado — listo para WordPress'));
+}
+function copyMetaSeo() {
+  const meta = document.getElementById('metaDescAuto')?.textContent||'';
+  const alt = document.getElementById('altTextAuto')?.textContent||'';
+  const slug = document.getElementById('slugAuto')?.textContent||'';
+  navigator.clipboard.writeText('Meta descripción:\n'+meta+'\n\nAlt Text imagen:\n'+alt+'\n\nSlug URL:\n'+slug)
+    .then(() => toast('📊 Metadatos SEO copiados'));
+}
+
+// ─── COPY / PASTE / PRINT / DELETE / SEND ───
+function copyArticle() {
+  const title = document.getElementById('titleInp').value;
+  const body = document.getElementById('bodyInp').value;
+  const full = (title ? title + '\n\n' : '') + body;
+  navigator.clipboard.writeText(full).then(() => toast('📋 Artículo copiado al portapapeles'));
+}
+
+async function pasteToEditor() {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) return;
+    const ta = document.getElementById('bodyInp');
+    const p = ta.selectionStart;
+    ta.value = ta.value.substring(0,p) + text + ta.value.substring(p);
+    ta.focus(); upd();
+    toast('📌 Texto pegado en el editor');
+  } catch(e) { toast('⚠️ No se pudo acceder al portapapeles'); }
+}
+
+function printArticle() {
+  window.print();
+}
+
+function printPDF() {
+  window.print();
+}
+
+function deleteCurrentArticle() {
+  if (!activeId) { toast('⚠️ No hay artículo activo'); return; }
+  const a = articles.find(x => x.id === activeId);
+  if (!a) return;
+  pendingDeleteId = activeId;
+  document.getElementById('deleteArtTitle').textContent = `"${a.title || 'Sin título'}"`;
+  showModal('deleteModal');
+}
+
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  articles = articles.filter(x => x.id !== pendingDeleteId);
+  if (activeId === pendingDeleteId) {
+    activeId = null;
+    document.getElementById('titleInp').value = '';
+    document.getElementById('bodyInp').value = '';
+    document.getElementById('kwInp').value = '';
+    document.getElementById('slugInp').value = '';
+    upd();
+    if (articles.length) loadArt(articles[0].id);
+  }
+  pendingDeleteId = null;
+  save(); closeModal('deleteModal');
+  toast('🗑 Artículo eliminado');
+}
+
+function deleteArtFromCard(id, e) {
+  e.stopPropagation();
+  pendingDeleteId = id;
+  const a = articles.find(x => x.id === id);
+  document.getElementById('deleteArtTitle').textContent = `"${a?.title || 'Sin título'}"`;
+  showModal('deleteModal');
+}
+
+function editArtFromCard(id, e) {
+  e.stopPropagation();
+  editingCardId = id;
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('editTitle').value = a.title || '';
+  document.getElementById('editCategory').value = a.category || '';
+  document.getElementById('editStatus').value = a.status || 'draft';
+  showModal('editModal');
+}
+
+function saveEditModal() {
+  const idx = articles.findIndex(x => x.id === editingCardId);
+  if (idx < 0) return;
+  articles[idx].title = document.getElementById('editTitle').value;
+  articles[idx].category = document.getElementById('editCategory').value.toUpperCase();
+  articles[idx].status = document.getElementById('editStatus').value;
+  save(); renderGrid(); closeModal('editModal');
+  toast('✅ Artículo actualizado');
+}
+
+// ─── SEND OPTIONS ───
+function sendByEmail() {
+  const title = encodeURIComponent(document.getElementById('titleInp').value || 'Artículo BlogFort');
+  const body = encodeURIComponent(document.getElementById('bodyInp').value.substring(0,1000));
+  window.location.href = `mailto:?subject=${title}&body=${body}`;
+  closeModal('sendModal');
+}
+
+function copyForSend() {
+  copyArticle();
+  closeModal('sendModal');
+}
+
+function sendWhatsApp() {
+  const title = document.getElementById('titleInp').value || 'Artículo';
+  const kw = document.getElementById('kwInp').value;
+  const msg = encodeURIComponent(`📝 *${title}*\n${kw ? `🔑 Keyword: ${kw}\n` : ''}✍ Redactado con BlogFort Agency`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+  closeModal('sendModal');
+}
+
+function exportPDFAndSend() {
+  closeModal('sendModal');
+  loadArticleToPDF();
+  showScreen('pdf');
+  setTimeout(() => exportPDF(), 400);
+}
+
+// formatting
+function fmt(cmd) {
+  const ta = document.getElementById('bodyInp');
+  const s = ta.selectionStart, e = ta.selectionEnd, sel = ta.value.substring(s,e);
+  if (!sel) return;
+  const m = { bold:`**${sel}**`, italic:`*${sel}*`, underline:`__${sel}__` };
+  ta.value = ta.value.substring(0,s) + (m[cmd]||sel) + ta.value.substring(e);
+  ta.focus(); upd();
+}
+function insTag(t) {
+  const ta = document.getElementById('bodyInp'), p = ta.selectionStart;
+  const tags = { H1:'\n# ', H2:'\n## ', H3:'\n### ' };
+  ta.value = ta.value.substring(0,p) + (tags[t]||'\n## ') + ta.value.substring(p);
+  ta.focus(); upd();
+}
+function insList() {
+  const ta = document.getElementById('bodyInp'), p = ta.selectionStart;
+  ta.value = ta.value.substring(0,p) + '\n- Elemento 1\n- Elemento 2\n- Elemento 3\n' + ta.value.substring(p);
+  ta.focus(); upd();
+}
+function insLink() {
+  const ta = document.getElementById('bodyInp'), s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.substring(s,e) || 'texto del enlace';
+  ta.value = ta.value.substring(0,s) + `[${sel}](https://ejemplo.com)` + ta.value.substring(e);
+  ta.focus(); upd();
+}
+function insQuote() {
+  const ta = document.getElementById('bodyInp'), p = ta.selectionStart;
+  ta.value = ta.value.substring(0,p) + '\n> Dato o cita destacada aquí.\n' + ta.value.substring(p);
+  ta.focus(); upd();
+}
+function ar(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+function showDrawerTab(n) {
+  ['ai','seo','struct'].forEach(t => {
+    document.getElementById('dpanel-'+t).classList.toggle('active', t===n);
+    document.getElementById('dtab-'+t).classList.toggle('active', t===n);
+  });
+}
+
+// ─── ANALYSIS ───
+let aTimer;
+function upd() { clearTimeout(aTimer); aTimer = setTimeout(_upd, 200); saveCurrent(); }
+function _upd() {
+  const body = document.getElementById('bodyInp').value;
+  const title = document.getElementById('titleInp').value;
+  const kw = document.getElementById('kwInp').value.trim().toLowerCase();
+  const words = body.trim() ? body.trim().split(/\s+/).length : 0;
+  document.getElementById('wc').textContent = words.toLocaleString();
+  document.getElementById('cc').textContent = body.length.toLocaleString();
+  document.getElementById('readInp').value = Math.max(1,Math.round(words/200)) + ' min';
+  if (!document.getElementById('slugInp').value && title) {
+    document.getElementById('slugInp').value = title.toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+      .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,'-').substring(0,60);
+  }
+  // ── META SEO AUTOMÁTICO ──
+  if (title || kw) {
+    const panel = document.getElementById('metaSeoPanel');
+    if (panel) panel.style.display = 'block';
+    const baseDesc = kw
+      ? (title + '. ' + kw.charAt(0).toUpperCase()+kw.slice(1) + ': información verificada para tomar mejores decisiones sobre tu salud.').substring(0,155)
+      : (title + ': guía completa con información actualizada y contrastada para tu bienestar.').substring(0,155);
+    const metaEl = document.getElementById('metaDescAuto');
+    if (metaEl) metaEl.textContent = baseDesc;
+    const mc = document.getElementById('metaCount');
+    if (mc) { mc.textContent = baseDesc.length+'/155'; mc.className='meta-seo-count '+(baseDesc.length<=155?'ok':'warn'); }
+    const altEl = document.getElementById('altTextAuto');
+    if (altEl) altEl.textContent = title ? 'Imagen sobre '+title.toLowerCase().replace(/[¿¡]/g,'').substring(0,80) : kw ? 'Imagen sobre '+kw : '—';
+    const slugEl = document.getElementById('slugAuto');
+    if (slugEl) slugEl.textContent = (title||kw||'articulo').toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+      .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,'-').substring(0,60);
+  }
+  // Human score heuristic
+  const humanScore = calcHumanScore(body, title);
+  const hs = document.getElementById('humanScore');
+  hs.textContent = body.length > 50 ? humanScore : '--';
+  hs.style.color = humanScore >= 80 ? 'var(--teal)' : humanScore >= 60 ? 'var(--warning)' : 'var(--rust)';
+  document.getElementById('humanScoreDesc').textContent = body.length > 50
+    ? humanScore >= 80 ? '✅ Contenido con tono humano y natural.'
+    : humanScore >= 60 ? '⚠️ Puede mejorar. Usa "Humanizar 100%".'
+    : '❌ Suena robótico. Aplica el corrector.'
+    : 'Escribe contenido para ver tu puntuación.';
+
+  // SEO
+  const bl = body.toLowerCase();
+  const kwCount = kw ? (bl.match(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length : 0;
+  const density = words > 0 && kw ? (kwCount/words)*100 : 0;
+  const checks = [];
+  if (!kw) checks.push({s:'warn',t:'Define una keyword principal'});
+  else {
+    checks.push({s:title.toLowerCase().includes(kw)?'ok':'warn',t:title.toLowerCase().includes(kw)?'Keyword en el título ✓':'Keyword ausente en el título'});
+    checks.push({s:bl.includes(kw)?'ok':'bad',t:bl.includes(kw)?`Keyword en cuerpo (${kwCount}x) ✓`:'Keyword no encontrada en cuerpo'});
+    checks.push({s:density>=0.5&&density<=2.5?'ok':density<0.5?'warn':'bad',t:`Densidad: ${density.toFixed(1)}% (ideal 0.5–2.5%)`});
+  }
+  checks.push({s:title.length>=40&&title.length<=60?'ok':'warn',t:`H1 Título: ${title.length} chars (ideal 40–60)`});
+  checks.push({s:words>=800?'ok':words>=400?'warn':'bad',t:`${words} palabras (mín. recomendado: 800)`});
+  const h2count = (body.match(/^## /mg)||[]).length;
+  checks.push({s:h2count>=2?'ok':h2count===1?'warn':'bad',t:h2count>=2?`H2: ${h2count} secciones ✓`:h2count===1?'H2: solo 1 sección (añade más)':'Sin secciones H2 — estructura incompleta'});
+  const h3count = (body.match(/^### /mg)||[]).length;
+  checks.push({s:h3count>=1?'ok':'warn',t:h3count>=1?`H3: ${h3count} subsección(es) ✓`:'Añade ### H3 para mejorar estructura'});
+  checks.push({s:(body.match(/\[.+?\]\(.+?\)/g)||[]).length>0?'ok':'warn',t:(body.match(/\[.+?\]\(.+?\)/g)||[]).length>0?'Enlace(s) detectados ✓':'Añade al menos un enlace'});
+  const fuentes = (body.match(/\[Fuente:/g)||[]).length;
+  checks.push({s:fuentes>=2?'ok':fuentes===1?'warn':'bad',t:fuentes>=2?`Fuentes médicas citadas: ${fuentes} ✓`:fuentes===1?'Solo 1 fuente médica (añade más)':'Sin fuentes médicas [Fuente: OMS, 2024]'});
+  const score = Math.round((checks.filter(c=>c.s==='ok').length/checks.length)*100);
+  document.getElementById('seoNum').textContent = score;
+  const bs = document.getElementById('bigSeo');
+  bs.textContent = score; bs.style.color = score>=70?'var(--teal)':score>=45?'var(--warning)':'var(--rust)';
+  document.getElementById('seoChecks').innerHTML = checks.map(c=>`<div class="seo-check"><div class="ci ${c.s}">${c.s==='ok'?'✓':c.s==='warn'?'!':'✗'}</div><span>${c.t}</span></div>`).join('');
+  document.getElementById('densDiv').innerHTML = kw && words>0 ? `<div style="font-size:11px;margin-bottom:3px;display:flex;justify-content:space-between;"><strong>${kw}</strong><span>${density.toFixed(1)}%</span></div><div class="d-bar"><div class="d-fill" style="width:${Math.min(density*30,100)}%"></div></div>` : '<span style="font-size:11px;color:var(--mid);font-style:italic;">Define una keyword.</span>';
+  // readability
+  const sents = body.split(/[.!?]+/).filter(s=>s.trim().length>10).length;
+  const aws = sents > 0 ? Math.round(words/sents) : 0;
+  const paras = body.split(/\n\n+/).filter(p=>p.trim()).length;
+  document.getElementById('readStats').innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--mid);">Palabras/oración</span><span style="font-family:'DM Mono',monospace;font-weight:600;">${aws||'--'}</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--mid);">Párrafos</span><span style="font-family:'DM Mono',monospace;font-weight:600;">${paras}</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--mid);">Oraciones</span><span style="font-family:'DM Mono',monospace;font-weight:600;">${sents}</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--mid);">Total palabras</span><span style="font-family:'DM Mono',monospace;font-weight:600;color:${words>=800?'var(--teal)':'var(--warning)'};">${words}</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--mid);">Human Score</span><span style="font-family:'DM Mono',monospace;font-weight:700;color:${humanScore>=80?'var(--teal)':humanScore>=60?'var(--warning)':'var(--rust)'};">${body.length>50?humanScore+'%':'--'}</span></div>
+  </div>`;
+  const hdgs = body.split('\n').filter(l=>/^#{1,3} /.test(l));
+  document.getElementById('outline').innerHTML = hdgs.length ? hdgs.map(h=>{
+    const lvl = h.startsWith('### ')?'h3':h.startsWith('## ')?'h2':'h1';
+    const txt = h.replace(/^#{1,3} /,'');
+    return `<div style="padding:4px 8px;${lvl==='h3'?'padding-left:24px':lvl==='h2'?'padding-left:16px':''};border-left:2px solid ${lvl==='h1'?'var(--gold)':'var(--border)'};margin-bottom:3px;font-size:${lvl==='h1'?'12':lvl==='h2'?'11':'10.5'}px;"><span style="opacity:.4;font-size:9px;">${lvl.toUpperCase()} </span>${txt}</div>`;
+  }).join('') : '<span style="font-size:11px;color:var(--mid);font-style:italic;">Añade ## H2 para ver esquema.</span>';
+}
+
+function calcHumanScore(text, title) {
+  if (!text || text.length < 50) return 0;
+  let score = 65;
+
+  // ── SEÑALES POSITIVAS (voz humana, +2 cada una) ──
+  const positives = [
+    /\byo\b/i, /\bme\b/i, /\bnos\b/i, /\bnosotros\b/i,
+    /\bentiendo\b/i, /\bcreo\b/i, /\bpienso\b/i, /\bsiento\b/i,
+    /\bsiempre\b/i, /\bcuando\b/i, /\bpero\b/i, /\baunque\b/i,
+    /\bsin embargo\b/i, /\bde hecho\b/i, /\bla verdad\b/i,
+    /\?/, /!/, /\bes decir\b/i, /\bpor ejemplo\b/i,
+    /\bimagina\b/i, /\bpiensa\b/i, /\brecuerda\b/i, /\bsabes\b/i
+  ];
+  positives.forEach(r => { if (r.test(text)) score += 2; });
+
+  // ── SEÑALES NEGATIVAS (tono IA/robótico, -7 cada una) ──
+  const negatives = [
+    /en resumen,/i, /en conclusión,/i, /es importante destacar/i,
+    /cabe destacar/i, /sin duda alguna/i, /en el mundo actual/i,
+    /en los últimos años/i, /es fundamental/i, /en términos generales/i,
+    /es relevante mencionar/i, /no hay que olvidar/i, /hay que tener en cuenta/i,
+    /en el ámbito de/i, /desde esta perspectiva/i, /a modo de conclusión/i,
+    /en definitiva,/i, /resulta evidente/i, /queda claro que/i
+  ];
+  negatives.forEach(r => { if (r.test(text)) score -= 7; });
+
+  // ── LONGITUD DE ORACIONES ──
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 5);
+  const totalWords = text.split(/\s+/).length;
+  const avgWords = sentences.length > 0 ? totalWords / sentences.length : 20;
+  if (avgWords <= 12) score += 10;
+  else if (avgWords <= 18) score += 5;
+  else if (avgWords > 28) score -= 10;
+
+  // ── VARIEDAD DE LONGITUD (ritmo narrativo) ──
+  if (sentences.length > 4) {
+    const lengths = sentences.map(s => s.trim().split(/\s+/).length);
+    const variance = Math.max(...lengths) - Math.min(...lengths);
+    if (variance > 15) score += 8;
+    else if (variance > 8) score += 4;
+  }
+
+  // ── PÁRRAFOS CORTOS (legibilidad) ──
+  const paras = text.split(/\n\n+/).filter(p => p.trim());
+  if (paras.length > 2) {
+    const avgParaLen = totalWords / paras.length;
+    if (avgParaLen < 60) score += 6;
+    else if (avgParaLen > 120) score -= 5;
+  }
+
+  // ── ESTRUCTURA H1/H2/H3 presente ──
+  if (/^# /m.test(text)) score += 3;
+  if (/^## /m.test(text)) score += 3;
+  if (/^### /m.test(text)) score += 2;
+
+  // ── FUENTES MÉDICAS CITADAS (bonus modo médico) ──
+  const fuentes = (text.match(/\[Fuente:/g) || []).length;
+  if (fuentes >= 2) score += 8;
+  else if (fuentes === 1) score += 4;
+
+  return Math.max(10, Math.min(100, Math.round(score)));
+}
+
+// ═══════════ AI ═══════════
+// ── SYSTEM PROMPT INVISIBLE ANTI-MULETILLAS ──
+const SYSTEM_ANTI_AI = `REGLAS ABSOLUTAS DE ESTILO:
+PALABRAS PROHIBIDAS (nunca las uses): "el vasto mundo", "en el panorama actual", "resulta crucial", "es menester", "a lo largo de", "cabe señalar", "hoy en dia", "cada vez mas", "sin lugar a dudas", "es importante destacar", "cabe destacar", "en resumen", "en conclusion", "en terminos generales", "resulta evidente", "queda claro que", "a modo de conclusion", "en definitiva".
+VARIACION DE PERPLEJIDAD OBLIGATORIA: Alterna siempre frases cortas (5-10 palabras) con frases largas (18-25 palabras). Nunca escribas 3 oraciones seguidas de similar longitud.
+TONO: Escribe como un experto humano que explica algo a un amigo inteligente. Usa primera persona ocasionalmente, preguntas retocricas y analogias cotidianas.
+ESTRUCTURA: Usa H1 (#) para titulo, H2 (##) para secciones, H3 (###) para subsecciones. Parrafos de maximo 4 lineas.`;
+
+async function callAI(system, userMsg, maxTokens=1000) {
+  if (!apiKey) { openApiModal(); throw new Error('Configura tu API Key primero'); }
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:maxTokens,
+        system: SYSTEM_ANTI_AI + ' ' + system,
+        messages:[{role:'user',content:userMsg}]
+      })
+    });
+    const d = await r.json();
+    if (d.error) {
+      const msg = d.error.message || '';
+      if (msg.includes('credit')||msg.includes('balance')||msg.includes('quota')||msg.includes('rate')||msg.includes('auth')||msg.includes('invalid')) showBanner();
+      throw new Error(msg);
+    }
+    hideBanner();
+    return d.content?.map(b=>b.text||'').join('') || '';
+  } catch(e) {
+    if (e.name==='TypeError') { showBanner(); throw new Error('Sin conexion a internet. Verifica tu red.'); }
+    throw e;
+  }
+}
+function showBanner() { const b=document.getElementById('apiBanner'); b.style.display='flex'; b.classList.add('show'); }
+function hideBanner() { const b=document.getElementById('apiBanner'); b.style.display='none'; b.classList.remove('show'); }
+
+// ── MODO MÉDICO ──
+let modoMedico = true;
+
+function toggleMedico(btn) {
+  modoMedico = !modoMedico;
+  btn.classList.toggle('on', modoMedico);
+  const head = document.getElementById('aiBoxHead');
+  head.textContent = modoMedico ? '🔬 Asistente Médico/SEO — BlogFort' : '✦ Asistente IA — BlogFort';
+  toast(modoMedico ? '🔬 Modo Médico/Científico activado' : '✍ Modo Redacción General activado');
+}
+
+function buildMedicalSystem(lang, kw, title, mode) {
+  const langNames = { es:'español', en:'inglés', pt:'portugués', fr:'francés', de:'alemán' };
+  const idioma = langNames[lang] || 'español';
+
+  const baseHuman = `REGLA DE ORO — HUMANIZACIÓN: El contenido debe superar 85/100 en cualquier detector de IA. Nunca uses: "en resumen", "es importante destacar", "cabe destacar", "sin duda alguna", "en el mundo actual", "en los últimos años", "es fundamental". Escribe como un experto que habla con un colega o paciente. Frases cortas (máx 20 palabras), variadas en longitud, con conectores naturales.`;
+
+  const baseMedico = `MODO MÉDICO/CIENTÍFICO ACTIVADO:
+- Eres un redactor médico con rigor científico y experiencia clínica real.
+- FUENTES OBLIGATORIAS: Cuando hagas una afirmación clínica o estadística, cítala con [Fuente: Organismo, Año]. Usa solo fuentes reales: OMS/WHO, NIH, PubMed, ADA (American Dental Association), Cochrane Library, MedlinePlus, Mayo Clinic, SESPAS, SEPA (periodoncia), SEORL, SED.
+- NUNCA inventes datos, estadísticas ni fuentes. Si no tienes certeza de una cifra exacta, exprésala de forma cualitativa o indica "según estudios recientes".
+- Terminología clínica correcta + explicación accesible entre paréntesis cuando sea técnica.
+- E-E-A-T médico: demuestra Experiencia, Expertise, Autoridad y Confianza en cada párrafo.`;
+
+  const modeMap = {
+    escribir: 'Redacta contenido original con estructura H1 > H2 > H3 clara. Tono 100% humano y empático. Incluye al menos una pregunta retórica y una analogía accesible.',
+    mejorar: 'Mejora el texto: hazlo más fluido, empático y natural. Elimina cualquier rastro de lenguaje robótico o genérico.',
+    seo: 'Optimiza para SEO: integra la keyword de forma natural (densidad 1-2%), mejora la estructura con ## H2 y ### H3, añade LSI semántico.',
+    humanizar: 'Reescribe este texto completamente para que suene 100% humano. Primera persona cuando sea natural. Frases cortas. Lenguaje cálido pero profesional. Sin un solo cliché de IA.',
+    cientifico: 'Desarrolla el tema con rigor científico: incluye al menos 2 datos con fuente real entre corchetes [Fuente: X, Año], usa terminología clínica correcta con explicación accesible, y estructura el argumento con evidencia.',
+    titulo: 'Genera 3 títulos SEO con la keyword, que suenen naturales y atractivos. Cada uno entre 50-60 caracteres.',
+    meta: 'Escribe una meta descripción SEO de EXACTAMENTE 155 caracteres con la keyword. Sin comillas. Tono humano.',
+    conclusion: 'Redacta una conclusión de 2-3 párrafos: empática, personal, con CTA sutil y un dato o reflexión final que aporte valor.',
+    eeat: 'Reescribe o mejora el texto aplicando E-E-A-T médico completo: señales de experiencia real, citas de fuentes autorizadas, lenguaje de autoridad clínica sin perder calidez humana.',
+    disclaimer: 'Escribe un disclaimer médico profesional en 2-3 líneas para el final del artículo. Debe indicar que es contenido informativo, no sustituye consulta médica profesional, y recomienda acudir a un especialista de salud cualificado.'
+  };
+
+  const sys = modoMedico
+    ? `${baseMedico}\n\n${baseHuman}\n\nIdioma: ${idioma}. Keyword objetivo: "${kw}". Título del artículo: "${title}". Instrucción específica: ${modeMap[mode] || modeMap.escribir}\n\nResponde DIRECTAMENTE con el contenido solicitado, sin introducción, sin comentarios previos, sin explicar lo que vas a hacer.`
+    : `Eres un copywriter SEO experto en sector salud y empresas. ${baseHuman}\n\nIdioma: ${idioma}. Keyword objetivo: "${kw}". Título: "${title}". ${modeMap[mode] || modeMap.escribir}\n\nResponde directamente con el contenido, sin introducción ni comentarios.`;
+
+  return sys;
+}
+
+async function runAI() {
+  const pr = document.getElementById('aiPr').value.trim();
+  if (!pr) { document.getElementById('aiPr').focus(); return; }
+  const mode = document.getElementById('aiMode').value;
+  const title = document.getElementById('titleInp').value;
+  const kw = document.getElementById('kwInp').value;
+  const body = document.getElementById('bodyInp').value;
+  const lang = document.getElementById('editorLang').value;
+  const sys = buildMedicalSystem(lang, kw, title, mode);
+  setAILoad(true);
+  try {
+    const txt = await callAI(sys, pr + (body ? `\n\nTexto actual del artículo:\n${body.substring(0,2000)}` : ''), 2000);
+    document.getElementById('aiResText').textContent = txt;
+    document.getElementById('aiRes').classList.add('on');
+  } catch(e) { toast('⚠️ ' + e.message); }
+  setAILoad(false);
+}
+
+async function qa(prompt) {
+  document.getElementById('aiPr').value = prompt;
+  showDrawerTab('ai');
+  await runAI();
+}
+
+async function qaMedico(prompt) {
+  // Fuerza modo médico aunque esté desactivado temporalmente
+  const wasMedico = modoMedico;
+  modoMedico = true;
+  document.getElementById('aiPr').value = prompt;
+  showDrawerTab('ai');
+  await runAI();
+  modoMedico = wasMedico;
+}
+
+function setAILoad(on) {
+  document.getElementById('aiGoBtn').disabled = on;
+  document.getElementById('aiSpin').classList.toggle('on', on);
+  document.getElementById('aiGoLbl').style.display = on?'none':'';
+}
+
+function insertAI() {
+  const txt = document.getElementById('aiResText').textContent;
+  const ta = document.getElementById('bodyInp'), p = ta.selectionStart;
+  ta.value = ta.value.substring(0,p) + '\n\n' + txt + '\n\n' + ta.value.substring(p);
+  ta.focus(); upd(); toast('✅ Insertado en el editor');
+}
+
+function copyAI() {
+  navigator.clipboard.writeText(document.getElementById('aiResText').textContent);
+  toast('⎘ Copiado al portapapeles');
+}
+
+// ═══════════ ARTICLES GRID ═══════════
+function renderGrid() {
+  const g = document.getElementById('artGrid');
+  g.innerHTML = `<div class="art-card new-art-card" onclick="newArt()"><div class="new-art-icon">✦</div><div class="new-art-lbl">Nuevo artículo</div></div>`;
+  articles.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'art-card';
+    el.innerHTML = `
+      <div class="art-card-cat">${a.category||'GENERAL'}</div>
+      <div class="art-card-title">${a.title||'Sin título'}</div>
+      <div class="art-card-meta"><span class="status-dot ${a.status==='published'?'pub':'draft'}"></span>${a.status==='published'?'Publicado':'Borrador'} · ${a.date||''}</div>
+      <div class="art-card-actions">
+        <div class="card-act-btn" onclick="loadArt(${a.id})">✏️ Editar</div>
+        <div class="card-act-btn send" onclick="quickSend(${a.id},event)">📤 Enviar</div>
+        <div class="card-act-btn" onclick="copyArtById(${a.id},event)">📋 Copiar</div>
+        <div class="card-act-btn" onclick="editArtFromCard(${a.id},event)">⚙️</div>
+        <div class="card-act-btn del" onclick="deleteArtFromCard(${a.id},event)">🗑</div>
+      </div>`;
+    g.appendChild(el);
+  });
+}
+
+function copyArtById(id, e) {
+  e.stopPropagation();
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  const full = (a.title ? a.title + '\n\n' : '') + (a.body || '');
+  navigator.clipboard.writeText(full).then(() => toast('📋 Artículo copiado'));
+}
+
+function quickSend(id, e) {
+  e.stopPropagation();
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  activeId = id;
+  showModal('sendModal');
+}
+
+// ═══════════ PDF ═══════════
+function loadArticleToPDF() {
+  document.getElementById('pdfTitle').value = document.getElementById('titleInp').value || 'Documento';
+  document.getElementById('pdfBody').value = document.getElementById('bodyInp').value;
+  toast('↩ Artículo cargado en PDF');
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { toast('⚠️ Cargando librería PDF...'); return; }
+  const title = document.getElementById('pdfTitle').value || 'Documento';
+  const author = document.getElementById('pdfAuthor').value || 'BlogFort Agency';
+  const body = document.getElementById('pdfBody').value || '';
+  const color = document.getElementById('pdfColor').value;
+  const fontSize = parseInt(document.getElementById('pdfSize').value) || 12;
+  const hexToRgb = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W = 210, margin = 20, maxW = W - margin*2;
+  let y = 20;
+  const [r,g,b] = hexToRgb(color);
+  doc.setFillColor(r,g,b);
+  doc.rect(0, 0, W, 30, 'F');
+  doc.setTextColor(245,158,11);
+  doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text(title.substring(0,60), margin, 18);
+  doc.setFontSize(9); doc.setTextColor(200,200,180); doc.text(author, margin, 26);
+  y = 40;
+  doc.setTextColor(30,30,30);
+  const lines = body.split('\n');
+  lines.forEach(line => {
+    if (y > 272) { doc.addPage(); y = 20; }
+    if (line.startsWith('## ')) {
+      y += 4; doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
+      doc.text(line.replace('## ',''), margin, y);
+      y += 5; doc.setDrawColor(r,g,b); doc.setLineWidth(0.4); doc.line(margin, y, W-margin, y); y += 4;
+      doc.setTextColor(30,30,30);
+    } else if (line.startsWith('### ')) {
+      y += 3; doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(60,60,60);
+      doc.text(line.replace('### ',''), margin, y); y += 5; doc.setTextColor(30,30,30);
+    } else if (line.startsWith('> ')) {
+      doc.setFillColor(240,253,250); doc.rect(margin, y-3, maxW, 8, 'F');
+      doc.setFontSize(fontSize-1); doc.setFont('helvetica','italic'); doc.setTextColor(13,148,136);
+      const split = doc.splitTextToSize(line.replace('> ',''), maxW-6);
+      split.forEach(sl => { doc.text(sl, margin+4, y); y += 5; });
+      doc.setTextColor(30,30,30);
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      doc.setFontSize(fontSize); doc.setFont('helvetica','normal');
+      doc.splitTextToSize('• ' + line.substring(2), maxW-4).forEach(sl => { doc.text(sl, margin+2, y); y += 5; });
+    } else if (line.trim() === '') { y += 3;
+    } else {
+      doc.setFontSize(fontSize); doc.setFont('helvetica','normal');
+      doc.splitTextToSize(line, maxW).forEach(sl => { doc.text(sl, margin, y); y += 5; });
+    }
+  });
+  const pages = doc.getNumberOfPages();
+  for (let i=1; i<=pages; i++) {
+    doc.setPage(i); doc.setFontSize(8); doc.setTextColor(160,160,150);
+    doc.text(`BlogFort Agency — Página ${i} de ${pages}`, margin, 290);
+    doc.text(new Date().toLocaleDateString('es-ES'), W-margin, 290, {align:'right'});
+  }
+  doc.save(title.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '.pdf');
+  toast('📄 PDF descargado');
+}
+
+async function generatePDFWithAI() {
+  const pr = document.getElementById('pdfAiPrompt').value.trim();
+  if (!pr) return;
+  document.getElementById('pdfAiBtn').disabled = true;
+  document.getElementById('pdfAiSpin').classList.add('on');
+  document.getElementById('pdfAiLbl').style.display = 'none';
+  try {
+    const txt = await callAI('Eres un escritor experto en salud y negocios. Redacta en español con tono humano, empático y profesional. Genera el documento con estructura: título con #, secciones con ##, conclusión con CTA sutil. Sin frases genéricas ni tono robótico.', pr, 1800);
+    const firstLine = txt.split('\n')[0].replace(/^#+\s*/,'').trim();
+    document.getElementById('pdfTitle').value = firstLine;
+    document.getElementById('pdfBody').value = txt;
+    document.getElementById('pdfAiResult').textContent = '✅ Documento generado. Revisa el contenido arriba y descárgalo como PDF.';
+    document.getElementById('pdfAiResult').classList.add('on');
+    toast('✅ PDF generado por IA');
+  } catch(e) { toast('⚠️ ' + e.message); }
+  document.getElementById('pdfAiBtn').disabled = false;
+  document.getElementById('pdfAiSpin').classList.remove('on');
+  document.getElementById('pdfAiLbl').style.display = '';
+}
+
+// ═══════════ IMAGE EDITOR ═══════════
+let origFile = null, origSize = 0;
+
+function dragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag'); }
+function dragLeave() { document.getElementById('dropZone').classList.remove('drag'); }
+function dropImg(e) { e.preventDefault(); dragLeave(); const f = e.dataTransfer?.files?.[0]; if(f) processImg(f); }
+function loadImg(e) { const f = e.target.files?.[0]; if(f) processImg(f); }
+
+function processImg(file) {
+  if (!file.type.startsWith('image/')) { toast('⚠️ Solo se admiten imágenes'); return; }
+  origFile = file; origSize = file.size;
+  document.getElementById('origSize').textContent = formatBytes(file.size);
+  // Mostrar nombre del archivo en la cabecera
+  const nameEl = document.getElementById('imgFileName');
+  if (nameEl) nameEl.textContent = file.name || 'Imagen cargada';
+  const reader = new FileReader();
+  reader.onload = e => {
+    origImgData = e.target.result;
+    const img = new Image();
+    img.onload = () => {
+      origImgNaturalW = img.naturalWidth;
+      origImgNaturalH = img.naturalHeight;
+      document.getElementById('imgW').value = img.naturalWidth;
+      document.getElementById('imgH').value = img.naturalHeight;
+      document.getElementById('imgDims').textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+      document.getElementById('imgPreviewWrap').style.display = 'block';
+      // Ocultar la zona de carga y mostrar hint de "cambiar imagen"
+      document.getElementById('dropZone').style.display = 'none';
+      renderPreview();
+      // Auto-scroll hacia los controles en móvil Android
+      setTimeout(() => {
+        const wrap = document.getElementById('imgPreviewWrap');
+        if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function syncDims(changed) {
+  if (!document.getElementById('aspectLock').checked) return;
+  if (!origImgNaturalW || !origImgNaturalH) return;
+  const ratio = origImgNaturalW / origImgNaturalH;
+  if (changed === 'w') {
+    const w = parseInt(document.getElementById('imgW').value) || origImgNaturalW;
+    document.getElementById('imgH').value = Math.round(w / ratio);
+  } else {
+    const h = parseInt(document.getElementById('imgH').value) || origImgNaturalH;
+    document.getElementById('imgW').value = Math.round(h * ratio);
+  }
+  renderPreview();
+}
+
+function applyScale() {
+  const scale = parseInt(document.getElementById('scaleSlider').value) / 100;
+  document.getElementById('scaleVal').textContent = Math.round(scale*100) + '%';
+  if (!origImgNaturalW) return;
+  document.getElementById('imgW').value = Math.round(origImgNaturalW * scale);
+  document.getElementById('imgH').value = Math.round(origImgNaturalH * scale);
+  renderPreview();
+}
+
+function renderPreview() {
+  if (!origImgData) return;
+  const targetW = parseInt(document.getElementById('imgW').value) || origImgNaturalW;
+  const targetH = parseInt(document.getElementById('imgH').value) || origImgNaturalH;
+  const brightness = document.getElementById('brightnessSlider').value;
+  const contrast = document.getElementById('contrastSlider').value;
+  const saturation = document.getElementById('saturationSlider').value;
+  const sharpness = parseInt(document.getElementById('sharpnessSlider').value);
+  const quality = parseInt(document.getElementById('qualitySlider').value) / 100;
+  const fmt = document.getElementById('imgFormat').value;
+
+  document.getElementById('qualityVal').textContent = Math.round(quality*100) + '%';
+  document.getElementById('brightnessVal').textContent = brightness + '%';
+  document.getElementById('contrastVal').textContent = contrast + '%';
+  document.getElementById('saturationVal').textContent = saturation + '%';
+  document.getElementById('sharpnessVal').textContent = sharpness;
+
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.getElementById('imgCanvas');
+    canvas.width = targetW; canvas.height = targetH;
+    const ctx = canvas.getContext('2d');
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+    ctx.filter = 'none';
+    if (sharpness > 0) applySharpen(ctx, targetW, targetH, sharpness * 0.3);
+    document.getElementById('imgDims').textContent = `${targetW} × ${targetH} px`;
+    const mtype = fmt==='png'?'image/png':fmt==='webp'?'image/webp':'image/jpeg';
+    const dataUrl = canvas.toDataURL(mtype, fmt==='png'?undefined:quality);
+    const compBytes = Math.round((dataUrl.length-22)*0.75);
+    document.getElementById('compSize').textContent = formatBytes(compBytes);
+    const saved = Math.round((1-compBytes/origSize)*100);
+    document.getElementById('reduction').textContent = saved > 0 ? `-${saved}%` : '+'+Math.abs(saved)+'%';
+    document.getElementById('reduction').style.color = saved > 0 ? 'var(--success)' : 'var(--rust)';
+  };
+  img.src = origImgData;
+}
+
+function applySharpen(ctx, w, h, amount) {
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  const kernel = [-amount, -amount, -amount, -amount, 1+8*amount, -amount, -amount, -amount, -amount];
+  const side = 3, halfSide = 1;
+  const output = new Uint8ClampedArray(data.length);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let r=0,g=0,b=0;
+      for (let ky=0;ky<side;ky++) for (let kx=0;kx<side;kx++) {
+        const sx=Math.min(w-1,Math.max(0,x+kx-halfSide)), sy=Math.min(h-1,Math.max(0,y+ky-halfSide));
+        const off=(sy*w+sx)*4, wt=kernel[ky*side+kx];
+        r+=data[off]*wt; g+=data[off+1]*wt; b+=data[off+2]*wt;
+      }
+      const off=(y*w+x)*4;
+      output[off]=Math.min(255,Math.max(0,r)); output[off+1]=Math.min(255,Math.max(0,g));
+      output[off+2]=Math.min(255,Math.max(0,b)); output[off+3]=data[off+3];
+    }
+  }
+  ctx.putImageData(new ImageData(output,w,h), 0, 0);
+}
+
+function compressImg() {
+  const canvas = document.getElementById('imgCanvas');
+  const fmt = document.getElementById('imgFormat').value;
+  const quality = parseInt(document.getElementById('qualitySlider').value) / 100;
+  const mtype = fmt==='png'?'image/png':fmt==='webp'?'image/webp':'image/jpeg';
+  const ext = fmt==='png'?'png':fmt==='webp'?'webp':'jpg';
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL(mtype, fmt==='png'?undefined:quality);
+  a.download = (origFile?.name||'imagen').replace(/\.[^.]+$/,'')+'-blogfort.'+ext;
+  a.click();
+  toast('🖼 Imagen descargada');
+}
+
+function printImg() {
+  const canvas = document.getElementById('imgCanvas');
+  const w = window.open('');
+  w.document.write(`<img src="${canvas.toDataURL()}" style="max-width:100%;print-color-adjust:exact;">`);
+  w.document.close(); w.print();
+}
+
+function resetImgSliders() {
+  document.getElementById('brightnessSlider').value = 100;
+  document.getElementById('contrastSlider').value = 100;
+  document.getElementById('saturationSlider').value = 100;
+  document.getElementById('sharpnessSlider').value = 0;
+  document.getElementById('qualitySlider').value = 80;
+  document.getElementById('scaleSlider').value = 100;
+  if (origImgNaturalW) {
+    document.getElementById('imgW').value = origImgNaturalW;
+    document.getElementById('imgH').value = origImgNaturalH;
+  }
+  renderPreview();
+  toast('↺ Ajustes restablecidos');
+}
+
+function resetImg() {
+  origFile=null; origImgData=null; origImgNaturalW=0; origImgNaturalH=0;
+  document.getElementById('imgPreviewWrap').style.display='none';
+  document.getElementById('dropZone').style.display='';
+  document.getElementById('imgInput').value='';
+  toast('🗑 Imagen eliminada');
+}
+
+function changeImg() {
+  document.getElementById('imgInput').value='';
+  document.getElementById('imgInput').click();
+}
+
+function formatBytes(b) {
+  if (b<1024) return b+'B';
+  if (b<1048576) return (b/1024).toFixed(1)+'KB';
+  return (b/1048576).toFixed(2)+'MB';
+}
+
+// ═══════════ SPELL / HUMANIZER ═══════════
+let spellResultText = '';
+
+function loadBodyToSpell() {
+  document.getElementById('spellText').value = document.getElementById('bodyInp').value;
+  toast('↩ Texto cargado desde el editor');
+}
+
+async function runSpell() {
+  const text = document.getElementById('spellText').value.trim();
+  if (!text) return;
+  const lang = document.getElementById('spellLang').value;
+  const kw = document.getElementById('spellKw').value.trim();
+  document.getElementById('spellBtn').disabled = true;
+  document.getElementById('spellSpin').classList.add('on');
+  document.getElementById('spellBtnLbl').style.display = 'none';
+  const sys = `Eres un editor experto en copywriting SEO y contenido de salud con enfoque en contenido 100% humano. Idioma: ${lang}. Analiza el texto y devuelve SOLO un JSON con este formato exacto sin backticks:
+{"corrected":"texto completo corregido y humanizado al máximo posible (tono cálido, personal, frases variadas, sin clichés de IA)","issues":[{"type":"error|seo|human","text":"fragmento problemático","suggestion":"mejora concreta"}],"summary":"resumen de mejoras en 1-2 oraciones","humanScore":85}
+Tipos: "error"=ortografía/gramática, "seo"=optimización${kw?` (keyword: ${kw})`:''},"human"=humanización. El texto corregido debe superar 85/100 en detectores de IA.`;
+  try {
+    const raw = await callAI(sys, text, 2500);
+    let data;
+    try { data = JSON.parse(raw.replace(/```json?|```/g,'').trim()); } catch(e) { data = { corrected: raw, issues: [], summary: 'Texto procesado.', humanScore: 80 }; }
+    spellResultText = data.corrected || text;
+    let html = '';
+    if (data.humanScore) html += `<div style="background:var(--teal-l);border:1px solid rgba(13,148,136,.2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--teal);margin-bottom:12px;display:flex;align-items:center;gap:8px;"><strong style="font-size:20px;font-family:'DM Mono',monospace;">${data.humanScore}/100</strong> <span>Human Score estimado después de corrección</span></div>`;
+    if (data.summary) html += `<div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mid);margin-bottom:12px;">✦ ${data.summary}</div>`;
+    if (data.issues?.length) {
+      html += `<div class="ds-title" style="margin-bottom:8px;">Correcciones detectadas (${data.issues.length})</div><ul class="correction-list">`;
+      data.issues.forEach(i => {
+        const cls = i.type==='error'?'cb-error':i.type==='seo'?'cb-seo':'cb-human';
+        const lbl = i.type==='error'?'Error':i.type==='seo'?'SEO':'Humanizar';
+        html += `<li class="correction-item"><span class="correction-badge ${cls}">${lbl}</span><div style="flex:1;font-size:11px;"><strong style="color:var(--rust);">${i.text}</strong> → <span style="color:var(--teal);">${i.suggestion}</span></div></li>`;
+      });
+      html += '</ul>';
+    }
+    html += `<div style="margin-top:14px;"><div class="ds-title" style="margin-bottom:6px;">Texto humanizado (listo para publicar)</div><div style="background:white;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;max-height:320px;overflow-y:auto;">${data.corrected}</div></div>`;
+    document.getElementById('spellResultContent').innerHTML = html;
+    document.getElementById('spellResultCard').style.display = 'block';
+    toast(`✅ ${data.issues?.length||0} mejoras aplicadas · Human Score: ${data.humanScore||'--'}/100`);
+  } catch(e) { toast('⚠️ ' + e.message); }
+  document.getElementById('spellBtn').disabled = false;
+  document.getElementById('spellSpin').classList.remove('on');
+  document.getElementById('spellBtnLbl').style.display = '';
+}
+
+function applySpellResult() {
+  if (!spellResultText) return;
+  document.getElementById('bodyInp').value = spellResultText;
+  upd(); showScreen('editor'); toast('✅ Texto humanizado aplicado al editor');
+}
+
+function copySpellResult() {
+  navigator.clipboard.writeText(spellResultText);
+  toast('⎘ Texto copiado');
+}
+
+// ═══════════ TRANSLATOR ═══════════
+const langFlags = {
+  'español':'🇪🇸', 'inglés':'🇬🇧', 'inglés americano':'🇺🇸', 'inglés británico':'🇬🇧',
+  'portugués':'🇧🇷', 'francés':'🇫🇷', 'alemán':'🇩🇪', 'italiano':'🇮🇹',
+  'chino mandarín':'🇨🇳', 'japonés':'🇯🇵', 'árabe':'🇸🇦', 'ruso':'🇷🇺'
+};
+
+function swapLangs() {
+  const s = document.getElementById('srcLang'), t = document.getElementById('tgtLang');
+  [s.value, t.value] = [t.value, s.value];
+  const st = document.getElementById('transSource').value, tt = document.getElementById('transTarget').value;
+  document.getElementById('transSource').value = tt; document.getElementById('transTarget').value = st;
+  updateTransLabels();
+updateDialectInfo();
+}
+
+function updateTransLabels() {
+  const s = document.getElementById('srcLang').value, t = document.getElementById('tgtLang').value;
+  document.getElementById('srcLbl').textContent = `${langFlags[s]||'🌐'} ${s.charAt(0).toUpperCase()+s.slice(1)} — Texto original`;
+  document.getElementById('tgtLbl').textContent = `${langFlags[t]||'🌐'} ${t.charAt(0).toUpperCase()+t.slice(1)} — Traducción`;
+}
+
+function loadBodyToTrans() {
+  document.getElementById('transSource').value = document.getElementById('bodyInp').value;
+  toast('↩ Texto cargado desde el editor');
+}
+
+function clearTrans() {
+  document.getElementById('transSource').value = '';
+  document.getElementById('transTarget').value = '';
+}
+
+function copyTrans() {
+  navigator.clipboard.writeText(document.getElementById('transTarget').value);
+  toast('⎘ Traducción copiada');
+}
+
+function insertTransToEditor() {
+  const txt = document.getElementById('transTarget').value;
+  if (!txt) return;
+  document.getElementById('bodyInp').value = txt;
+  upd(); showScreen('editor'); toast('↩ Traducción insertada en el editor');
+}
+
+// ── DIALECTO LOCAL ──
+const dialectProfiles = {
+  mexico:            { label:'🇲🇽 México · Español neutro LATAM', note:'voseo ausente, tú formal, expresiones mexicanas' },
+  colombia:          { label:'🇨🇴 Colombia · Español formal', note:'usted predominante, tono formal, expresiones colombianas' },
+  argentina:         { label:'🇦🇷 Argentina · Rioplatense', note:'voseo, entonación rioplatense, lunfardo empresarial' },
+  chile:             { label:'🇨🇱 Chile · Español chileno', note:'chilenismos controlados, tono profesional' },
+  peru:              { label:'🇵🇪 Perú · Español andino', note:'neutro culto, referencias al mercado peruano' },
+  venezuela:         { label:'🇻🇪 Venezuela · Español caribeño', note:'tono caribeño formal, expresiones venezolanas' },
+  cuba:              { label:'🇨🇺 Cuba · Español cubano', note:'tono cubano formal, expresiones locales' },
+  espana_castellano: { label:'🇪🇸 Castellano · España', note:'tuteo, vocabulario peninsular estándar' },
+  espana_catalan:    { label:'🇪🇸 Cataluña · Castellano catalán', note:'castellano con influencias catalanas, formal' },
+  espana_andaluz:    { label:'🇪🇸 Andalucía · Español andaluz', note:'seseo suave, expresiones andaluzas, tono cálido' },
+  usa_general:       { label:'🇺🇸 US English · General American', note:'neutral American accent, business formal' },
+  usa_southern:      { label:'🇺🇸 US Southern · Southern American', note:'southern courtesy markers, warm professional tone' },
+  uk_british:        { label:'🇬🇧 British English · RP', note:'formal British register, UK business conventions' },
+  australia:         { label:'🇦🇺 Australian English', note:'Australian directness, informal-professional blend' },
+  brasil:            { label:'🇧🇷 Brasil · Português brasileiro', note:'português do Brasil, expressões locais, formal' },
+  portugal:          { label:'🇵🇹 Portugal · Português europeu', note:'português europeu, registo formal empresarial' },
+  francia:           { label:'🇫🇷 France · Français standard', note:'français soutenu, vouvoiement, conventions d\'affaires' },
+  alemania:          { label:'🇩🇪 Deutschland · Hochdeutsch', note:'Hochdeutsch, formelles Geschäftsdeutsch, Sie-Form' },
+  italia:            { label:'🇮🇹 Italia · Italiano standard', note:'italiano formale, Lei, convenzioni commerciali' },
+  china:             { label:'🇨🇳 中国 · 普通话', note:'正式商务普通话，简体字' },
+  japon:             { label:'🇯🇵 日本 · 標準語', note:'敬語 (keigo), formal business Japanese' },
+  arabia:            { label:'🇸🇦 Arabia · العربية الفصحى', note:'MSA formal, business register' },
+};
+
+function updateDialectInfo() {
+  const region = document.getElementById('dialectRegion')?.value || 'espana_castellano';
+  const profile = dialectProfiles[region] || dialectProfiles.espana_castellano;
+  const el = document.getElementById('dialectInfo');
+  if (el) el.textContent = profile.label.split(' · ')[1] || profile.label;
+}
+
+// ── VOZ — Speech Recognition ──
+let recognition = null, isRecording = false;
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    toast('⚠️ Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.');
+    return;
+  }
+  if (isRecording) {
+    stopVoice();
+  } else {
+    startVoice();
+  }
+}
+
+function startVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  const sl = document.getElementById('srcLang')?.value || 'español';
+  // Mapear idioma a código BCP47
+  const langMap = {
+    'español':'es-ES','inglés americano':'en-US','inglés británico':'en-GB',
+    'portugués':'pt-BR','francés':'fr-FR','alemán':'de-DE','italiano':'it-IT',
+    'chino mandarín':'zh-CN','japonés':'ja-JP','árabe':'ar-SA','ruso':'ru-RU'
+  };
+  recognition.lang = langMap[sl] || 'es-ES';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('micBtn').textContent = '🔴';
+    document.getElementById('voiceStatus').textContent = 'Escuchando...';
+    toast('🎤 Grabando — habla ahora');
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    const ta = document.getElementById('transSource');
+    if (final) ta.value = (ta.value + ' ' + final).trim();
+    document.getElementById('voiceStatus').textContent = interim ? '⟳ ' + interim.substring(0,30) + '...' : 'Escuchando...';
+  };
+
+  recognition.onerror = (e) => {
+    stopVoice();
+    if (e.error === 'not-allowed') toast('⚠️ Permiso de micrófono denegado. Actívalo en tu navegador.');
+    else toast('⚠️ Error de voz: ' + e.error);
+  };
+
+  recognition.onend = () => { if (isRecording) stopVoice(); };
+  recognition.start();
+}
+
+function stopVoice() {
+  isRecording = false;
+  if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
+  const btn = document.getElementById('micBtn');
+  if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+  const vs = document.getElementById('voiceStatus');
+  if (vs) vs.textContent = 'Toca para hablar';
+  toast('🎤 Grabación finalizada');
+}
+
+async function runTranslate() {
+  const src = document.getElementById('transSource').value.trim();
+  if (!src) return;
+  // Detener grabación si está activa
+  if (isRecording) stopVoice();
+  const sl = document.getElementById('srcLang').value;
+  const tl = document.getElementById('tgtLang').value;
+  const mode = document.getElementById('transMode')?.value || 'empresarial';
+  const region = document.getElementById('dialectRegion')?.value || 'espana_castellano';
+  const dialectProfile = dialectProfiles[region] || dialectProfiles.espana_castellano;
+  updateTransLabels();
+
+  const modeInstructions = {
+    empresarial: 'Usa tono corporativo profesional. Mantén la terminología de negocios y el registro formal.',
+    tecnico: 'Usa terminología técnica precisa. Mantén los términos especializados sin traducir cuando sea estándar.',
+    marketing: 'Adapta para impacto comercial en el mercado destino. Mantén el poder persuasivo y el CTA.',
+    medico: 'Usa terminología clínica correcta. Adapta referencias a organismos reguladores del país destino.',
+    legal: 'Usa lenguaje jurídico formal del país destino. Añade [N.T.] cuando no exista equivalente.',
+    informal: 'Usa lenguaje natural y conversacional. Adapta coloquialismos al mercado destino.',
+    dialecto: 'Adapta el texto al dialecto y variante local especificada, respetando los modismos y expresiones culturales propias de esa región.'
+  };
+
+  document.getElementById('transBtn').disabled = true;
+  document.getElementById('transSpin').classList.add('on');
+  document.getElementById('transBtnLbl').style.display = 'none';
+
+  try {
+    const dialectNote = `ADAPTACIÓN DIALECTAL ACTIVA: El texto debe adaptarse específicamente al dialecto y variante del idioma de: ${dialectProfile.label}. Consideraciones locales: ${dialectProfile.note}. Si existe vocabulario, expresiones, tratamientos de cortesía (tú/vos/usted/vous/Sie/Lei) o convenciones comerciales específicas de esa región, úsalas de forma natural.`;
+    const sys = `Eres un traductor profesional experto en comunicación empresarial internacional con profundo conocimiento dialectal y cultural de cada mercado. Traduce del ${sl} al ${tl}. MODO: ${mode}. ${modeInstructions[mode]} ${dialectNote} Responde SOLO con el texto traducido, sin explicaciones ni notas salvo [N.T.].`;
+    const txt = await callAI(sys, src, 2500);
+    document.getElementById('transTarget').value = txt;
+    toast('✅ Traducido · ' + dialectProfile.label.split(' · ')[0]);
+  } catch(e) { toast('⚠️ ' + e.message); }
+
+  document.getElementById('transBtn').disabled = false;
+  document.getElementById('transSpin').classList.remove('on');
+  document.getElementById('transBtnLbl').style.display = '';
+}
+
+// ═══════════ SETTINGS ═══════════
+function saveSetting(key, val) { settings[key] = val; save(); }
+function toggleSetting(key, btn) { settings[key] = !settings[key]; btn.classList.toggle('on', settings[key]); save(); }
+function updateApiStatus() {
+  document.getElementById('apiStatusDesc').textContent = apiKey ? '✅ API Key configurada correctamente' : '⚠️ No configurada — necesaria para funciones de IA';
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify({articles, exportDate: new Date().toISOString()}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'blogfort_backup_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+  toast('📦 Datos exportados');
+}
+
+function clearData() {
+  if (confirm('¿Borrar todos los datos? Esta acción no se puede deshacer.')) {
+    localStorage.removeItem(DB); location.reload();
+  }
+}
+
+// ═══════════ API KEY ═══════════
+function openApiModal() {
+  document.getElementById('apiKeyInput').value = apiKey;
+  showModal('apiModal');
+}
+
+function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  apiKey = k; save(); closeModal('apiModal');
+  const btn = document.getElementById('apiKeyBtn');
+  if (k) { btn.classList.add('set'); btn.textContent = '🔑 API ✓'; }
+  else { btn.classList.remove('set'); btn.textContent = '🔑 API Key'; }
+  updateApiStatus();
+  toast(k ? '✅ API Key guardada' : '🔑 API Key eliminada');
+}
+
+// ═══════════ MONETIZATION ═══════════
+let planAnual = false;
+
+function toggleAnual(btn) {
+  planAnual = !planAnual;
+  btn.classList.toggle('on', planAnual);
+  const label = document.getElementById('planLblAnual');
+  const labelMes = document.getElementById('planLblMes');
+  if (label) label.style.color = planAnual ? 'var(--blue)' : 'var(--mid)';
+  if (labelMes) labelMes.style.color = planAnual ? 'var(--mid)' : 'var(--blue)';
+  // Actualizar precios
+  const precios = {
+    starter:   { mes: '$39',  anual: '$31' },
+    business:  { mes: '$97',  anual: '$78' },
+    enterprise:{ mes: '$249', anual: '$199' }
+  };
+  Object.keys(precios).forEach(plan => {
+    const el = document.getElementById('price-' + plan);
+    const pel = document.getElementById('period-' + plan);
+    if (el) el.textContent = planAnual ? precios[plan].anual : precios[plan].mes;
+    if (pel) pel.textContent = planAnual ? ' / mes (facturado anualmente)' : ' / mes';
+  });
+}
+
+function selectPlan(plan, price) {
+  const periodo = planAnual ? 'anual' : 'mensual';
+  const contacto = {
+    starter: 'Perfecto. Para activar el plan Starter visita blogfort.agency o escríbenos a hello@blogfort.agency',
+    business: 'Excelente elección. Para activar Business visita blogfort.agency o escríbenos a hello@blogfort.agency',
+    enterprise: 'Contactaremos contigo en menos de 24h. Escríbenos a enterprise@blogfort.agency o visita blogfort.agency'
+  };
+  const msg = contacto[plan] || 'Gracias por tu interés en BlogFort Agency.';
+  // Toast + modal de confirmación
+  toast(`⚡ Plan ${plan} ${price} ${periodo} — Revisa tu email`);
+  setTimeout(() => {
+    const el = document.getElementById('planConfirmMsg');
+    if (el) el.textContent = msg;
+    showModal('planConfirmModal');
+  }, 400);
+  closeModal('planModal');
+}
+
+// ═══════════ TOAST ═══════════
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ═══════════ SERVICE WORKER ═══════════
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+// ═══════════ URL PARAMS ═══════════
+const params = new URLSearchParams(location.search);
+if (params.get('action')==='new') newArt();
+if (params.get('tool')==='translator') showScreen('translator');
+
+// ═══════════ AUTOSAVE ═══════════
+setInterval(() => { if(settings.autosave!==false) saveCurrent(); }, 30000);
+
+// ═══════════ TECLADO ANDROID — visualViewport ═══════════
+// Cuando el teclado virtual sube, ajusta el alto del editor para que no tape el texto
+if (window.visualViewport) {
+  let lastH = window.visualViewport.height;
+  window.visualViewport.addEventListener('resize', () => {
+    const vh = window.visualViewport.height;
+    const diff = lastH - vh;
+    // Si el teclado subió más de 100px, hacemos scroll al cursor
+    if (diff > 100) {
+      const active = document.activeElement;
+      if (active && (active.id === 'bodyInp' || active.id === 'titleInp')) {
+        setTimeout(() => {
+          active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 100);
+      }
+    }
+    lastH = vh;
+  });
+}
+
+// ═══════════ WELCOME SCREEN ═══════════
+function startBlogFort() {
+  const overlay = document.getElementById('welcomeOverlay');
+  overlay.classList.add('hiding');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    localStorage.setItem('blogfort_welcomed', '1');
+  }, 500);
+}
+
+// ═══════════ INIT ═══════════
+load();
+if (articles.length) loadArt(articles[0].id);
+updateTransLabels();
+
+// Mostrar bienvenida solo la primera vez
+if (!localStorage.getItem('blogfort_welcomed')) {
+  document.getElementById('welcomeOverlay').style.display = 'flex';
+} else {
+  document.getElementById('welcomeOverlay').style.display = 'none';
+}
+</script>
+</body>
+</html>
