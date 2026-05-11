@@ -10,7 +10,7 @@
 <meta name="description" content="Plataforma profesional de contenido SEO con IA — BlogFort Agency">
 <link rel="manifest" href="manifest.json">
 <title>BlogFort</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
@@ -21,6 +21,11 @@
   --success:#059669; --warning:#d97706;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
+  --f-bg:#030810; --f-surface:#070f1a; --f-surface2:#0b1825;
+  --f-border:#132a42; --f-border2:#1a3a5c;
+  --f-accent:#00a8ff; --f-accent2:#00ffcc; --f-gold:#f0a500;
+  --f-text:#c8dff0; --f-text-dim:#3d6a8a;
+  --f-glow:0 0 18px rgba(0,168,255,0.35); --f-glow2:0 0 18px rgba(0,255,204,0.3);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--ink);}
@@ -527,7 +532,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
   <!-- ══════════ WELCOME SCREEN ══════════ -->
   <div class="welcome-overlay" id="welcomeOverlay">
     <div class="welcome-hero">
-      <div class="welcome-castle">🏰</div>
+      <div class="welcome-castle"><img src="blogfort-logo-transparente.png" alt="BlogFort Agency" style="width:220px;max-width:72vw;height:auto;filter:drop-shadow(0 0 24px rgba(240,165,0,0.5));"></div>
       <div class="welcome-logo">Blog<em>Fort</em></div>
       <div class="welcome-tag">Agency · Content Platform</div>
       <div class="welcome-tagline">
@@ -601,29 +606,164 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
     <button class="api-pause-close" onclick="hideBanner()">✕</button>
   </div>
 
-  <!-- TOP NAV -->
-  <nav class="topnav">
-    <div class="brand">
-      <span class="brand-icon">🏰</span>
-      <span class="brand-name">Blog<em>Fort</em></span>
-      <span class="brand-tag">AGENCY</span>
+  <!-- TOP NAV — FALCON DNA -->
+  <nav class="topnav" style="background:var(--f-bg);border-bottom:1px solid var(--f-border);padding:calc(8px + var(--safe-top)) 14px 8px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:relative;overflow:hidden;">
+    <div style="content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--f-accent),var(--f-accent2),transparent);pointer-events:none;"></div>
+    <div class="brand" style="font-family:'Playfair Display',serif;font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px;position:relative;z-index:1;">
+      <img src="blogfort-logo-transparente.png" alt="BlogFort Agency" height="42" style="height:42px;width:auto;object-fit:contain;filter:drop-shadow(0 0 8px rgba(240,165,0,0.4));flex-shrink:0;">
+      <span style="color:#fff;">Blog<em style="color:var(--f-gold);font-style:normal;">Fort</em></span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2.5px;border:1px solid rgba(0,168,255,0.4);color:var(--f-accent);padding:2px 8px;border-radius:2px;font-weight:700;text-shadow:0 0 8px rgba(0,168,255,0.5);">AGENCY</span>
     </div>
     <div class="nav-spacer"></div>
-    <div class="nav-actions">
-      <button class="plan-badge" onclick="showModal('planModal')">⚡ PLANES</button>
-      <button class="api-key-btn" id="apiKeyBtn" onclick="openApiModal()">🔑 API Key 🔒</button>
+    <div class="nav-actions" style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;">
+      <button class="plan-badge" onclick="showModal('planModal')" style="background:transparent;border:1px solid var(--f-gold);color:var(--f-gold);border-radius:3px;padding:4px 11px;font-size:9px;font-weight:700;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:2px;transition:all .2s;">⚡ PLANES</button>
+      <button class="api-key-btn" id="apiKeyBtn" onclick="openApiModal()" style="background:rgba(0,168,255,0.07);border:1px solid var(--f-border2);color:var(--f-text-dim);border-radius:3px;padding:5px 11px;font-size:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:1px;transition:all .2s;">🔑 API KEY</button>
     </div>
   </nav>
+  <style>
+  @keyframes bfPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  @keyframes bfRing{0%,100%{opacity:0.5;}50%{opacity:0.1;}}
+  </style>
 
-  <!-- TAB BAR -->
+  <!-- TAB BAR — FALCON OPERATIVO -->
+  <style>
+  .tabbar{display:flex;background:var(--f-surface);border-bottom:1px solid var(--f-border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tab{flex-shrink:0;padding:9px 11px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;font-weight:600;color:var(--f-text-dim);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;text-transform:uppercase;position:relative;}
+  .tab.active{color:var(--f-accent);border-bottom-color:var(--f-accent);background:rgba(0,168,255,0.06);text-shadow:0 0 8px rgba(0,168,255,0.4);}
+  .tab:hover:not(.active){color:var(--f-text);background:rgba(255,255,255,0.03);}
+  .tab svg{width:13px;height:13px;flex-shrink:0;transition:filter .2s;}
+  .tab.active svg{filter:drop-shadow(0 0 4px rgba(0,168,255,0.7));}
+  .tab-label{font-size:8px;letter-spacing:1.5px;}
+  /* Tool card heads FALCON */
+  .tool-card-head{background:var(--f-surface)!important;color:var(--f-accent)!important;font-family:'Share Tech Mono',monospace!important;font-size:10px!important;letter-spacing:2px!important;border-bottom:1px solid var(--f-border)!important;position:relative;overflow:hidden;}
+  .tool-card-head::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--f-accent),transparent);}
+  /* AI drawer FALCON */
+  .ai-drawer{background:var(--f-surface2)!important;border-left:1px solid var(--f-border)!important;}
+  .drawer-tabs{background:var(--f-surface)!important;border-bottom:1px solid var(--f-border)!important;}
+  .dtab{font-family:'Share Tech Mono',monospace!important;font-size:9px!important;letter-spacing:2px!important;color:var(--f-text-dim)!important;text-transform:uppercase;}
+  .dtab.active{color:var(--f-accent)!important;border-bottom-color:var(--f-accent)!important;}
+  .ai-box{background:var(--f-surface)!important;border:1px solid var(--f-border)!important;}
+  .ai-box-head{background:var(--f-bg)!important;color:var(--f-accent)!important;font-family:'Share Tech Mono',monospace!important;font-size:8px!important;letter-spacing:2px!important;}
+  .ai-ta{background:var(--f-surface)!important;color:var(--f-text)!important;}
+  .ai-ta::placeholder{color:var(--f-text-dim)!important;}
+  .ai-foot{background:var(--f-bg)!important;border-top:1px solid var(--f-border)!important;}
+  .ai-sel{background:var(--f-surface)!important;color:var(--f-text-dim)!important;border:1px solid var(--f-border)!important;font-family:'Share Tech Mono',monospace!important;font-size:9px!important;}
+  .ai-go{background:transparent!important;border:1px solid var(--f-accent2)!important;color:var(--f-accent2)!important;font-family:'Share Tech Mono',monospace!important;letter-spacing:2px!important;border-radius:3px!important;}
+  .ai-go:hover{background:var(--f-accent2)!important;color:var(--f-bg)!important;}
+  .ai-result{background:var(--f-surface)!important;border:1px solid var(--f-border)!important;color:var(--f-text)!important;}
+  .qa-btn{background:var(--f-surface)!important;border:1px solid var(--f-border)!important;color:var(--f-text-dim)!important;font-family:'Share Tech Mono',monospace!important;font-size:9px!important;letter-spacing:1px!important;border-radius:4px!important;text-transform:uppercase;}
+  .qa-btn:hover{background:rgba(0,168,255,0.08)!important;border-color:var(--f-accent)!important;color:var(--f-accent)!important;}
+  .ds-title{font-family:'Share Tech Mono',monospace!important;font-size:8px!important;letter-spacing:2.5px!important;color:var(--f-text-dim)!important;border-bottom:1px solid var(--f-border)!important;}
+  .dpanel{padding:12px!important;}
+  /* Plantillas CSS */
+  #screen-templates{background:#f5f7fa;overflow-y:auto;}
+  .tpl-header{background:var(--f-surface);border-bottom:1px solid var(--f-border);padding:13px 14px 11px;position:relative;overflow:hidden;}
+  .tpl-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--f-accent),var(--f-accent2),transparent);}
+  .tpl-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+  .tpl-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--f-accent);letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 10px rgba(0,168,255,0.4);display:flex;align-items:center;gap:7px;}
+  .tpl-subtitle{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--f-text-dim);letter-spacing:2px;}
+  .tpl-cats{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .tpl-cats::-webkit-scrollbar{display:none;}
+  .tpl-cat{flex-shrink:0;padding:4px 10px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;background:transparent;border:1px solid var(--f-border);color:var(--f-text-dim);border-radius:2px;cursor:pointer;transition:all .15s;}
+  .tpl-cat:hover{border-color:var(--f-accent);color:var(--f-accent);}
+  .tpl-cat.active{border-color:var(--f-accent2);color:var(--f-accent2);background:rgba(0,255,204,0.07);}
+  .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px;}
+  .tpl-card{background:#fff;border:1px solid var(--f-border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;}
+  .tpl-card:hover{border-color:var(--f-accent);box-shadow:0 4px 14px rgba(0,168,255,.1);transform:translateY(-2px);}
+  .tpl-card-head{background:var(--f-surface);padding:9px 11px 7px;border-bottom:1px solid var(--f-border);position:relative;overflow:hidden;}
+  .tpl-card-head::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--f-accent),transparent);}
+  .tpl-card-icon{width:28px;height:28px;margin-bottom:5px;background:rgba(0,168,255,0.08);border:1px solid var(--f-border2);border-radius:5px;display:flex;align-items:center;justify-content:center;}
+  .tpl-card-icon svg{width:14px;height:14px;color:var(--f-accent);}
+  .tpl-card-name{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--f-accent);font-weight:700;}
+  .tpl-card-cat{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--f-text-dim);margin-top:2px;}
+  .tpl-card-body{padding:8px 11px;}
+  .tpl-card-desc{font-size:11px;color:#4b5563;line-height:1.4;margin-bottom:6px;}
+  .tpl-card-tags{display:flex;flex-wrap:wrap;gap:3px;}
+  .tpl-tag{font-size:9px;background:#eff6ff;color:#1a56db;padding:2px 6px;border-radius:3px;font-weight:600;}
+  .tpl-card-footer{padding:7px 11px;border-top:1px solid #f1f5f9;display:flex;gap:5px;}
+  .tpl-use-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;background:transparent;border:1px solid var(--f-accent);color:var(--f-accent);border-radius:3px;padding:5px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+  .tpl-use-btn:hover{background:var(--f-accent);color:var(--f-bg);}
+  .tpl-ai-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;background:transparent;border:1px solid var(--f-accent2);color:var(--f-accent2);border-radius:3px;padding:5px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+  .tpl-ai-btn:hover{background:var(--f-accent2);color:var(--f-bg);}
+  .tpl-builder{background:#fff;border:1px solid var(--f-border);border-radius:10px;margin:0 12px 12px;overflow:hidden;display:none;}
+  .tpl-builder.on{display:block;}
+  .tpl-builder-head{background:var(--f-surface);padding:10px 14px;border-bottom:1px solid var(--f-border);display:flex;align-items:center;justify-content:space-between;position:relative;}
+  .tpl-builder-head::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--f-accent2),transparent);}
+  .tpl-builder-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--f-accent2);}
+  .tpl-builder-close{background:transparent;border:1px solid var(--f-border);color:var(--f-text-dim);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .tpl-builder-close:hover{border-color:#dc2626;color:#dc2626;}
+  .tpl-form{padding:13px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .tpl-field{display:flex;flex-direction:column;gap:3px;}
+  .tpl-field.full{grid-column:1/-1;}
+  .tpl-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--f-text-dim);text-transform:uppercase;}
+  .tpl-input{border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:#0d0d0d;outline:none;transition:border-color .15s;background:#fff;}
+  .tpl-input:focus{border-color:var(--f-accent);}
+  .tpl-select{border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:#0d0d0d;outline:none;background:#fff;cursor:pointer;}
+  .tpl-textarea{border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-family:'DM Mono',monospace;font-size:11px;color:#0d0d0d;outline:none;resize:vertical;min-height:75px;background:#fff;line-height:1.5;}
+  .tpl-textarea:focus{border-color:var(--f-accent);}
+  .tpl-actions{padding:0 13px 13px;display:flex;gap:7px;}
+  .tpl-btn-gen{flex:1;background:transparent;border:1px solid var(--f-accent2);color:var(--f-accent2);border-radius:4px;padding:9px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .tpl-btn-gen:hover{background:var(--f-accent2);color:var(--f-bg);}
+  .tpl-btn-gen:disabled{opacity:.35;cursor:not-allowed;}
+  .tpl-btn-load{flex:1;background:transparent;border:1px solid var(--f-accent);color:var(--f-accent);border-radius:4px;padding:9px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .15s;}
+  .tpl-btn-load:hover{background:var(--f-accent);color:var(--f-bg);}
+  .tpl-loading{display:none;align-items:center;justify-content:center;gap:9px;padding:13px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--f-accent2);letter-spacing:2px;}
+  .tpl-loading.on{display:flex;}
+  .tpl-radar{width:19px;height:19px;border:2px solid var(--f-border);border-radius:50%;position:relative;animation:radarSpin 1.5s linear infinite;}
+  .tpl-radar::after{content:'';position:absolute;top:50%;left:50%;width:50%;height:2px;background:linear-gradient(90deg,var(--f-accent2),transparent);transform-origin:left center;transform:translateY(-50%);}
+  @keyframes radarSpin{to{transform:rotate(360deg);}}
+  .tpl-json-wrap{padding:0 13px 13px;}
+  .tpl-json-head{background:var(--f-bg);border:1px solid var(--f-border);border-bottom:none;border-radius:5px 5px 0 0;padding:6px 11px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--f-accent);letter-spacing:2px;display:flex;align-items:center;justify-content:space-between;}
+  .tpl-json-body{background:var(--f-surface2);border:1px solid var(--f-border);border-radius:0 0 5px 5px;padding:10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--f-text);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:190px;overflow-y:auto;}
+  .tpl-json-copy{background:transparent;border:1px solid var(--f-border2);color:var(--f-text-dim);padding:3px 8px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;cursor:pointer;transition:all .15s;}
+  .tpl-json-copy:hover{border-color:var(--f-accent2);color:var(--f-accent2);}
+  .tpl-saved-head{background:var(--f-surface);border-top:1px solid var(--f-border);border-bottom:1px solid var(--f-border);padding:8px 13px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--f-text-dim);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+  .tpl-saved-list{padding:9px 12px;}
+  .tpl-saved-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:9px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:9px;transition:border-color .15s;}
+  .tpl-saved-item:hover{border-color:var(--f-accent);}
+  .tpl-saved-name{font-size:13px;font-weight:600;color:#0d0d0d;}
+  .tpl-saved-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6b7280;letter-spacing:1px;margin-top:2px;}
+  .tpl-saved-acts{display:flex;gap:5px;flex-shrink:0;}
+  .tpl-saved-btn{font-family:'Share Tech Mono',monospace;font-size:8px;padding:4px 8px;border-radius:2px;cursor:pointer;transition:all .15s;letter-spacing:1px;text-transform:uppercase;}
+  .tpl-saved-use{background:transparent;border:1px solid var(--f-accent);color:var(--f-accent);}
+  .tpl-saved-use:hover{background:var(--f-accent);color:var(--f-bg);}
+  .tpl-saved-del{background:transparent;border:1px solid #dc2626;color:#dc2626;}
+  .tpl-saved-del:hover{background:#dc2626;color:#fff;}
+  </style>
   <div class="tabbar">
-    <button class="tab active" onclick="showScreen('editor')" id="tab-editor">✍️ <span class="tab-label">Editor</span></button>
-    <button class="tab" onclick="showScreen('articles')" id="tab-articles">📚 <span class="tab-label">Artículos</span></button>
-    <button class="tab" onclick="showScreen('pdf')" id="tab-pdf">📄 <span class="tab-label">PDF</span></button>
-    <button class="tab" onclick="showScreen('images')" id="tab-images">🖼 <span class="tab-label">Imágenes</span></button>
-    <button class="tab" onclick="showScreen('spell')" id="tab-spell">✅ <span class="tab-label">Corrector</span></button>
-    <button class="tab" onclick="showScreen('translator')" id="tab-translator">🌐 <span class="tab-label">Traductor</span></button>
-    <button class="tab" onclick="showScreen('settings')" id="tab-settings">⚙️ <span class="tab-label">Config</span></button>
+    <button class="tab active" onclick="showScreen('editor')" id="tab-editor">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M2 12L5 9 11 3 13 5 7 11 4 14 2 12Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 4L12 6" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="tab-label">EDITOR</span>
+    </button>
+    <button class="tab" onclick="showScreen('articles')" id="tab-articles">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5 5H11M5 8H11M5 11H8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="tab-label">ARTÍCULOS</span>
+    </button>
+    <button class="tab" onclick="showScreen('pdf')" id="tab-pdf">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M4 2H9L12 5V14H4V2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 2V5H12" stroke="currentColor" stroke-width="1.2"/><path d="M6 8H10M6 10H10M6 12H8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="tab-label">PDF</span>
+    </button>
+    <button class="tab" onclick="showScreen('images')" id="tab-images">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><circle cx="5.5" cy="6.5" r="1" stroke="currentColor" stroke-width="1"/><path d="M2 11L5 8L8 10L11 7L14 10" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="tab-label">IMÁGENES</span>
+    </button>
+    <button class="tab" onclick="showScreen('spell')" id="tab-spell">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M3 12L6 4H8L11 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 9H9.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="13" cy="10" r="2" stroke="currentColor" stroke-width="1.1"/></svg>
+      <span class="tab-label">CORRECTOR</span>
+    </button>
+    <button class="tab" onclick="showScreen('translator')" id="tab-translator">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 2C8 2 6 5 6 8C6 11 8 14 8 14" stroke="currentColor" stroke-width="1.1"/><path d="M8 2C8 2 10 5 10 8C10 11 8 14 8 14" stroke="currentColor" stroke-width="1.1"/><path d="M2 8H14" stroke="currentColor" stroke-width="1.1"/></svg>
+      <span class="tab-label">TRADUCTOR</span>
+    </button>
+    <button class="tab" onclick="showScreen('settings')" id="tab-settings">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5V3M8 13V14.5M1.5 8H3M13 8H14.5M3.2 3.2L4.3 4.3M11.7 11.7L12.8 12.8M12.8 3.2L11.7 4.3M4.3 11.7L3.2 12.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="tab-label">CONFIG</span>
+    </button>
+    <button class="tab" onclick="showScreen('templates')" id="tab-templates">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="0.8" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="0.8" stroke="currentColor" stroke-width="1.2"/><path d="M9 11.5H14M11.5 9V14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="tab-label">PLANTILLAS</span>
+    </button>
   </div>
 
   <!-- CONTENT -->
@@ -1244,7 +1384,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
         <div class="setting-group">
           <div class="setting-group-title">Sobre BlogFort</div>
           <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:16px;font-size:12px;color:var(--mid);line-height:1.8;">
-            <strong style="color:var(--ink);font-size:14px;">🏰 BlogFort Agency v3.0</strong><br>
+            <strong style="color:var(--ink);font-size:14px;">BlogFort Agency v3.0</strong><br>
             Plataforma profesional de contenido SEO con IA · PWA instalable<br><br>
             Herramientas: Editor SEO · Asistente IA · PDF · Editor de imágenes · Corrector Humanizador · Traductor multiidioma<br><br>
             Desarrollado por <strong style="color:var(--blue);">Aníbal Juan Alonso Sesma</strong> — BlogFort Content Agency · Sector Salud & Empresas<br><br>
@@ -1260,6 +1400,81 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
           </div>
         </div>
       </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════ PLANTILLAS ══════════ -->
+    <div class="screen" id="screen-templates">
+      <div class="tpl-header">
+        <div class="tpl-header-top">
+          <div class="tpl-title">
+            <svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px"><rect x="2" y="2" width="5" height="5" rx="0.8" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="0.8" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="0.8" stroke="currentColor" stroke-width="1.3"/><path d="M9 11.5H14M11.5 9V14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            EDITOR DE PLANTILLAS
+          </div>
+          <div class="tpl-subtitle">// BLOGFORT AGENCY</div>
+        </div>
+        <div class="tpl-cats">
+          <button class="tpl-cat active" onclick="filterTpl('todas',this)">◈ TODAS</button>
+          <button class="tpl-cat" onclick="filterTpl('marketing',this)">⬡ MARKETING</button>
+          <button class="tpl-cat" onclick="filterTpl('ventas',this)">◆ VENTAS</button>
+          <button class="tpl-cat" onclick="filterTpl('comunicacion',this)">▸ COMUNICACIÓN</button>
+          <button class="tpl-cat" onclick="filterTpl('rrhh',this)">▹ RRHH</button>
+          <button class="tpl-cat" onclick="filterTpl('salud',this)">✦ SALUD</button>
+        </div>
+      </div>
+      <div class="tpl-grid" id="tplGrid"></div>
+      <div class="tpl-builder" id="tplBuilder">
+        <div class="tpl-builder-head">
+          <div class="tpl-builder-title" id="tplBuilderTitle">⚡ CONSTRUCTOR</div>
+          <button class="tpl-builder-close" onclick="closeTplBuilder()">✕</button>
+        </div>
+        <div class="tpl-form">
+          <div class="tpl-field"><div class="tpl-label">Empresa</div><input class="tpl-input" id="tpl-company" placeholder="Ej: Clínica Dental Ortiz"></div>
+          <div class="tpl-field"><div class="tpl-label">Sector</div>
+            <select class="tpl-select" id="tpl-sector">
+              <option value="salud">Salud & Dental</option><option value="tecnologia">Tecnología</option>
+              <option value="legal">Legal & Finanzas</option><option value="inmobiliario">Inmobiliario</option>
+              <option value="marketing">Marketing</option><option value="ecommerce">eCommerce</option>
+              <option value="educacion">Educación</option><option value="turismo">Turismo</option><option value="empresas">General</option>
+            </select>
+          </div>
+          <div class="tpl-field"><div class="tpl-label">Público objetivo</div><input class="tpl-input" id="tpl-audience" placeholder="Ej: Familias, 25-50 años"></div>
+          <div class="tpl-field"><div class="tpl-label">Color primario</div><input class="tpl-input" id="tpl-color" placeholder="#1a56db" value="#1a56db"></div>
+          <div class="tpl-field"><div class="tpl-label">Tono de voz</div>
+            <select class="tpl-select" id="tpl-tone">
+              <option value="profesional">Profesional</option><option value="cercano">Cercano y empático</option>
+              <option value="agresivo_ventas">Agresivo en ventas</option><option value="cientifico">Científico</option><option value="inspirador">Inspirador</option>
+            </select>
+          </div>
+          <div class="tpl-field"><div class="tpl-label">Idioma</div>
+            <select class="tpl-select" id="tpl-lang">
+              <option value="es">Español</option><option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option>
+            </select>
+          </div>
+          <div class="tpl-field full"><div class="tpl-label">Servicios principales (separados por coma)</div><input class="tpl-input" id="tpl-services" placeholder="Ej: Implantes, Ortodoncia, Blanqueamiento"></div>
+          <div class="tpl-field full"><div class="tpl-label">Propuesta de valor</div><textarea class="tpl-textarea" id="tpl-value" placeholder="Ej: 20 años de experiencia, tecnología punta..."></textarea></div>
+        </div>
+        <div class="tpl-actions">
+          <button class="tpl-btn-gen" id="tplGenBtn" onclick="generateTplWithAI()">⚡ GENERAR CON IA</button>
+          <button class="tpl-btn-load" onclick="loadTplToEditor()">↩ CARGAR EN EDITOR</button>
+        </div>
+        <div class="tpl-loading" id="tplLoading"><div class="tpl-radar"></div><span id="tplLoadingTxt">GENERANDO...</span></div>
+        <div class="tpl-json-wrap" id="tplJsonWrap" style="display:none">
+          <div class="tpl-json-head"><span>// JSON MAESTRO — FALCON + MATRIX</span><button class="tpl-json-copy" onclick="copyTplJson()">⎘ COPIAR</button></div>
+          <div class="tpl-json-body" id="tplJsonBody"></div>
+        </div>
+        <div id="tplAIResult" style="display:none;padding:0 13px 13px;">
+          <div style="background:var(--f-surface);border:1px solid var(--f-border);border-radius:6px;padding:10px;font-size:11px;color:#0d0d0d;line-height:1.7;max-height:200px;overflow-y:auto;white-space:pre-wrap;" id="tplAIContent"></div>
+          <div style="display:flex;gap:7px;margin-top:8px;">
+            <button class="tpl-btn-load" style="flex:1" onclick="insertTplContent()">↩ INSERTAR EN EDITOR</button>
+            <button class="tpl-btn-gen" style="flex:1;border-color:var(--f-gold);color:var(--f-gold);" onclick="saveTplCustom()">💾 GUARDAR</button>
+          </div>
+        </div>
+      </div>
+      <div class="tpl-saved-head"><span>// MIS PLANTILLAS GUARDADAS</span><span id="tplSavedCount" style="color:var(--f-accent2)">0 PLANTILLAS</span></div>
+      <div class="tpl-saved-list" id="tplSavedList">
+        <div style="text-align:center;padding:18px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--f-text-dim);letter-spacing:2px;">SIN PLANTILLAS GUARDADAS AÚN</div>
       </div>
     </div>
 
@@ -2792,6 +3007,174 @@ if (!localStorage.getItem('blogfort_welcomed')) {
 } else {
   document.getElementById('welcomeOverlay').style.display = 'none';
 }
+
+// ═══════════ PLANTILLAS ═══════════
+const TEMPLATES_DATA = [
+  {id:'lp-producto',cat:'marketing',name:'LANDING PAGE',desc:'Página enfocada a una oferta con botón CTA principal.',tags:['CTA','Conversión','SEO'],
+   icon:'<path d="M3 12V4H13V12H3Z" stroke="currentColor" stroke-width="1.2"/><path d="M6 8H10M8 6V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+   estructura:'# [NOMBRE EMPRESA] — [SERVICIO PRINCIPAL]\n\n## El problema que resolvemos\n[Describe el dolor principal del cliente]\n\n## Nuestra solución\n[Propuesta de valor única en 2-3 líneas]\n\n## Servicios\n- [Servicio 1]\n- [Servicio 2]\n- [Servicio 3]\n\n## ¿Por qué elegirnos?\n- ✓ [Beneficio 1]\n- ✓ [Beneficio 2]\n- ✓ [Beneficio 3]\n\n## Contacto\n📞 [Teléfono] · ✉ [Email] · 📍 [Ubicación]'},
+  {id:'web-corp',cat:'marketing',name:'WEB CORPORATIVA',desc:'Estructura multipágina: Inicio, Nosotros, Servicios, Blog y Contacto.',tags:['Multipágina','Branding','SEO'],
+   icon:'<rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M2 6H14" stroke="currentColor" stroke-width="1.2"/><circle cx="4.5" cy="4.5" r="0.8" fill="currentColor"/>',
+   estructura:'# INICIO\n## [Headline impacto]\n[Subtítulo con beneficio clave]\n[CTA principal]\n\n---\n\n# SOBRE NOSOTROS\n## Quiénes somos\n[Historia y valores]\n\n---\n\n# SERVICIOS\n- **[Servicio 1]** — [Descripción]\n- **[Servicio 2]** — [Descripción]\n\n---\n\n# CONTACTO\n📞 [Teléfono] · ✉ [Email]\n📍 [Dirección]'},
+  {id:'portafolio',cat:'marketing',name:'PORTAFOLIO',desc:'Ideal para constructoras, arquitectos o agencias creativas.',tags:['Proyectos','Galería','Casos'],
+   icon:'<rect x="2" y="2" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.2"/>',
+   estructura:'# PORTAFOLIO — [EMPRESA]\n\n## Proyectos destacados\n\n### Proyecto 1: [Nombre]\n**Sector:** [X] · **Año:** [X]\n[Descripción]\n\n### Proyecto 2: [Nombre]\n[Descripción]\n\n## Contacta para tu proyecto\n[CTA + Datos]'},
+  {id:'lead-magnet',cat:'marketing',name:'LEAD MAGNET',desc:'Página para captar emails a cambio de un PDF o descuento.',tags:['Email','Captación','Funnel'],
+   icon:'<path d="M8 2L10 6H14L11 9L12 13L8 11L4 13L5 9L2 6H6L8 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+   estructura:'# [TÍTULO DEL REGALO GRATUITO]\n## Descarga gratis: [Nombre del recurso]\n\n### ¿Qué recibirás?\n- ✓ [Beneficio 1]\n- ✓ [Beneficio 2]\n- ✓ [Beneficio 3]\n\n### Accede gratis ahora\n**Nombre:**\n**Email:**\n[Botón: DESCARGAR AHORA]\n\n*Sin spam. Respetamos tu privacidad.*'},
+  {id:'presupuesto',cat:'ventas',name:'PRESUPUESTO DIGITAL',desc:'Propuesta donde el cliente puede ver precio y aceptar en línea.',tags:['Precio','Propuesta','CRM'],
+   icon:'<rect x="3" y="2" width="10" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M6 6H10M6 8H10M6 10H8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+   estructura:'# PROPUESTA COMERCIAL\n**Para:** [Nombre cliente]\n**De:** [Tu empresa]\n**Fecha:** [Fecha] · **Válida hasta:** [Fecha]\n\n---\n\n## Resumen ejecutivo\n[Descripción breve]\n\n## Inversión\n| Concepto | Precio |\n|---|---|\n| [Servicio 1] | [€/$] |\n| **TOTAL** | **[€/$]** |\n\n## Condiciones\n- Forma de pago: [50% inicio, 50% entrega]\n\n[BOTÓN: ACEPTAR PROPUESTA]'},
+  {id:'catalogo',cat:'ventas',name:'CATÁLOGO DIGITAL',desc:'Vitrina tipo e-commerce simplificada para consulta rápida.',tags:['Productos','Precios','E-commerce'],
+   icon:'<rect x="2" y="2" width="5" height="6" rx="0.5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="2" width="5" height="6" rx="0.5" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="10" width="5" height="4" rx="0.5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="10" width="5" height="4" rx="0.5" stroke="currentColor" stroke-width="1.2"/>',
+   estructura:'# CATÁLOGO [EMPRESA] — [AÑO]\n\n## Nuestros Productos / Servicios\n\n### CATEGORÍA 1\n\n**[Producto 1]**\n[Descripción SEO 2-3 líneas]\n💰 Precio: [X €/$]\n\n**[Producto 2]**\n[Descripción]\n💰 Precio: [X €/$]\n\n---\n\n## ¿Cómo pedirlo?\n1. [Paso 1]\n2. [Paso 2]\n\n📞 [Teléfono] · ✉ [Email]'},
+  {id:'factura',cat:'ventas',name:'FACTURA / RECIBO',desc:'Documento de pago profesional con branding de empresa.',tags:['Pago','Documento','Legal'],
+   icon:'<path d="M4 2H10L12 4V14H4V2Z" stroke="currentColor" stroke-width="1.2"/><path d="M10 2V4H12" stroke="currentColor" stroke-width="1.2"/><path d="M6 7H10M6 9H10M6 11H8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+   estructura:'# FACTURA N.º [NÚMERO]\n\n**Emisor:** [Empresa] · NIF: [X]\n[Dirección] · [Email]\n\n**Receptor:** [Cliente] · NIF: [X]\n\n**Fecha:** [X] · **Vencimiento:** [X]\n\n---\n\n| Concepto | Total |\n|---|---|\n| [Servicio 1] | [X €] |\n| **TOTAL** | **[X €]** |\n\nForma de pago: Transferencia — IBAN: [X]'},
+  {id:'newsletter',cat:'comunicacion',name:'NEWSLETTER',desc:'Email HTML listo para enviar a suscriptores con noticias.',tags:['Email','Fidelización','CRM'],
+   icon:'<rect x="2" y="4" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M2 5L8 9L14 5" stroke="currentColor" stroke-width="1.2"/>',
+   estructura:'# NEWSLETTER [EMPRESA] — [MES/AÑO]\n\n---\n\n👋 **Hola, [Nombre]:**\n\n[Apertura cálida en 2-3 líneas]\n\n---\n\n## 📌 LO MÁS IMPORTANTE\n\n### [Noticia 1]\n[Desarrollo 3-4 líneas]\n\n### [Noticia 2]\n[Desarrollo]\n\n---\n\n## 💡 CONSEJO DEL MES\n[Tip útil y accionable]\n\nHasta pronto,\n**[Nombre]** · [Cargo] — [Empresa]'},
+  {id:'tarjeta-digital',cat:'comunicacion',name:'TARJETA DIGITAL',desc:'Página móvil con datos de contacto y botón "Guardar contacto".',tags:['vCard','Networking','Móvil'],
+   icon:'<rect x="2" y="4" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><circle cx="5.5" cy="8" r="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M9 7H13M9 9H12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>',
+   estructura:'# TARJETA DE CONTACTO DIGITAL\n\n## [Nombre completo]\n**[Cargo]** · [Empresa]\n\n---\n\n📞 [Teléfono móvil]\n✉ [Email]\n🌐 [Web]\n📍 [Ciudad, País]\n\n### Redes sociales\n- LinkedIn: [URL]\n- Instagram: [URL]\n\n---\n\n[BOTÓN: 💾 GUARDAR CONTACTO]\n\n### Sobre mí\n[Bio profesional 2-3 líneas]\n\n[BOTÓN: ✉ ENVIAR MENSAJE]'},
+  {id:'nota-prensa',cat:'comunicacion',name:'NOTA DE PRENSA',desc:'Formato profesional para anuncios oficiales estructura periodística.',tags:['PR','Medios','Oficial'],
+   icon:'<path d="M3 2H13V14H3V2Z" stroke="currentColor" stroke-width="1.2"/><path d="M5 5H11M5 7H11M5 9H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+   estructura:'# NOTA DE PRENSA\n**PARA PUBLICACIÓN INMEDIATA**\n[Ciudad], [Fecha]\n\n---\n\n## [TITULAR EN MAYÚSCULAS]\n### Subtítulo ampliando el mensaje\n\n**[Ciudad] —** [Primera línea: qué, quién, cuándo, dónde]\n\n[Segundo párrafo: contexto y detalles]\n\n"[Cita del portavoz]"\n— [Nombre], [Cargo], [Empresa]\n\n---\n\n### Sobre [EMPRESA]\n[Boilerplate 3-4 líneas]\n\n### Contacto para medios\n[Nombre] · [Email] · [Teléfono]'},
+  {id:'onboarding',cat:'rrhh',name:'MANUAL BIENVENIDA',desc:'Página interna de onboarding para nuevos empleados.',tags:['RRHH','Onboarding','Interno'],
+   icon:'<circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 13C3 10.8 5.2 9 8 9C10.8 9 13 10.8 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+   estructura:'# BIENVENIDA A [EMPRESA]\n\n### 👋 Mensaje de [CEO/Director]\n[Mensaje cálido y motivador]\n\n---\n\n## Misión y valores\n**Misión:** [X]\n**Valores:** [V1] · [V2] · [V3]\n\n## Tu primer día\n- [ ] Reunión con tu responsable: [Nombre]\n- [ ] Configuración de cuentas\n- [ ] Tour por las instalaciones\n\n## Herramientas y accesos\n| Herramienta | Acceso | Responsable |\n|---|---|---|\n| [Email] | [Instrucciones] | [IT] |\n\n## Contactos importantes\n[Nombre] — [Cargo] — [Email]'},
+  {id:'feedback',cat:'rrhh',name:'FORMULARIO FEEDBACK',desc:'Encuesta de satisfacción para clientes o empleados.',tags:['Encuesta','Datos','Matrix'],
+   icon:'<path d="M3 4H13V11H8L5 14V11H3V4Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
+   estructura:'# ENCUESTA DE SATISFACCIÓN — [EMPRESA]\n\n**Hola [Nombre],** Tu opinión nos importa. Tarda menos de 2 minutos.\n\n---\n\n## 1. Valoración general\n⭐ 1 — ⭐⭐ 2 — ⭐⭐⭐ 3 — ⭐⭐⭐⭐ 4 — ⭐⭐⭐⭐⭐ 5\n\n## 2. ¿Qué valoras más?\n[ ] Calidad del servicio\n[ ] Rapidez de respuesta\n[ ] Atención al cliente\n[ ] Precio / Valor\n\n## 3. ¿Qué podríamos mejorar?\n[Campo libre]\n\n## 4. ¿Nos recomendarías?\n[ ] Sí, definitivamente\n[ ] Probablemente sí\n[ ] No por ahora\n\n[BOTÓN: ENVIAR RESPUESTA]'},
+  {id:'clinica-dental',cat:'salud',name:'CLÍNICA DENTAL',desc:'Landing page para captación de pacientes odontológicos.',tags:['Dental','SEO','Salud'],
+   icon:'<path d="M8 3C6 3 4 4.5 4 6.5C4 8 5 9 5 10.5C5 12 6 13 8 13C10 13 11 12 11 10.5C11 9 12 8 12 6.5C12 4.5 10 3 8 3Z" stroke="currentColor" stroke-width="1.2"/>',
+   estructura:'# [NOMBRE CLÍNICA] — Tu sonrisa en manos expertas\n\n## ¿Buscas un dentista en [Ciudad]?\n[Párrafo empático conectando con el miedo del paciente]\n\n## Nuestros tratamientos\n\n### 🦷 Implantes dentales\n[Descripción + precio orientativo]\n\n### ✨ Carillas de porcelana\n[Descripción + beneficio]\n\n### 😁 Ortodoncia invisible\n[Descripción + beneficio]\n\n## ¿Por qué elegirnos?\n- ✓ [X] años de experiencia\n- ✓ Primera consulta gratuita\n- ✓ Financiación sin intereses\n\n## Reserva tu cita\n📞 [Teléfono] — [Horario]\n[BOTÓN: RESERVAR CITA GRATUITA]\n📍 [Dirección]'},
+  {id:'articulo-salud',cat:'salud',name:'ARTÍCULO SALUD SEO',desc:'Estructura E-E-A-T para artículos médicos optimizados para Google.',tags:['YMYL','E-E-A-T','SEO'],
+   icon:'<path d="M8 2V6M8 6H4M8 6H12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="3" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>',
+   estructura:'# [KEYWORD]: Todo lo que debes saber\n*Revisado por [Dr./Dra. Nombre], [Especialidad] — [Fecha]*\n\n---\n\n## Puntos clave\n- [Dato rápida 1]\n- [Dato rápida 2]\n- [Dato rápida 3]\n\n---\n\n## ¿Qué es [tema]?\n[Definición clara. Sin jerga excesiva.]\n[Fuente: Organismo, Año]\n\n## Síntomas / Indicaciones\n[Lista clara de señales]\n\n## Diagnóstico y tratamientos\n[Info clínica con fuentes: OMS, NIH, PubMed]\n\n## ¿Cuándo consultar al médico?\n[Señales de alarma directas]\n\n## Prevención\n[Consejos prácticos]\n\n---\n\n*⚕️ Contenido informativo. No sustituye consulta médica.*\n*Fuentes: [Lista de fuentes reales]*'},
+];
+
+let tplActiveFilter='todas', tplActiveName='', tplActiveEstructura='';
+let savedTemplates=JSON.parse(localStorage.getItem('bf_saved_tpls')||'[]');
+
+function initTemplates(){renderTplGrid();renderSavedTpls();}
+function filterTpl(cat,btn){tplActiveFilter=cat;document.querySelectorAll('.tpl-cat').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTplGrid();}
+
+function renderTplGrid(){
+  const grid=document.getElementById('tplGrid');if(!grid)return;
+  const filtered=tplActiveFilter==='todas'?TEMPLATES_DATA:TEMPLATES_DATA.filter(t=>t.cat===tplActiveFilter);
+  grid.innerHTML=filtered.map(t=>`<div class="tpl-card">
+    <div class="tpl-card-head">
+      <div class="tpl-card-icon"><svg viewBox="0 0 16 16" fill="none" style="width:14px;height:14px;color:var(--f-accent)">${t.icon}</svg></div>
+      <div class="tpl-card-name">${t.name}</div>
+      <div class="tpl-card-cat">${t.cat.toUpperCase()}</div>
+    </div>
+    <div class="tpl-card-body">
+      <div class="tpl-card-desc">${t.desc}</div>
+      <div class="tpl-card-tags">${t.tags.map(tag=>`<span class="tpl-tag">${tag}</span>`).join('')}</div>
+    </div>
+    <div class="tpl-card-footer">
+      <button class="tpl-use-btn" onclick="openTplBuilder('${t.id}')">◈ USAR</button>
+      <button class="tpl-ai-btn" onclick="quickLoadTpl('${t.id}')">⚡ CARGAR</button>
+    </div>
+  </div>`).join('');
+}
+
+function openTplBuilder(id){
+  const tpl=TEMPLATES_DATA.find(t=>t.id===id);if(!tpl)return;
+  tplActiveName=tpl.name;tplActiveEstructura=tpl.estructura;
+  document.getElementById('tplBuilderTitle').textContent='⚡ CONSTRUCTOR — '+tpl.name;
+  document.getElementById('tplBuilder').classList.add('on');
+  document.getElementById('tplJsonWrap').style.display='none';
+  document.getElementById('tplAIResult').style.display='none';
+  document.getElementById('tplBuilder').scrollIntoView({behavior:'smooth'});
+}
+function closeTplBuilder(){document.getElementById('tplBuilder').classList.remove('on');}
+
+function quickLoadTpl(id){
+  const tpl=TEMPLATES_DATA.find(t=>t.id===id);if(!tpl)return;
+  document.getElementById('bodyInp').value=tpl.estructura.replace(/\\n/g,'\n');
+  showScreen('editor');upd();toast('📋 Plantilla cargada en el editor');
+}
+
+function loadTplToEditor(){
+  const ai=document.getElementById('tplAIContent').textContent;
+  const c=ai||tplActiveEstructura.replace(/\\n/g,'\n');
+  if(c){document.getElementById('bodyInp').value=c;showScreen('editor');upd();toast('📋 Plantilla cargada en el editor');}
+}
+function insertTplContent(){loadTplToEditor();}
+
+async function generateTplWithAI(){
+  const company=document.getElementById('tpl-company').value.trim();
+  if(!company){alert('Introduce el nombre de la empresa');return;}
+  if(!apiKey){alert('Configura tu API Key primero');return;}
+  const sector=document.getElementById('tpl-sector').value;
+  const audience=document.getElementById('tpl-audience').value.trim();
+  const color=document.getElementById('tpl-color').value.trim();
+  const tone=document.getElementById('tpl-tone').value;
+  const lang=document.getElementById('tpl-lang').value;
+  const services=document.getElementById('tpl-services').value.trim();
+  const value=document.getElementById('tpl-value').value.trim();
+  const btn=document.getElementById('tplGenBtn');
+  const loading=document.getElementById('tplLoading');
+  const msgs=['CLAUDE DISEÑANDO...','ADAPTANDO AL SECTOR...','REDACTANDO CONTENIDO...','OPTIMIZANDO SEO...','GENERANDO JSON...'];
+  let mi=0;
+  btn.disabled=true;loading.classList.add('on');
+  document.getElementById('tplJsonWrap').style.display='none';
+  document.getElementById('tplAIResult').style.display='none';
+  const msgInt=setInterval(()=>{document.getElementById('tplLoadingTxt').textContent=msgs[mi%msgs.length];mi++;},900);
+  const prompt=`Genera una plantilla profesional completa para la empresa "${company}" del sector "${sector}".
+DATOS: Público: ${audience||'Clientes del sector'}. Tono: ${tone}. Idioma: ${lang}. Servicios: ${services||'Los principales del sector'}. Propuesta de valor: ${value||'Calidad y profesionalidad'}. Color: ${color}. Tipo: ${tplActiveName}.
+ESTRUCTURA BASE A RELLENAR:
+${tplActiveEstructura.replace(/\\n/g,'\n')}
+Reemplaza TODOS los campos entre corchetes con contenido real. Optimiza para SEO.
+Al final añade el JSON entre etiquetas <JSON_MAESTRO>{"metadata":{"project_name":"${company}","template_type":"${tplActiveName}","language":"${lang}"},"brand_identity":{"primary_color":"${color}","tone_of_voice":"${tone}"},"seo_meta":{"title":"[título 60 chars]","description":"[meta 155 chars]","keywords":["kw1","kw2","kw3"]}}</JSON_MAESTRO>`;
+  try{
+    const txt=await callAI('Eres experto en marketing de contenidos y diseño web. Genera plantillas profesionales y personalizadas.',prompt,1500);
+    clearInterval(msgInt);loading.classList.remove('on');btn.disabled=false;
+    const jsonMatch=txt.match(/<JSON_MAESTRO>([\s\S]*?)<\/JSON_MAESTRO>/);
+    const contentText=jsonMatch?txt.replace(/<JSON_MAESTRO>[\s\S]*?<\/JSON_MAESTRO>/,'').trim():txt;
+    document.getElementById('tplAIContent').textContent=contentText;
+    document.getElementById('tplAIResult').style.display='block';
+    if(jsonMatch){
+      try{document.getElementById('tplJsonBody').textContent=JSON.stringify(JSON.parse(jsonMatch[1].trim()),null,2);}
+      catch(e){document.getElementById('tplJsonBody').textContent=jsonMatch[1].trim();}
+      document.getElementById('tplJsonWrap').style.display='block';
+    }
+    toast('✅ Plantilla generada con IA');
+  }catch(err){clearInterval(msgInt);loading.classList.remove('on');btn.disabled=false;toast('⚠️ '+err.message);}
+}
+
+function copyTplJson(){navigator.clipboard.writeText(document.getElementById('tplJsonBody').textContent).then(()=>toast('⎘ JSON copiado'));}
+
+function saveTplCustom(){
+  const company=document.getElementById('tpl-company').value.trim()||'Mi plantilla';
+  const content=document.getElementById('tplAIContent').textContent;
+  if(!content){alert('Genera primero el contenido con IA');return;}
+  savedTemplates.push({id:Date.now(),name:company,sector:document.getElementById('tpl-sector').value,type:tplActiveName,content,date:new Date().toLocaleDateString('es-ES')});
+  localStorage.setItem('bf_saved_tpls',JSON.stringify(savedTemplates));
+  renderSavedTpls();toast('✅ Plantilla guardada');
+}
+
+function renderSavedTpls(){
+  const list=document.getElementById('tplSavedList');const count=document.getElementById('tplSavedCount');
+  if(!list)return;
+  count.textContent=savedTemplates.length+' PLANTILLAS';
+  if(!savedTemplates.length){list.innerHTML='<div style="text-align:center;padding:18px;font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--f-text-dim);letter-spacing:2px;">SIN PLANTILLAS GUARDADAS AÚN</div>';return;}
+  list.innerHTML=savedTemplates.slice().reverse().map(t=>`<div class="tpl-saved-item"><div><div class="tpl-saved-name">${t.name}</div><div class="tpl-saved-meta">${t.type} · ${t.sector} · ${t.date}</div></div><div class="tpl-saved-acts"><button class="tpl-saved-btn tpl-saved-use" onclick="loadSavedTpl(${t.id})">↩ USAR</button><button class="tpl-saved-btn tpl-saved-del" onclick="deleteSavedTpl(${t.id})">✗</button></div></div>`).join('');
+}
+
+function loadSavedTpl(id){
+  const tpl=savedTemplates.find(t=>t.id===id);if(!tpl)return;
+  document.getElementById('bodyInp').value=tpl.content;showScreen('editor');upd();toast('📋 Plantilla cargada');
+}
+function deleteSavedTpl(id){
+  if(!confirm('¿Eliminar esta plantilla?'))return;
+  savedTemplates=savedTemplates.filter(t=>t.id!==id);
+  localStorage.setItem('bf_saved_tpls',JSON.stringify(savedTemplates));renderSavedTpls();
+}
+initTemplates();
+
 </script>
 </body>
 </html>
