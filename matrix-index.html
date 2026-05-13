@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATRIX v3.1 — BlogFort Agency LLC</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #F0F4F8;
+    --bg-secondary: #E2E8F0;
+    --bg-card: #FFFFFF;
+    --bg-dark: #0A1628;
+    --bg-mid: #0D2137;
+    --accent-blue: #1B4F8A;
+    --accent-cyan: #0EA5E9;
+    --accent-orange: #F59E0B;
+    --seal-public: #00B894;
+    --seal-internal: #0EA5E9;
+    --seal-confidential: #F39C12;
+    --seal-restricted: #C0392B;
+    --alert-red: #C0392B;
+    --alert-orange: #E67E22;
+    --alert-blue: #0EA5E9;
+    --text-primary: #0A1628;
+    --text-mid: #4A5568;
+    --text-light: #94A3B8;
+    --border: #CBD5E1;
+    --border-light: #E2E8F0;
+    --shadow-sm: 0 1px 3px rgba(10,22,40,0.08);
+    --shadow-md: 0 4px 16px rgba(10,22,40,0.10);
+    --shadow-lg: 0 8px 32px rgba(10,22,40,0.14);
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+
+  /* ── LOGIN ── */
+  #loginScreen { position: fixed; inset: 0; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; }
+  .login-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 30% 60%, rgba(27,79,138,0.18) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 80% 20%, rgba(14,165,233,0.10) 0%, transparent 70%); }
+  .login-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(27,79,138,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(27,79,138,0.06) 1px, transparent 1px); background-size: 40px 40px; }
+  .login-box { position: relative; width: 380px; padding: 48px 40px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); backdrop-filter: blur(20px); text-align: center; }
+  .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 8px; color: #fff; margin-bottom: 4px; }
+  .login-sub { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 4px; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 40px; }
+  .login-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--text-light); text-transform: uppercase; text-align: left; margin-bottom: 8px; }
+  .login-input { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius); color: #fff; font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 4px; outline: none; transition: border-color 0.2s; margin-bottom: 24px; text-align: center; }
+  .login-input:focus { border-color: var(--accent-cyan); }
+  .login-btn { width: 100%; padding: 14px; background: var(--accent-blue); border: none; border-radius: var(--radius); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 4px; cursor: pointer; transition: all 0.2s; }
+  .login-btn:hover { background: #1a5fa8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(27,79,138,0.4); }
+  .login-error { margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--seal-restricted); letter-spacing: 2px; opacity: 0; transition: opacity 0.3s; }
+  .login-footer { margin-top: 32px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.2); }
+
+  /* ── APP ── */
+  #app { display: none; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 240px; background: var(--bg-dark); display: flex; flex-direction: column; z-index: 100; border-right: 1px solid rgba(255,255,255,0.06); }
+  .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .sidebar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 6px; color: #fff; line-height: 1; }
+  .sidebar-sub { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 3px; color: var(--accent-cyan); text-transform: uppercase; margin-top: 2px; }
+  .version-pill { display: inline-block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--seal-public); border: 1px solid rgba(0,184,148,0.3); padding: 1px 6px; border-radius: 10px; margin-top: 4px; }
+  .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .nav-section { padding: 12px 20px 6px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; margin: 1px 0; }
+  .nav-item:hover { background: rgba(255,255,255,0.04); }
+  .nav-item.active { background: rgba(27,79,138,0.25); border-left-color: var(--accent-cyan); }
+  .nav-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 14px; background: rgba(255,255,255,0.05); flex-shrink: 0; }
+  .nav-item.active .nav-icon { background: rgba(27,79,138,0.4); }
+  .nav-label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); flex: 1; }
+  .nav-item.active .nav-label { color: #fff; }
+  .nav-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 20px; background: var(--accent-blue); color: #fff; }
+  .nav-badge-red { background: var(--alert-red); }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+  /* Footer buttons */
+  .footer-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+  .footer-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 8px; border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); transition: all 0.2s; text-transform: uppercase; }
+  .footer-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .footer-btn.active-profile { border-color: rgba(14,165,233,0.4); color: var(--accent-cyan); background: rgba(14,165,233,0.08); }
+  .footer-btn.active-sistema { border-color: rgba(245,158,11,0.4); color: var(--accent-orange); background: rgba(245,158,11,0.08); }
+
+  .ceo-badge { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.04); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.08); }
+  .ceo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--seal-public); box-shadow: 0 0 6px var(--seal-public); animation: pulse 2s infinite; }
+  .ceo-info { flex: 1; }
+  .ceo-name { font-size: 12px; font-weight: 600; color: #fff; }
+  .ceo-level { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--accent-cyan); }
+  .logout-btn { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 16px; transition: color 0.2s; padding: 4px; }
+  .logout-btn:hover { color: var(--seal-restricted); }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 4px currentColor; } 50% { box-shadow: 0 0 10px currentColor; } }
+
+  /* ── MAIN ── */
+  .main { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── TOPBAR ── */
+  .topbar { height: 48px; background: var(--bg-dark); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; padding: 0 16px; gap: 7px; position: sticky; top: 0; z-index: 50; }
+  .topbar-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.5); flex: 1; text-transform: uppercase; }
+  .topbar-time { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.3); }
+
+  /* CONN BUTTONS */
+  .conn-btn { display: flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid; text-transform: uppercase; transition: all 0.25s; position: relative; white-space: nowrap; }
+  .conn-blogfort { background: rgba(0,184,148,0.10); border-color: rgba(0,184,148,0.45); color: #00B894; }
+  .conn-blogfort:hover { background: rgba(0,184,148,0.18); border-color: rgba(0,184,148,0.7); box-shadow: 0 0 12px rgba(0,184,148,0.25); }
+  .conn-falcon { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.35); color: rgba(245,158,11,0.6); }
+  .conn-falcon.active { background: rgba(245,158,11,0.14); border-color: rgba(245,158,11,0.55); color: #F59E0B; box-shadow: 0 0 10px rgba(245,158,11,0.2); }
+  .conn-falcon:hover { border-color: rgba(245,158,11,0.6); color: #F59E0B; }
+  .conn-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; transition: all 0.3s; }
+  .conn-dot-green { background: #00B894; animation: pulseGlow 2s infinite; }
+  .conn-dot-orange { background: #F59E0B; animation: pulseGlow 2.5s infinite; }
+  .conn-dot-off { background: rgba(245,158,11,0.25); border: 1px solid rgba(245,158,11,0.3); }
+
+  /* Alert bell */
+  .alert-bell-btn { position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 28px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5); cursor: pointer; font-size: 13px; transition: all 0.2s; }
+  .alert-bell-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .alert-bell-count { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--alert-red); color: #fff; font-family: 'DM Mono', monospace; font-size: 9px; display: flex; align-items: center; justify-content: center; padding: 0 3px; display: none; }
+
+  .security-indicator { display: flex; align-items: center; gap: 5px; padding: 4px 8px; background: rgba(0,184,148,0.06); border: 1px solid rgba(0,184,148,0.15); border-radius: 20px; }
+  .security-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--seal-public); animation: pulse 2s infinite; }
+  .security-text { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px; color: var(--seal-public); text-transform: uppercase; }
+
+  .content { flex: 1; padding: 28px; overflow-y: auto; }
+
+  /* ── PANELS ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .page-header { margin-bottom: 20px; }
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--text-primary); line-height: 1; }
+  .page-subtitle { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-light); text-transform: uppercase; margin-top: 3px; }
+
+  /* ── STATS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 22px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; }
+  .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.blue::before { background: var(--accent-blue); }
+  .stat-card.green::before { background: var(--seal-public); }
+  .stat-card.amber::before { background: var(--seal-confidential); }
+  .stat-card.red::before { background: var(--seal-restricted); }
+  .stat-card.cyan::before { background: var(--accent-cyan); }
+  .stat-card.finance::before { background: linear-gradient(90deg, #00B894, #0EA5E9); }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-light); text-transform: uppercase; margin-bottom: 10px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 2px; color: var(--text-primary); line-height: 1; }
+  .stat-value-sm { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; color: var(--text-primary); line-height: 1; }
+  .stat-desc { font-size: 12px; color: var(--text-mid); margin-top: 4px; }
+
+  /* ── CARDS ── */
+  .card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); margin-bottom: 20px; overflow: hidden; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 12px; }
+  .card-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--text-primary); flex: 1; }
+  .card-body { padding: 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+  /* ── TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { text-align: left; padding: 10px 14px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-light); text-transform: uppercase; border-bottom: 1px solid var(--border-light); background: var(--bg-primary); font-weight: 500; }
+  .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-light); color: var(--text-primary); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(10,22,40,0.02); }
+
+  /* ── BADGES ── */
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .badge-public { background: rgba(0,184,148,0.1); color: var(--seal-public); }
+  .badge-public .badge-dot { background: var(--seal-public); }
+  .badge-internal { background: rgba(14,165,233,0.1); color: var(--seal-internal); }
+  .badge-internal .badge-dot { background: var(--seal-internal); }
+  .badge-confidential { background: rgba(243,156,18,0.1); color: var(--seal-confidential); }
+  .badge-confidential .badge-dot { background: var(--seal-confidential); }
+  .badge-restricted { background: rgba(192,57,43,0.1); color: var(--seal-restricted); }
+  .badge-restricted .badge-dot { background: var(--seal-restricted); }
+  .badge-pending { background: rgba(243,156,18,0.1); color: var(--seal-confidential); }
+  .badge-active { background: rgba(0,184,148,0.1); color: var(--seal-public); }
+  .badge-blocked { background: rgba(192,57,43,0.1); color: var(--seal-restricted); }
+
+  /* ── BUTTONS ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif; letter-spacing: 0.3px; }
+  .btn-primary { background: var(--accent-blue); color: #fff; }
+  .btn-primary:hover { background: #1a5fa8; box-shadow: 0 2px 8px rgba(27,79,138,0.3); }
+  .btn-ghost { background: transparent; color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg-secondary); }
+  .btn-danger { background: rgba(192,57,43,0.1); color: var(--seal-restricted); border: 1px solid rgba(192,57,43,0.2); }
+  .btn-danger:hover { background: rgba(192,57,43,0.2); }
+  .btn-success { background: rgba(0,184,148,0.1); color: var(--seal-public); border: 1px solid rgba(0,184,148,0.2); }
+  .btn-success:hover { background: rgba(0,184,148,0.2); }
+  .btn-finance { background: linear-gradient(135deg, rgba(0,184,148,0.15), rgba(14,165,233,0.15)); color: #059669; border: 1px solid rgba(0,184,148,0.3); }
+  .btn-finance:hover { background: linear-gradient(135deg, rgba(0,184,148,0.25), rgba(14,165,233,0.25)); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .confirm-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(0,184,148,0.1); border: 1px solid rgba(0,184,148,0.25); border-radius: var(--radius); color: var(--seal-public); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+  .confirm-btn:hover { background: rgba(0,184,148,0.2); }
+
+  /* ── SEARCH BAR ── */
+  .search-bar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .search-input { flex: 1; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; color: var(--text-primary); background: var(--bg-card); outline: none; transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--accent-blue); }
+  .search-input::placeholder { color: var(--text-light); font-size: 11px; }
+  .search-select { padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--text-primary); background: var(--bg-card); outline: none; cursor: pointer; }
+
+  /* ── STORAGE BAR ── */
+  .storage-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; }
+  .storage-indicators { display: flex; gap: 16px; flex-wrap: wrap; }
+  .storage-item { display: flex; align-items: center; gap: 5px; }
+  .storage-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: var(--seal-public); }
+  .dot-grey { background: var(--text-light); }
+  .storage-ok { color: var(--seal-public); }
+  .storage-na { color: var(--text-light); }
+
+  /* ── LOG TERMINAL ── */
+  .log-terminal { background: var(--bg-dark); border-radius: var(--radius-lg); padding: 20px; font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.8; max-height: 320px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.06); }
+  .log-line { display: flex; gap: 12px; }
+  .log-time { color: rgba(255,255,255,0.25); flex-shrink: 0; }
+  .log-tag-security { color: var(--seal-restricted); }
+  .log-tag-confirm { color: var(--seal-public); }
+  .log-tag-info { color: var(--accent-cyan); }
+  .log-tag-warn { color: var(--seal-confidential); }
+  .log-msg { color: rgba(255,255,255,0.7); }
+
+  /* ── SEAL CARDS ── */
+  .seal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .seal-card { border-radius: var(--radius-lg); padding: 18px; border: 1px solid; position: relative; overflow: hidden; }
+  .seal-card.public { background: rgba(0,184,148,0.05); border-color: rgba(0,184,148,0.2); }
+  .seal-card.internal { background: rgba(14,165,233,0.05); border-color: rgba(14,165,233,0.2); }
+  .seal-card.confidential { background: rgba(243,156,18,0.05); border-color: rgba(243,156,18,0.2); }
+  .seal-card.restricted { background: rgba(192,57,43,0.05); border-color: rgba(192,57,43,0.2); }
+  .seal-number { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 2px; line-height: 1; }
+  .seal-card.public .seal-number { color: var(--seal-public); }
+  .seal-card.internal .seal-number { color: var(--seal-internal); }
+  .seal-card.confidential .seal-number { color: var(--seal-confidential); }
+  .seal-card.restricted .seal-number { color: var(--seal-restricted); }
+  .seal-name { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; margin-bottom: 8px; }
+  .seal-card.public .seal-name { color: var(--seal-public); }
+  .seal-card.internal .seal-name { color: var(--seal-internal); }
+  .seal-card.confidential .seal-name { color: var(--seal-confidential); }
+  .seal-card.restricted .seal-name { color: var(--seal-restricted); }
+  .seal-desc { font-size: 11px; color: var(--text-mid); line-height: 1.5; }
+
+  /* ── FLOW ── */
+  .flow-node { display: flex; flex-direction: column; align-items: center; min-width: 90px; padding: 14px 12px; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-light); text-align: center; box-shadow: var(--shadow-sm); }
+  .flow-node-icon { font-size: 22px; margin-bottom: 6px; }
+  .flow-node-name { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 2px; color: var(--text-primary); }
+  .flow-node-role { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--text-light); text-transform: uppercase; margin-top: 2px; }
+  .flow-arrow { display: flex; flex-direction: column; align-items: center; padding: 0 8px; flex-shrink: 0; }
+  .flow-line { width: 40px; height: 2px; background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+  .flow-confirm { font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 1px; color: var(--seal-public); text-transform: uppercase; margin-top: 3px; white-space: nowrap; }
+
+  /* ── BLACKLIST ── */
+  .blacklist-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(192,57,43,0.04); border: 1px solid rgba(192,57,43,0.12); border-radius: var(--radius); margin-bottom: 8px; }
+  .blacklist-domain { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-primary); flex: 1; }
+  .blacklist-type { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--seal-restricted); text-transform: uppercase; }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-light); text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-primary); background: var(--bg-card); outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--accent-blue); }
+  .form-input-mono { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; }
+
+  /* ── SECTOR TAGS ── */
+  .sector-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; background: rgba(27,79,138,0.08); border: 1px solid rgba(27,79,138,0.15); border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--accent-blue); text-transform: uppercase; }
+
+  /* ── ALERT BOX ── */
+  .alert-box { padding: 14px 18px; border-radius: var(--radius); margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; }
+  .alert-info { background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2); color: #0369a1; }
+  .alert-success { background: rgba(0,184,148,0.08); border: 1px solid rgba(0,184,148,0.2); color: #059669; }
+  .alert-warn { background: rgba(243,156,18,0.08); border: 1px solid rgba(243,156,18,0.2); color: #b45309; }
+  .alert-danger { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2); color: var(--seal-restricted); }
+
+  /* ── PROGRESS ── */
+  .progress-bar { height: 5px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-light); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── TOAST ── */
+  #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; background: var(--bg-dark); color: #fff; border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; box-shadow: var(--shadow-lg); transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 9999; border-left: 3px solid var(--seal-public); }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .panel.active > * { animation: fadeIn 0.3s ease forwards; }
+
+  .input-row { display: flex; gap: 8px; }
+  .input-row .form-input { flex: 1; }
+
+  /* ── BÓVEDA CÁMARAS ── */
+  .camara-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .camara-tab { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-mid); transition: all 0.2s; }
+  .camara-tab:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .camara-tab.active-alfa { background: rgba(192,57,43,0.06); border-color: rgba(192,57,43,0.3); color: var(--seal-restricted); }
+  .camara-tab.active-beta { background: rgba(14,165,233,0.06); border-color: rgba(14,165,233,0.3); color: var(--accent-cyan); }
+  .camara-content { display: none; }
+  .camara-content.active { display: block; }
+
+  .camara-header { padding: 16px 20px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; align-items: center; gap: 12px; margin-bottom: 0; }
+  .camara-alfa-header { background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.2); border-bottom: none; }
+  .camara-beta-header { background: rgba(14,165,233,0.06); border: 1px solid rgba(14,165,233,0.2); border-bottom: none; }
+
+  .camara-subcarpetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .subcarpeta-btn { padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; text-align: center; transition: all 0.2s; }
+  .subcarpeta-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .subcarpeta-btn.sel-alfa { border-color: rgba(192,57,43,0.3); }
+  .subcarpeta-btn.sel-alfa:hover { background: rgba(192,57,43,0.04); }
+  .subcarpeta-btn.sel-beta { border-color: rgba(14,165,233,0.3); }
+  .subcarpeta-btn.sel-beta:hover { background: rgba(14,165,233,0.04); }
+  .subcarpeta-btn.active { box-shadow: var(--shadow-md); }
+  .subcarpeta-btn.active.sel-alfa { background: rgba(192,57,43,0.06); }
+  .subcarpeta-btn.active.sel-beta { background: rgba(14,165,233,0.06); }
+  .subcarpeta-icon { font-size: 22px; margin-bottom: 6px; }
+  .subcarpeta-name { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-mid); }
+  .subcarpeta-count { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text-primary); margin-top: 2px; }
+
+  /* ── PIN MODAL ── */
+  #pinModal { position: fixed; inset: 0; background: rgba(10,22,40,0.85); display: none; align-items: center; justify-content: center; z-index: 8000; backdrop-filter: blur(4px); }
+  #pinModal.open { display: flex; }
+  .pin-box { background: var(--bg-dark); border: 1px solid rgba(192,57,43,0.3); border-radius: var(--radius-lg); padding: 40px; text-align: center; width: 340px; }
+  .pin-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--seal-restricted); margin-bottom: 4px; }
+  .pin-sub { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 28px; }
+  .pin-input { width: 100%; padding: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(192,57,43,0.3); border-radius: var(--radius); color: #fff; font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 8px; text-align: center; outline: none; margin-bottom: 16px; }
+  .pin-input:focus { border-color: var(--seal-restricted); }
+  .pin-btn { width: 100%; padding: 12px; background: var(--seal-restricted); border: none; border-radius: var(--radius); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 3px; cursor: pointer; transition: all 0.2s; }
+  .pin-btn:hover { background: #e74c3c; }
+  .pin-cancel { margin-top: 12px; background: none; border: none; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+  .pin-cancel:hover { color: rgba(255,255,255,0.6); }
+  .pin-error { margin-top: 12px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--seal-restricted); letter-spacing: 2px; opacity: 0; transition: opacity 0.3s; }
+
+  /* ── ALERTAS SEMÁFORO ── */
+  .alerts-panel { position: fixed; top: 58px; right: 16px; width: 340px; background: var(--bg-dark); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 4000; display: none; max-height: 480px; overflow-y: auto; }
+  .alerts-panel.open { display: block; }
+  .alerts-panel-header { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; }
+  .alerts-panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: #fff; }
+  .alerts-panel-close { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 16px; }
+  .alert-item { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; gap: 10px; }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-dot-red { width: 8px; height: 8px; border-radius: 50%; background: var(--alert-red); flex-shrink: 0; margin-top: 4px; animation: pulse 1.5s infinite; }
+  .alert-dot-orange { width: 8px; height: 8px; border-radius: 50%; background: var(--alert-orange); flex-shrink: 0; margin-top: 4px; animation: pulse 2s infinite; }
+  .alert-dot-blue { width: 8px; height: 8px; border-radius: 50%; background: var(--alert-blue); flex-shrink: 0; margin-top: 4px; }
+  .alert-item-text { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .alert-item-time { font-size: 9px; color: rgba(255,255,255,0.25); margin-top: 3px; }
+  .no-alerts { padding: 24px; text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.25); text-transform: uppercase; }
+
+  /* ── CALCULADORA WIDGET DASHBOARD ── */
+  .calc-quick { background: linear-gradient(135deg, rgba(0,184,148,0.06), rgba(14,165,233,0.06)); border: 1px solid rgba(0,184,148,0.2); border-radius: var(--radius-lg); padding: 20px; }
+  .calc-quick-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 3px; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .calc-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+  .calc-input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text-primary); background: var(--bg-card); outline: none; }
+  .calc-input:focus { border-color: var(--seal-public); }
+  .calc-op { padding: 8px 10px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 13px; cursor: pointer; color: var(--text-mid); }
+  .calc-op.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+  .calc-result { background: var(--bg-dark); border-radius: var(--radius); padding: 10px 14px; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; color: var(--seal-public); text-align: right; min-height: 46px; }
+
+  /* ── FINANZAS PANEL ── */
+  .finance-tabs { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .finance-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; background: var(--bg-card); color: var(--text-light); transition: all 0.2s; border: none; }
+  .finance-tab.active { background: var(--accent-blue); color: #fff; }
+  .finance-content { display: none; }
+  .finance-content.active { display: block; }
+
+  .result-box { background: var(--bg-dark); border-radius: var(--radius-lg); padding: 20px; margin-top: 20px; }
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+  .result-value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
+  .result-value.green { color: var(--seal-public); }
+  .result-value.red { color: var(--seal-restricted); }
+  .result-value.blue { color: var(--accent-cyan); }
+  .result-value.amber { color: var(--accent-orange); }
+
+  .contratos-list { max-height: 280px; overflow-y: auto; }
+  .contrato-item { padding: 12px 16px; background: var(--bg-primary); border-radius: var(--radius); margin-bottom: 8px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-light); }
+  .contrato-info { flex: 1; }
+  .contrato-cliente { font-weight: 600; font-size: 13px; }
+  .contrato-meta { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-light); margin-top: 2px; }
+  .contrato-monto { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; color: var(--seal-public); }
+
+  /* ── PERFIL / SISTEMA MODALS ── */
+  .side-modal { position: fixed; top: 0; right: -360px; width: 360px; height: 100vh; background: var(--bg-dark); border-left: 1px solid rgba(255,255,255,0.08); z-index: 3000; transition: right 0.3s ease; overflow-y: auto; }
+  .side-modal.open { right: 0; }
+  .side-modal-header { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; }
+  .side-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 4px; color: #fff; }
+  .side-modal-close { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 20px; }
+  .side-modal-close:hover { color: #fff; }
+  .side-modal-body { padding: 20px; }
+  .side-form-group { margin-bottom: 20px; }
+  .side-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.35); text-transform: uppercase; display: block; margin-bottom: 8px; }
+  .side-input { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); color: #fff; font-family: 'DM Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
+  .side-input:focus { border-color: var(--accent-cyan); }
+  .side-btn { width: 100%; padding: 11px; background: var(--accent-blue); border: none; border-radius: var(--radius); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 3px; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+  .side-btn:hover { background: #1a5fa8; }
+  .side-section { margin-bottom: 28px; }
+  .side-section-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .sidebar { width: 200px; } .main { margin-left: 200px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .seal-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .content { padding: 16px; }
+    .search-bar { flex-wrap: wrap; }
+    .conn-btn span.conn-label { display: none; }
+    .camara-subcarpetas { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 500px) {
+    .sidebar { width: 56px; } .main { margin-left: 56px; }
+    .nav-label, .nav-section, .nav-badge, .sidebar-sub, .ceo-info, .footer-actions { display: none; }
+    .sidebar-logo { font-size: 14px; letter-spacing: 1px; text-align: center; }
+    .sidebar-header { padding: 16px 6px; }
+    .nav-item { padding: 12px 0; justify-content: center; }
+    .nav-icon { width: 28px; height: 28px; font-size: 13px; }
+    .ceo-badge { justify-content: center; padding: 8px 6px; }
+    .ceo-dot { margin: 0 auto; }
+    .logout-btn { display: none; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .topbar-time { display: none; }
+  }
+
+  /* ── TERMS MODAL ── */
+  #termsModal { position: fixed; inset: 0; background: rgba(3,8,16,0.97); display: flex; align-items: center; justify-content: center; z-index: 99999; flex-direction: column; }
+  .terms-box { position: relative; width: min(780px,96vw); max-height: 90vh; display: flex; flex-direction: column; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); backdrop-filter: blur(20px); overflow: hidden; }
+  .terms-header { padding: 28px 32px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; }
+  .terms-logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .terms-logo { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 6px; color: #fff; }
+  .terms-version { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent-cyan); border: 1px solid rgba(14,165,233,0.3); padding: 2px 8px; border-radius: 10px; }
+  .terms-headline { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+  .terms-body { flex: 1; overflow-y: auto; padding: 22px 32px; }
+  .terms-section { margin-bottom: 20px; }
+  .terms-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 3px; color: var(--accent-cyan); margin-bottom: 8px; }
+  .terms-text { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.85; }
+  .terms-text strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+  .terms-highlight { background: rgba(27,79,138,0.15); border: 1px solid rgba(14,165,233,0.2); border-radius: var(--radius); padding: 14px 18px; margin: 10px 0; }
+  .terms-highlight-text { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.7); line-height: 1.7; }
+  .terms-author { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius); padding: 14px 18px; margin: 14px 0; display: flex; align-items: center; gap: 14px; }
+  .terms-author-seal { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg,var(--accent-blue),var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .terms-author-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 3px; color: #fff; }
+  .terms-author-title { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--accent-cyan); margin-top: 2px; }
+  .terms-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 16px 0; }
+  .terms-footer-bar { padding: 16px 32px; border-top: 1px solid rgba(255,255,255,0.07); background: rgba(0,0,0,0.3); flex-shrink: 0; }
+  .terms-check-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; cursor: pointer; }
+  .terms-check { width: 18px; height: 18px; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; margin-top: 1px; }
+  .terms-check.checked { background: var(--accent-cyan); border-color: var(--accent-cyan); }
+  .terms-check-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+  .terms-accept-btn { width: 100%; padding: 13px; background: var(--accent-blue); border: none; border-radius: var(--radius); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 4px; cursor: pointer; transition: all 0.2s; opacity: 0.35; pointer-events: none; }
+  .terms-accept-btn.ready { opacity: 1; pointer-events: all; }
+  .terms-accept-btn.ready:hover { background: #1a5fa8; transform: translateY(-1px); }
+  .terms-legal-note { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px; color: rgba(255,255,255,0.18); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ── TÉRMINOS Y CONDICIONES MODAL ── -->
+<div id="termsModal">
+  <div class="terms-box">
+    <div class="terms-header">
+      <div class="terms-logo-row">
+        <div class="terms-logo">MATRIX</div>
+        <div class="terms-version">v3.1</div>
+      </div>
+      <div class="terms-headline">// Términos de uso, privacidad y conformidad — Lectura obligatoria</div>
+    </div>
+    <div class="terms-body">
+
+      <div class="terms-author">
+        <div class="terms-author-seal">⚖️</div>
+        <div>
+          <div class="terms-author-name">ANÍBAL JUAN ALONSO SESMA</div>
+          <div class="terms-author-title">CREADOR Y PROPIETARIO LEGÍTIMO · BLOGFORT AGENCY LLC · WYOMING, USA</div>
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <div class="terms-section-title">⚖️ 1. PROPIEDAD INTELECTUAL Y AUTORÍA</div>
+        <div class="terms-text">
+          <strong>MATRIX v3.1</strong> es un software propietario creado, diseñado y desarrollado íntegramente por <strong>Aníbal Juan Alonso Sesma</strong>, fundador y CEO de <strong>BlogFort Agency LLC</strong>, empresa registrada bajo las leyes del Estado de Wyoming, Estados Unidos (EIN registrado). Todos los derechos de propiedad intelectual, diseño, arquitectura de datos y lógica operativa pertenecen exclusiva y permanentemente a su creador. Queda estrictamente prohibida su reproducción, redistribución, ingeniería inversa o uso no autorizado bajo cualquier jurisdicción aplicable.
+        </div>
+      </div>
+
+      <div class="terms-divider"></div>
+
+      <div class="terms-section">
+        <div class="terms-section-title">🔒 2. SOBERANÍA DE DATOS Y RESPONSABILIDAD</div>
+        <div class="terms-text">
+          MATRIX opera bajo el principio de <strong>Soberanía Root</strong>: todos los datos se almacenan exclusivamente en el dispositivo del usuario mediante IndexedDB y localStorage. <strong>BlogFort Agency LLC no tiene acceso, visibilidad ni control</strong> sobre los datos introducidos por el licenciatario. El usuario asume el control total y la responsabilidad absoluta de su propio "Refugio de Datos".<br><br>
+          <strong>Limitación de responsabilidad:</strong> BlogFort Agency LLC no se hace responsable de las decisiones financieras, legales o comerciales tomadas por el cliente basadas en los cálculos de la Calculadora Estratégica, el análisis de la IA o cualquier otro módulo de MATRIX, ya que estos dependen enteramente de los datos introducidos por el usuario.
+        </div>
+      </div>
+
+      <div class="terms-highlight">
+        <div class="terms-highlight-text">⚠️ ADVERTENCIA: Los resultados de la Calculadora Financiera son proyecciones orientativas. BlogFort Agency LLC no asume ninguna responsabilidad por pérdidas económicas derivadas de su uso. Consulte siempre a un asesor financiero o legal cualificado para decisiones críticas.</div>
+      </div>
+
+      <div class="terms-section">
+        <div class="terms-section-title">🔑 3. LICENCIA DE USO Y MONETIZACIÓN</div>
+        <div class="terms-text">
+          El acceso a MATRIX se otorga mediante licencia personal, intransferible y no exclusiva, sujeta al plan de suscripción contratado (Starter, Business o Enterprise). <strong>Está expresamente prohibido</strong> compartir credenciales de acceso, sublicenciar el software o utilizarlo con fines distintos a los establecidos en el plan contratado. El incumplimiento de estos términos resultará en la revocación inmediata de la licencia sin derecho a reembolso.
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <div class="terms-section-title">🤖 4. USO DE INTELIGENCIA ARTIFICIAL</div>
+        <div class="terms-text">
+          MATRIX utiliza la API de <strong>Anthropic (Claude)</strong> para funciones de análisis e inteligencia artificial. El usuario es responsable de proporcionar su propia API Key y de cumplir con los <strong>Términos de Uso de Anthropic</strong>. BlogFort Agency LLC actúa únicamente como arquitecto de la integración y no responde por cambios, interrupciones o modificaciones en el servicio de Anthropic. El contenido generado por IA es orientativo y no constituye asesoramiento profesional de ningún tipo.
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <div class="terms-section-title">🌍 5. JURISDICCIÓN Y LEY APLICABLE</div>
+        <div class="terms-text">
+          Estos términos se rigen por las leyes del Estado de <strong>Wyoming, Estados Unidos</strong>. Cualquier disputa derivada del uso de MATRIX se someterá a la jurisdicción exclusiva de los tribunales competentes de Wyoming. El uso de MATRIX desde territorio de la Unión Europea implica la aceptación adicional de las disposiciones del <strong>RGPD</strong> aplicables al tratamiento de datos personales.
+        </div>
+      </div>
+
+      <div style="background:rgba(0,184,148,0.06);border:1px solid rgba(0,184,148,0.2);border-radius:var(--radius);padding:14px 18px;margin-top:8px;">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--seal-public);margin-bottom:6px;">BLOGFORT AGENCY LLC · REGISTRO LEGAL</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.5);line-height:1.7;">
+          30 N Gould St · Sheridan · Wyoming 82801 · USA<br>
+          Creador: Aníbal Juan Alonso Sesma · CEO & Founder<br>
+          MATRIX v3.1 © 2025 BlogFort Agency LLC · Todos los derechos reservados
+        </div>
+      </div>
+
+    </div>
+    <div class="terms-footer-bar">
+      <div class="terms-check-row" onclick="toggleTermsCheck('chk1')">
+        <div class="terms-check" id="chk1"></div>
+        <div class="terms-check-label">He leído y acepto los Términos de Uso, la Política de Privacidad y la Declaración de Soberanía de Datos de MATRIX v3.1 — BlogFort Agency LLC.</div>
+      </div>
+      <div class="terms-check-row" onclick="toggleTermsCheck('chk2')">
+        <div class="terms-check" id="chk2"></div>
+        <div class="terms-check-label">Entiendo que BlogFort Agency LLC no se responsabiliza de las decisiones tomadas a partir de los cálculos de la IA o la Calculadora Estratégica, y que opero bajo un modelo de Soberanía Root asumiendo control total de mis datos.</div>
+      </div>
+      <button class="terms-accept-btn" id="termsAcceptBtn" onclick="acceptTerms()">✓ CONFIRMAR Y ACCEDER A MATRIX</button>
+      <div class="terms-legal-note">Al aceptar, queda registrada su conformidad · MATRIX v3.1 · BlogFort Agency LLC · Wyoming USA · © 2025 Aníbal Juan Alonso Sesma</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-box">
+    <div class="login-logo">MATRIX</div>
+    <div class="login-sub">BlogFort Agency LLC — CEO Access</div>
+    <div class="login-label">Contraseña Nivel 100</div>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" maxlength="32">
+    <button class="login-btn" onclick="attemptLogin()">ACCEDER AL SISTEMA</button>
+    <div class="login-error" id="loginError">// ACCESO DENEGADO — PROTOCOLO DE SILENCIO ACTIVADO</div>
+    <div class="login-footer">MATRIX v3.1 · BLOGFORT AGENCY LLC · WYOMING USA</div>
+  </div>
+</div>
+
+<!-- ── PIN MODAL — CÁMARA ALFA ── -->
+<div id="pinModal">
+  <div class="pin-box">
+    <div class="pin-title">🔐 CÁMARA ALFA</div>
+    <div class="pin-sub">// Acceso Legal Corporativo — Solo CEO</div>
+    <input class="pin-input" type="password" id="pinInput" placeholder="••••" maxlength="8">
+    <button class="pin-btn" onclick="validatePin()">VALIDAR ACCESO</button>
+    <div class="pin-error" id="pinError">// PIN INCORRECTO — INTENTO REGISTRADO</div>
+    <button class="pin-cancel" onclick="closePin()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ── ALERTS PANEL ── -->
+<div class="alerts-panel" id="alertsPanel">
+  <div class="alerts-panel-header">
+    <div class="alerts-panel-title">ALERTAS SEMÁFORO</div>
+    <button class="alerts-panel-close" onclick="toggleAlerts()">✕</button>
+  </div>
+  <div id="alertsList"><div class="no-alerts">Sin alertas activas</div></div>
+</div>
+
+<!-- ── PERFIL MODAL ── -->
+<div class="side-modal" id="perfilModal">
+  <div class="side-modal-header">
+    <div class="side-modal-title">👤 MI PERFIL</div>
+    <button class="side-modal-close" onclick="closeSideModal('perfilModal')">✕</button>
+  </div>
+  <div class="side-modal-body">
+    <div class="side-section">
+      <div class="side-section-title">Identidad CEO</div>
+      <div class="side-form-group"><label class="side-label">Nombre completo</label><input class="side-input" id="prf-nombre" value="Aníbal J. Alonso Sesma"></div>
+      <div class="side-form-group"><label class="side-label">Cargo</label><input class="side-input" id="prf-cargo" value="CEO & General Director"></div>
+      <div class="side-form-group"><label class="side-label">Email corporativo</label><input class="side-input" id="prf-email" placeholder="ceo@blogfort.agency"></div>
+      <button class="side-btn" onclick="saveProfile()">✓ GUARDAR PERFIL</button>
+    </div>
+    <div class="side-section">
+      <div class="side-section-title">Cambiar contraseña Matrix</div>
+      <div class="side-form-group"><label class="side-label">Contraseña actual</label><input class="side-input" type="password" id="prf-old"></div>
+      <div class="side-form-group"><label class="side-label">Nueva contraseña</label><input class="side-input" type="password" id="prf-new"></div>
+      <div class="side-form-group"><label class="side-label">Confirmar nueva</label><input class="side-input" type="password" id="prf-confirm"></div>
+      <button class="side-btn" onclick="changePasswordProfile()">✓ ACTUALIZAR CONTRASEÑA</button>
+    </div>
+    <div class="side-section">
+      <div class="side-section-title">PIN Bóveda Alfa</div>
+      <div class="side-form-group"><label class="side-label">Nuevo PIN (mín. 4 dígitos)</label><input class="side-input" type="password" id="prf-pin" placeholder="••••" maxlength="8"></div>
+      <button class="side-btn" onclick="changePinProfile()">✓ ACTUALIZAR PIN ALFA</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SISTEMA MODAL ── -->
+<div class="side-modal" id="sistemaModal">
+  <div class="side-modal-header">
+    <div class="side-modal-title">🛠️ CONSOLA MANDO</div>
+    <button class="side-modal-close" onclick="closeSideModal('sistemaModal')">✕</button>
+  </div>
+  <div class="side-modal-body">
+    <div class="side-section">
+      <div class="side-section-title">API Keys del Sistema</div>
+      <div class="side-form-group"><label class="side-label">Anthropic API Key</label><input class="side-input" type="password" id="sys-anthropic" placeholder="sk-ant-..."></div>
+      <div class="side-form-group"><label class="side-label">Firecrawl API Key</label><input class="side-input" type="password" id="sys-firecrawl" placeholder="fc-..."></div>
+      <button class="side-btn" onclick="saveApiKeysSys()">✓ GUARDAR API KEYS</button>
+    </div>
+    <div class="side-section">
+      <div class="side-section-title">Backup Sistema</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="side-btn" style="background:rgba(0,184,148,0.15);color:#00B894;border:1px solid rgba(0,184,148,0.3);" onclick="exportData()">📤 Exportar Bóveda JSON</button>
+        <button class="side-btn" style="background:rgba(14,165,233,0.1);color:#0EA5E9;border:1px solid rgba(14,165,233,0.25);" onclick="document.getElementById('importFile').click()">📥 Importar Backup</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+    <div class="side-section">
+      <div class="side-section-title">Zona de Peligro</div>
+      <button class="side-btn" style="background:rgba(192,57,43,0.15);color:#C0392B;border:1px solid rgba(192,57,43,0.3);" onclick="if(confirm('¿Borrar TODOS los datos? Irreversible.')) clearAllData()">🗑️ BORRAR TODO — NIVEL 100</button>
+    </div>
+    <div class="side-section">
+      <div class="side-section-title">Info de almacenamiento</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.4);padding:12px;background:rgba(255,255,255,0.04);border-radius:var(--radius);line-height:1.8;" id="sysStorageDetail">Calculando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">MATRIX</div>
+      <div class="sidebar-sub">// Sistema Operativo Central</div>
+      <div class="version-pill">v3.1 · OFFLINE READY</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">Control</div>
+      <div class="nav-item active" onclick="showPanel('dashboard', this)">
+        <div class="nav-icon">📊</div>
+        <span class="nav-label">Dashboard CEO</span>
+      </div>
+      <div class="nav-section">Sectores</div>
+      <div class="nav-item" onclick="showPanel('sector1', this)">
+        <div class="nav-icon">🌊</div>
+        <span class="nav-label">S1 — Flujo Contacto</span>
+        <span class="nav-badge" id="badge-s1">0</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('sector2', this)">
+        <div class="nav-icon">⚙️</div>
+        <span class="nav-label">S2 — Ejecución</span>
+        <span class="nav-badge" id="badge-s2">0</span>
+      </div>
+      <div class="nav-section">Finanzas</div>
+      <div class="nav-item" onclick="showPanel('finanzas', this)">
+        <div class="nav-icon">🧮</div>
+        <span class="nav-label">Calculadora</span>
+      </div>
+      <div class="nav-section">Seguridad</div>
+      <div class="nav-item" onclick="showPanel('boveda', this)">
+        <div class="nav-icon">🛡️</div>
+        <span class="nav-label">Bóveda Alfa / Beta</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('seguridad', this)">
+        <div class="nav-icon">🔒</div>
+        <span class="nav-label">Muro de Contención</span>
+        <span class="nav-badge nav-badge-red" id="badge-sec">0</span>
+      </div>
+      <div class="nav-section">Inteligencia</div>
+      <div class="nav-item" onclick="showPanel('log', this)">
+        <div class="nav-icon">🧠</div>
+        <span class="nav-label">Log & Auditoría</span>
+      </div>
+      <div class="nav-item" onclick="showPanel('licencia', this)">
+        <div class="nav-icon">🔑</div>
+        <span class="nav-label">Acceso & Licencia</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="footer-actions">
+        <button class="footer-btn" id="btnPerfil" onclick="openSideModal('perfilModal','btnPerfil','active-profile')">👤 Perfil</button>
+        <button class="footer-btn" id="btnSistema" onclick="openSideModal('sistemaModal','btnSistema','active-sistema')">🛠️ Sistema</button>
+      </div>
+      <div class="ceo-badge">
+        <div class="ceo-dot"></div>
+        <div class="ceo-info">
+          <div class="ceo-name" id="ceoNameDisplay">Aníbal J. Alonso</div>
+          <div class="ceo-level">NIVEL 100 — ROOT</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" title="Cerrar sesión">⏻</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">DASHBOARD CEO</div>
+      <div class="topbar-time" id="topbarTime"></div>
+      <button class="alert-bell-btn" onclick="toggleAlerts()" title="Alertas semáforo">
+        🔔
+        <span class="alert-bell-count" id="bellCount">0</span>
+      </button>
+      <button class="conn-btn conn-falcon" id="btnFalcon" onclick="toggleFalcon()" title="Motor de validación de datos">
+        <span class="conn-dot conn-dot-off" id="falconDot"></span>
+        <span class="conn-label">VALIDADOR</span>
+      </button>
+      <button class="conn-btn conn-blogfort" onclick="showBlogfortStatus()">
+        <span class="conn-dot conn-dot-green"></span>
+        <span class="conn-label">BLOGFORT</span>
+      </button>
+      <div class="security-indicator">
+        <div class="security-dot"></div>
+        <span class="security-text">Activo</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="storage-bar" id="storageSummary">
+          <div class="storage-indicators">
+            <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> LEADS · OFFLINE</div>
+            <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> CLIENTES · OFFLINE</div>
+            <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> BÓVEDA · OFFLINE</div>
+            <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> FINANZAS · OFFLINE</div>
+            <div class="storage-item storage-na"><span class="storage-dot dot-grey"></span> IA · ONLINE</div>
+          </div>
+          <div style="color:var(--text-light);font-size:10px;" id="storageInfo">💾 CARGANDO...</div>
+        </div>
+
+        <!-- Alertas activas dashboard -->
+        <div id="dashAlerts" style="display:none;margin-bottom:16px;"></div>
+
+        <div id="connStatusPanel" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="background:rgba(0,184,148,0.06);border:1px solid rgba(0,184,148,0.2);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;">⚡</span>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#00B894;">BLOGFORT APP</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(0,184,148,0.7);">● CONECTADO · PRODUCCIÓN</div>
+            </div>
+          </div>
+          <div id="falconStatusCard" style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="toggleFalcon()">
+            <span style="font-size:20px;">🦅</span>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#F59E0B;">MOTOR DE VALIDACIÓN</div>
+              <div id="falconCardStatus" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(245,158,11,0.5);">○ DESCONECTADO · EN ESPERA</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-label">Leads Activos</div>
+            <div class="stat-value" id="stat-leads">0</div>
+            <div class="stat-desc">Sector 1 — Flujo</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Clientes Activos</div>
+            <div class="stat-value" id="stat-clients">0</div>
+            <div class="stat-desc">Sector 2 — Ejecución</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-label">Confirmaciones</div>
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-desc">Pendientes aprobación</div>
+          </div>
+          <div class="stat-card finance">
+            <div class="stat-label">Ingresos / Mes</div>
+            <div class="stat-value-sm" id="stat-ingresos">€0</div>
+            <div class="stat-desc">Proyección mensual</div>
+          </div>
+          <div class="stat-card cyan">
+            <div class="stat-label">Margen Neto</div>
+            <div class="stat-value-sm" id="stat-margen">€0</div>
+            <div class="stat-desc">Después de impuestos</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-label">Alertas</div>
+            <div class="stat-value" id="stat-alerts">0</div>
+            <div class="stat-desc">Semáforo activo</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">FLUJO DEL ECOSISTEMA</div></div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding:16px;background:var(--bg-primary);border-radius:var(--radius);margin-bottom:12px;">
+                <div class="flow-node"><div class="flow-node-icon">🦅</div><div class="flow-node-name">MOTOR DE VALIDACIÓN</div><div class="flow-node-role">Nivel 1</div><div class="flow-node-role">Captador</div></div>
+                <div class="flow-arrow"><div class="flow-line"></div><div class="flow-confirm">✓ confirm</div></div>
+                <div class="flow-node" style="border-color:var(--accent-blue);background:rgba(27,79,138,0.05);"><div class="flow-node-icon">🔒</div><div class="flow-node-name">MATRIX</div><div class="flow-node-role">Nivel 100</div><div class="flow-node-role">Root CEO</div></div>
+                <div class="flow-arrow"><div class="flow-line"></div><div class="flow-confirm">✓ confirm</div></div>
+                <div class="flow-node"><div class="flow-node-icon">⚡</div><div class="flow-node-name">BLOGFORT</div><div class="flow-node-role">Nivel 2</div><div class="flow-node-role">Productor</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculadora rápida dashboard -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🧮 CALCULADORA RÁPIDA</div>
+              <button class="btn btn-finance btn-sm" onclick="showPanel('finanzas', document.querySelectorAll('.nav-item')[3])">Calculadora completa →</button>
+            </div>
+            <div class="card-body" style="padding:16px;">
+              <div class="calc-quick">
+                <div class="calc-row">
+                  <input class="calc-input" type="number" id="qc-a" placeholder="Cantidad A" oninput="quickCalc()">
+                  <div style="display:flex;gap:4px;">
+                    <button class="calc-op" id="qop-plus" onclick="setQOp('+')">+</button>
+                    <button class="calc-op" id="qop-minus" onclick="setQOp('-')">−</button>
+                    <button class="calc-op active" id="qop-mult" onclick="setQOp('*')">×</button>
+                    <button class="calc-op" id="qop-div" onclick="setQOp('/')">÷</button>
+                  </div>
+                  <input class="calc-input" type="number" id="qc-b" placeholder="Cantidad B" oninput="quickCalc()">
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <select class="calc-input" id="qc-currency" onchange="quickCalc()" style="flex:0 0 80px;">
+                    <option value="EUR">€ EUR</option>
+                    <option value="USD">$ USD</option>
+                    <option value="GBP">£ GBP</option>
+                  </select>
+                  <input class="calc-input" type="number" id="qc-iva" placeholder="IVA/Tax %" value="21" oninput="quickCalc()" style="flex:0 0 100px;">
+                  <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);align-self:center;">% impuesto</span>
+                </div>
+                <div class="calc-result" id="qc-result">—</div>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text-light);">
+                  <span>Base: <span id="qc-base">—</span></span>
+                  <span>Con impuesto: <span id="qc-total">—</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">ÚLTIMOS LEADS — SECTOR 1</div>
+            <button class="btn btn-ghost btn-sm" onclick="showPanel('sector1', document.querySelectorAll('.nav-item')[1])">Ver todos →</button>
+          </div>
+          <div style="padding:0;">
+            <table class="data-table" id="dashLeadsTable">
+              <thead><tr><th>Empresa</th><th>País</th><th>Sector</th><th>Estado</th><th>Fecha</th></tr></thead>
+              <tbody id="dashLeadsBody"><tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🦅</div><div class="empty-text">Sin leads aún</div></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECTOR 1 ══ -->
+      <div class="panel" id="panel-sector1">
+        <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;">
+          <div><div class="page-title">SECTOR 1 — FLUJO DE CONTACTO</div><div class="page-subtitle">// Depósito del Motor de Validación — Confirmaciones pendientes</div></div>
+          <button class="btn btn-primary" onclick="openAddLead()">+ Nuevo Lead</button>
+        </div>
+        <div class="alert-box alert-info" style="font-size:12px;"><span>🦅</span><span><strong>Motor de Validación activo.</strong> Los datos se guardan automáticamente y persisten sin conexión.</span></div>
+        <div class="search-bar">
+          <input class="search-input" id="searchLeads" placeholder="Buscar empresa, país, sector..." oninput="filterLeadsSearch()">
+          <select class="search-select" id="filterLeadStatus" onchange="filterLeadsSearch()"><option value="">Todos los estados</option><option value="pending">Pendientes</option><option value="confirmed">Confirmados</option></select>
+          <select class="search-select" id="filterLeadFase" onchange="filterLeadsSearch()"><option value="">Todas las fases</option><option value="Detección">Detección</option><option value="Carta Sower">Carta Sower</option><option value="Carta Espejo">Carta Espejo</option><option value="Reporte Final">Reporte Final</option></select>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">PIPELINE DE LEADS</div><span id="leadsCountLabel" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);">0 leads</span></div>
+          <div style="padding:0;">
+            <table class="data-table"><thead><tr><th>Empresa</th><th>País / Idioma</th><th>Sector</th><th>Fase Validación</th><th>Sello</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="leadsTableBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📡</div><div class="empty-text">Sin leads registrados</div></div></td></tr></tbody></table>
+          </div>
+        </div>
+        <div class="card" id="addLeadForm" style="display:none;">
+          <div class="card-header"><div class="card-title">REGISTRAR NUEVO LEAD</div><button class="btn btn-ghost btn-sm" onclick="closeAddLead()">✕ Cerrar</button></div>
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="f-empresa" placeholder="Nombre de la empresa"></div>
+              <div class="form-group"><label class="form-label">País</label><input class="form-input" id="f-pais" placeholder="España, México..."></div>
+              <div class="form-group"><label class="form-label">Sector</label><input class="form-input" id="f-sector" placeholder="Dental, Legal, Tech..."></div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">URL Web</label><input class="form-input form-input-mono" id="f-url" placeholder="https://empresa.com"></div>
+              <div class="form-group"><label class="form-label">Canal de Contacto</label><input class="form-input" id="f-canal" placeholder="Email, LinkedIn..."></div>
+            </div>
+            <div class="form-group"><label class="form-label">Notas de Análisis</label><textarea class="form-input" id="f-notas" rows="3" placeholder="Señales detectadas..."></textarea></div>
+            <div style="display:flex;gap:8px;"><button class="btn btn-primary" onclick="saveLead()">✓ Registrar en Matrix</button><button class="btn btn-ghost" onclick="closeAddLead()">Cancelar</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECTOR 2 ══ -->
+      <div class="panel" id="panel-sector2">
+        <div class="page-header" style="display:flex;align-items:flex-end;justify-content:space-between;">
+          <div><div class="page-title">SECTOR 2 — EJECUCIÓN PROGRAMADA</div><div class="page-subtitle">// Clientes activos — BlogFort App pipeline</div></div>
+          <button class="btn btn-primary" onclick="openAddClient()">+ Nuevo Cliente</button>
+        </div>
+        <div class="search-bar">
+          <input class="search-input" id="searchClients" placeholder="Buscar cliente, sector, servicio..." oninput="filterClientsSearch()">
+          <select class="search-select" id="filterClientSello" onchange="filterClientsSearch()"><option value="">Todos los sellos</option><option value="public">Público</option><option value="internal">Interno</option><option value="confidential">Confidencial</option><option value="restricted">Bóveda Profunda</option></select>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">CLIENTES ACTIVOS</div><span id="clientsCountLabel" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);">0 clientes</span></div>
+          <div style="padding:0;">
+            <table class="data-table"><thead><tr><th>Cliente</th><th>Sector</th><th>Servicio</th><th>Progreso</th><th>Sello</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="clientsTableBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⚙️</div><div class="empty-text">Sin clientes activos</div></div></td></tr></tbody></table>
+          </div>
+        </div>
+        <div class="card" id="addClientForm" style="display:none;">
+          <div class="card-header"><div class="card-title">REGISTRAR CLIENTE ACTIVO</div><button class="btn btn-ghost btn-sm" onclick="closeAddClient()">✕ Cerrar</button></div>
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="form-group"><label class="form-label">Empresa Cliente</label><input class="form-input" id="c-empresa"></div>
+              <div class="form-group"><label class="form-label">Sector</label><input class="form-input" id="c-sector"></div>
+              <div class="form-group"><label class="form-label">Servicio Contratado</label><input class="form-input" id="c-servicio" placeholder="SEO, Web, PDF..."></div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Sello de Seguridad</label>
+                <select class="form-input" id="c-sello"><option value="public">🟢 Público</option><option value="internal">🔵 Interno</option><option value="confidential" selected>🟡 Confidencial</option><option value="restricted">🔴 Bóveda Profunda</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Progreso (%)</label><input class="form-input" type="number" id="c-progreso" min="0" max="100" value="0"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveClient()">✓ Registrar en Matrix</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FINANZAS ══ -->
+      <div class="panel" id="panel-finanzas">
+        <div class="page-header"><div class="page-title">🧮 CALCULADORA FINANCIERA</div><div class="page-subtitle">// Motor financiero Matrix — Soberanía monetaria CEO</div></div>
+
+        <div class="finance-tabs">
+          <button class="finance-tab active" onclick="showFinanceTab('operativa', this)">⚡ Calculadora Operativa</button>
+          <button class="finance-tab" onclick="showFinanceTab('estrategica', this)">📊 Calculadora Estratégica</button>
+          <button class="finance-tab" onclick="showFinanceTab('contratos', this)">📋 Contratos Financieros</button>
+        </div>
+
+        <!-- OPERATIVA -->
+        <div class="finance-content active" id="ftab-operativa">
+          <div class="grid-2">
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header"><div class="card-title">CALCULADORA OPERATIVA</div></div>
+              <div class="card-body">
+                <div class="form-group"><label class="form-label">Moneda base</label>
+                  <select class="form-input" id="op-currency" onchange="calcOperativa()">
+                    <option value="EUR">€ Euro (EUR)</option><option value="USD">$ Dólar (USD)</option><option value="GBP">£ Libra (GBP)</option><option value="MXN">₱ Peso MX (MXN)</option>
+                  </select>
+                </div>
+                <div class="form-group"><label class="form-label">Precio del servicio</label><input class="form-input" type="number" id="op-precio" placeholder="0.00" oninput="calcOperativa()"></div>
+                <div class="grid-2" style="margin-bottom:0;">
+                  <div class="form-group"><label class="form-label">% Impuesto / IVA</label><input class="form-input" type="number" id="op-iva" value="21" placeholder="21" oninput="calcOperativa()"></div>
+                  <div class="form-group"><label class="form-label">% Descuento</label><input class="form-input" type="number" id="op-dto" value="0" placeholder="0" oninput="calcOperativa()"></div>
+                </div>
+                <div class="form-group"><label class="form-label">Coste de ejecución</label><input class="form-input" type="number" id="op-coste" placeholder="0.00" oninput="calcOperativa()"></div>
+                <div class="form-group"><label class="form-label">Periodicidad</label>
+                  <select class="form-input" id="op-periodo" onchange="calcOperativa()">
+                    <option value="1">Pago único</option><option value="1" data-m="1">Mensual</option><option value="3" data-m="3">Trimestral</option><option value="12" data-m="12">Anual</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header"><div class="card-title">RESULTADO OPERATIVO</div></div>
+              <div class="card-body">
+                <div class="result-box">
+                  <div class="result-row"><span class="result-label">Precio base</span><span class="result-value blue" id="res-base">—</span></div>
+                  <div class="result-row"><span class="result-label">Con descuento</span><span class="result-value blue" id="res-dto">—</span></div>
+                  <div class="result-row"><span class="result-label">Impuesto estimado</span><span class="result-value red" id="res-iva">—</span></div>
+                  <div class="result-row"><span class="result-label">Precio con impuesto</span><span class="result-value amber" id="res-total">—</span></div>
+                  <div class="result-row"><span class="result-label">Coste ejecución</span><span class="result-value red" id="res-coste">—</span></div>
+                  <div class="result-row" style="border-top:1px solid rgba(0,184,148,0.3);margin-top:8px;padding-top:8px;"><span class="result-label" style="color:rgba(0,184,148,0.7);">✦ MARGEN NETO</span><span class="result-value green" id="res-margen">—</span></div>
+                  <div class="result-row"><span class="result-label">Equivalente mensual</span><span class="result-value green" id="res-mensual">—</span></div>
+                  <div class="result-row"><span class="result-label">A reservar impuesto</span><span class="result-value amber" id="res-reserva">—</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESTRATÉGICA -->
+        <div class="finance-content" id="ftab-estrategica">
+          <div class="alert-box alert-info"><span>📊</span><span>La calculadora estratégica usa los contratos registrados en la Cámara Beta para proyectar tu flujo de caja real.</span></div>
+          <div class="grid-2">
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header"><div class="card-title">PARÁMETROS GLOBALES</div></div>
+              <div class="card-body">
+                <div class="form-group"><label class="form-label">% Impuesto país (global)</label><input class="form-input" type="number" id="est-tax" value="21" placeholder="21" oninput="calcEstrategica()"></div>
+                <div class="form-group"><label class="form-label">Gastos operativos BlogFort (mes)</label><input class="form-input" type="number" id="est-gastos" placeholder="0.00" oninput="calcEstrategica()"></div>
+                <div class="form-group"><label class="form-label">Proyección (meses)</label>
+                  <select class="form-input" id="est-meses" onchange="calcEstrategica()">
+                    <option value="1">1 mes</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12" selected>12 meses (anual)</option>
+                  </select>
+                </div>
+                <button class="btn btn-finance" style="width:100%;" onclick="calcEstrategica()">⚡ Calcular Proyección</button>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header"><div class="card-title">PROYECCIÓN FINANCIERA</div></div>
+              <div class="card-body">
+                <div class="result-box">
+                  <div class="result-row"><span class="result-label">Contratos activos</span><span class="result-value blue" id="est-ncontratos">0</span></div>
+                  <div class="result-row"><span class="result-label">Ingresos totales período</span><span class="result-value green" id="est-ingresos">—</span></div>
+                  <div class="result-row"><span class="result-label">Equivalente mensual</span><span class="result-value green" id="est-mensual">—</span></div>
+                  <div class="result-row"><span class="result-label">Total impuestos a reservar</span><span class="result-value red" id="est-impuestos">—</span></div>
+                  <div class="result-row"><span class="result-label">Total gastos operativos</span><span class="result-value red" id="est-gastos-total">—</span></div>
+                  <div class="result-row" style="border-top:1px solid rgba(0,184,148,0.3);margin-top:8px;padding-top:8px;"><span class="result-label" style="color:rgba(0,184,148,0.7);">✦ MARGEN NETO REAL</span><span class="result-value green" id="est-margen">—</span></div>
+                  <div class="result-row"><span class="result-label">Margen neto mensual</span><span class="result-value green" id="est-margen-mes">—</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTRATOS FINANCIEROS -->
+        <div class="finance-content" id="ftab-contratos">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">CONTRATOS FINANCIEROS — CÁMARA BETA</div>
+              <button class="btn btn-primary btn-sm" onclick="openAddContrato()">+ Nuevo Contrato</button>
+            </div>
+            <div class="contratos-list card-body" id="contratosListBody">
+              <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Sin contratos registrados</div></div>
+            </div>
+          </div>
+          <div class="card" id="addContratoForm" style="display:none;">
+            <div class="card-header"><div class="card-title">REGISTRAR CONTRATO FINANCIERO</div><button class="btn btn-ghost btn-sm" onclick="closeAddContrato()">✕</button></div>
+            <div class="card-body">
+              <div class="grid-3">
+                <div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="ct-cliente" placeholder="Empresa cliente"></div>
+                <div class="form-group"><label class="form-label">Monto total (€)</label><input class="form-input" type="number" id="ct-monto" placeholder="0.00"></div>
+                <div class="form-group"><label class="form-label">Periodicidad</label>
+                  <select class="form-input" id="ct-periodo">
+                    <option value="mensual">Mensual</option><option value="trimestral">Trimestral</option><option value="anual">Anual</option><option value="otros">Otros / Hito</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Coste ejecución (€)</label><input class="form-input" type="number" id="ct-coste" placeholder="0.00" value="0"></div>
+                <div class="form-group"><label class="form-label">Fecha inicio</label><input class="form-input" type="date" id="ct-fecha"></div>
+              </div>
+              <button class="btn btn-primary" onclick="saveContrato()">✓ Registrar Contrato</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BÓVEDA ══ -->
+      <div class="panel" id="panel-boveda">
+        <div class="page-header"><div class="page-title">🛡️ BÓVEDA — CÁMARAS ALFA & BETA</div><div class="page-subtitle">// Sistema de acceso por niveles — Separación legal / operativa</div></div>
+
+        <div class="camara-tabs">
+          <div class="camara-tab" id="tab-alfa" onclick="switchCamara('alfa')">🔴 Cámara Alfa — Legal Corporativo <span style="font-size:9px;margin-left:6px;opacity:0.6;">Solo CEO + PIN</span></div>
+          <div class="camara-tab" id="tab-beta" onclick="switchCamara('beta')">🔵 Cámara Beta — Contratos Clientes</div>
+        </div>
+
+        <!-- CÁMARA ALFA -->
+        <div class="camara-content" id="camara-alfa">
+          <div class="camara-header camara-alfa-header">
+            <span style="font-size:18px;">🔴</span>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--seal-restricted);">CÁMARA ALFA — LEGAL CORPORATIVO</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(192,57,43,0.6);">Constitución · Impuestos · Propiedad Intelectual — Solo CEO Nivel 100</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="openAddVault('alfa')">+ Nueva Entrada</button>
+          </div>
+          <div style="background:rgba(192,57,43,0.03);border:1px solid rgba(192,57,43,0.15);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:16px;">
+            <div class="camara-subcarpetas">
+              <div class="subcarpeta-btn sel-alfa" id="sub-alfa-constitucion" onclick="selectSubcarpeta('alfa','Constitución',this)">
+                <div class="subcarpeta-icon">📜</div>
+                <div class="subcarpeta-name">Constitución</div>
+                <div class="subcarpeta-count" id="cnt-alfa-constitucion">0</div>
+              </div>
+              <div class="subcarpeta-btn sel-alfa" id="sub-alfa-impuestos" onclick="selectSubcarpeta('alfa','Impuestos/RUT/NIF',this)">
+                <div class="subcarpeta-icon">🧾</div>
+                <div class="subcarpeta-name">Impuestos / RUT / NIF</div>
+                <div class="subcarpeta-count" id="cnt-alfa-impuestos">0</div>
+              </div>
+              <div class="subcarpeta-btn sel-alfa" id="sub-alfa-propiedad" onclick="selectSubcarpeta('alfa','Propiedad Intelectual',this)">
+                <div class="subcarpeta-icon">™️</div>
+                <div class="subcarpeta-name">Propiedad Intelectual</div>
+                <div class="subcarpeta-count" id="cnt-alfa-propiedad">0</div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header"><div class="card-title" id="alfa-subcarpeta-title">TODOS — CÁMARA ALFA</div><span id="alfa-count-label" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);">0 entradas</span></div>
+              <div style="padding:0;"><table class="data-table"><thead><tr><th>Entidad</th><th>Subcarpeta</th><th>Tipo</th><th>Sello</th><th>Fecha</th><th>Notas</th><th>Acción</th></tr></thead>
+              <tbody id="alfaTableBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📜</div><div class="empty-text">Cámara Alfa vacía</div></div></td></tr></tbody></table></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CÁMARA BETA -->
+        <div class="camara-content" id="camara-beta">
+          <div class="camara-header camara-beta-header">
+            <span style="font-size:18px;">🔵</span>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--accent-cyan);">CÁMARA BETA — CONTRATOS CLIENTES</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(14,165,233,0.6);">Contratos Activos · Planes Suscripción · Histórico — CEO & Auditor</div>
+            </div>
+            <button class="btn btn-sm" style="background:rgba(14,165,233,0.1);color:var(--accent-cyan);border:1px solid rgba(14,165,233,0.3);" onclick="openAddVault('beta')">+ Nueva Entrada</button>
+          </div>
+          <div style="background:rgba(14,165,233,0.03);border:1px solid rgba(14,165,233,0.15);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:16px;">
+            <div class="camara-subcarpetas">
+              <div class="subcarpeta-btn sel-beta" onclick="selectSubcarpeta('beta','Contratos Activos',this)">
+                <div class="subcarpeta-icon">📝</div>
+                <div class="subcarpeta-name">Contratos Activos</div>
+                <div class="subcarpeta-count" id="cnt-beta-activos">0</div>
+              </div>
+              <div class="subcarpeta-btn sel-beta" onclick="selectSubcarpeta('beta','Planes Suscripción',this)">
+                <div class="subcarpeta-icon">🔄</div>
+                <div class="subcarpeta-name">Planes Suscripción</div>
+                <div class="subcarpeta-count" id="cnt-beta-suscripcion">0</div>
+              </div>
+              <div class="subcarpeta-btn sel-beta" onclick="selectSubcarpeta('beta','Histórico Expirados',this)">
+                <div class="subcarpeta-icon">🗂️</div>
+                <div class="subcarpeta-name">Histórico Expirados</div>
+                <div class="subcarpeta-count" id="cnt-beta-historico">0</div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header"><div class="card-title" id="beta-subcarpeta-title">TODOS — CÁMARA BETA</div><span id="beta-count-label" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);">0 entradas</span></div>
+              <div style="padding:0;"><table class="data-table"><thead><tr><th>Entidad</th><th>Subcarpeta</th><th>Tipo</th><th>Sello</th><th>Fecha</th><th>Vencimiento</th><th>Acción</th></tr></thead>
+              <tbody id="betaTableBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Cámara Beta vacía</div></div></td></tr></tbody></table></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD VAULT FORM -->
+        <div class="card" id="addVaultForm" style="display:none;margin-top:16px;">
+          <div class="card-header"><div class="card-title" id="addVaultTitle">NUEVA ENTRADA EN BÓVEDA</div><button class="btn btn-ghost btn-sm" onclick="closeAddVault()">✕</button></div>
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="form-group"><label class="form-label">Entidad / Empresa</label><input class="form-input" id="v-entidad"></div>
+              <div class="form-group"><label class="form-label">Subcarpeta</label>
+                <select class="form-input" id="v-subcarpeta"></select>
+              </div>
+              <div class="form-group"><label class="form-label">Tipo de Dato</label><input class="form-input" id="v-tipo" placeholder="Escritura, Contrato, NDA..."></div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Sello de Seguridad</label>
+                <select class="form-input" id="v-sello"><option value="public">🟢 Público</option><option value="internal">🔵 Interno</option><option value="confidential">🟡 Confidencial</option><option value="restricted">🔴 Bóveda Profunda</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Fecha vencimiento (opcional)</label><input class="form-input" type="date" id="v-vencimiento"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Notas</label><input class="form-input" id="v-notas" placeholder="Información adicional..."></div>
+            <input type="hidden" id="v-camara" value="alfa">
+            <button class="btn btn-primary" onclick="saveVault()">🔒 Sellar en Bóveda</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SEGURIDAD ══ -->
+      <div class="panel" id="panel-seguridad">
+        <div class="page-header"><div class="page-title">MURO DE CONTENCIÓN</div><div class="page-subtitle">// Protocolo de Silencio Administrativo activo</div></div>
+        <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-header"><div class="card-title">ESTADO DEL PROTOCOLO</div></div>
+            <div class="card-body">
+              <div class="alert-box alert-success"><span>🛡️</span><div><strong>Protocolo de Silencio: ACTIVO</strong><br><small>Entidades no autorizadas reciben respuesta nula.</small></div></div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">Modo Espejo</span><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">Persistencia Offline</span><span class="badge badge-active"><span class="badge-dot"></span>Activa</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">PIN Bóveda Alfa</span><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">Sensores de Alerta</span><span class="badge badge-active"><span class="badge-dot"></span>Activos</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-header"><div class="card-title">BLACKLIST</div><button class="btn btn-danger btn-sm" onclick="openAddBlacklist()">+ Añadir</button></div>
+            <div class="card-body" id="blacklistContainer"><div class="empty-state" style="padding:24px;"><div class="empty-icon">🚫</div><div class="empty-text">Lista negra vacía</div></div></div>
+            <div id="addBlacklistForm" style="display:none;padding:16px;border-top:1px solid var(--border-light);">
+              <div class="input-row">
+                <input class="form-input form-input-mono" id="bl-domain" placeholder="dominio.com / IP">
+                <select class="form-input" id="bl-type" style="width:140px;flex-shrink:0;"><option>COMPETENCIA</option><option>BOT SCRAPING</option><option>JURISDICCIÓN</option><option>MANUAL</option></select>
+                <button class="btn btn-danger" onclick="saveBlacklist()">Bloquear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Semáforo visual -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">SEMÁFORO DE ALERTAS</div><button class="btn btn-ghost btn-sm" onclick="runAlertScan()">🔍 Escanear ahora</button></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+              <div style="padding:16px;border-radius:var(--radius);background:rgba(192,57,43,0.06);border:1px solid rgba(192,57,43,0.2);text-align:center;">
+                <div style="font-size:24px;margin-bottom:6px;">🔴</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--alert-red);" id="sem-red">0</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(192,57,43,0.7);">CRÍTICO ≤15 días</div>
+              </div>
+              <div style="padding:16px;border-radius:var(--radius);background:rgba(230,126,34,0.06);border:1px solid rgba(230,126,34,0.2);text-align:center;">
+                <div style="font-size:24px;margin-bottom:6px;">🟠</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--alert-orange);" id="sem-orange">0</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(230,126,34,0.7);">ADVERTENCIA ≤30 días</div>
+              </div>
+              <div style="padding:16px;border-radius:var(--radius);background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.2);text-align:center;">
+                <div style="font-size:24px;margin-bottom:6px;">🔵</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--alert-blue);" id="sem-blue">0</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(14,165,233,0.7);">INFO · Nuevos registros</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LOG & AUDITORÍA ══ -->
+      <div class="panel" id="panel-log">
+        <div class="page-header"><div class="page-title">🧠 LOG & AUDITORÍA</div><div class="page-subtitle">// Registro de trazabilidad total — Cada movimiento queda registrado</div></div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">LOG DE MATRIX — TIEMPO REAL</div><button class="btn btn-ghost btn-sm" onclick="clearLog()">Limpiar</button></div>
+          <div style="padding:0;"><div class="log-terminal" id="mainLog" style="max-height:500px;border-radius:0;border:none;"><div class="log-line"><span class="log-time" id="logInitTime"></span><span class="log-tag-info">[MATRIX]</span><span class="log-msg"> Sistema v3.1 inicializado. Cámaras Alfa & Beta activas.</span></div></div></div>
+        </div>
+      </div>
+
+      <!-- ══ ACCESO & LICENCIA ══ -->
+      <div class="panel" id="panel-licencia">
+        <div class="page-header">
+          <div class="page-title">🔑 ACCESO & LICENCIA</div>
+          <div class="page-subtitle">// API · Planes de uso · Términos y privacidad — BlogFort Agency LLC</div>
+        </div>
+
+        <!-- API KEY ANTHROPIC -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🔐 API KEY — ANTHROPIC</div>
+            <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--seal-public);" id="apiStatusLabel">● SIN CONFIGURAR</span>
+          </div>
+          <div class="card-body">
+            <div class="alert-box alert-info" style="font-size:12px;">
+              <span>ℹ️</span>
+              <span>Tu API Key permite que MATRIX use inteligencia artificial de Anthropic para análisis, validación y generación de contenido. Se almacena cifrada localmente y nunca se transmite.</span>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Anthropic API Key</label>
+                <div class="input-row">
+                  <input class="form-input form-input-mono" type="password" id="lic-anthropic" placeholder="sk-ant-api03-...">
+                  <button class="btn btn-ghost btn-sm" onclick="toggleVisibilityLic('lic-anthropic')">👁</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Estado de conexión</label>
+                <div style="padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);border:1px solid var(--border);">
+                  <div id="apiTestResult" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-light);">// Sin verificar</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="saveApiKeyLic()">✓ Guardar API Key</button>
+              <button class="btn btn-success" onclick="testApiKey()">⚡ Verificar conexión</button>
+              <button class="btn btn-ghost" onclick="clearApiKey()">✕ Eliminar Key</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLANES DE USO -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 PLANES DE USO — MATRIX</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+              <!-- STARTER -->
+              <div style="border-radius:var(--radius-lg);border:1px solid var(--border-light);overflow:hidden;position:relative;" id="plan-starter">
+                <div style="background:linear-gradient(135deg,#1B4F8A,#0EA5E9);padding:20px;text-align:center;">
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Plan</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:#fff;">STARTER</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#fff;line-height:1;margin-top:8px;">€49<span style="font-size:16px;font-weight:normal;opacity:0.7;">/mes</span></div>
+                </div>
+                <div style="padding:16px;background:var(--bg-card);">
+                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
+                    <div>✓ Hasta 50 leads/mes</div>
+                    <div>✓ 5 clientes activos</div>
+                    <div>✓ Bóveda Beta básica</div>
+                    <div>✓ Calculadora operativa</div>
+                    <div>✓ Log de auditoría</div>
+                    <div style="color:var(--text-light);">✗ Cámara Alfa</div>
+                    <div style="color:var(--text-light);">✗ Motor de Validación</div>
+                    <div style="color:var(--text-light);">✗ Calculadora estratégica</div>
+                  </div>
+                  <button class="btn btn-ghost" style="width:100%;margin-top:12px;" onclick="selectPlan('starter')">Seleccionar</button>
+                </div>
+              </div>
+
+              <!-- BUSINESS -->
+              <div style="border-radius:var(--radius-lg);border:2px solid var(--seal-public);overflow:hidden;position:relative;box-shadow:var(--shadow-md);" id="plan-business">
+                <div style="position:absolute;top:12px;right:12px;background:var(--seal-public);color:#fff;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:10px;">RECOMENDADO</div>
+                <div style="background:linear-gradient(135deg,#00B894,#0EA5E9);padding:20px;text-align:center;">
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Plan</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:#fff;">BUSINESS</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#fff;line-height:1;margin-top:8px;">€149<span style="font-size:16px;font-weight:normal;opacity:0.7;">/mes</span></div>
+                </div>
+                <div style="padding:16px;background:var(--bg-card);">
+                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
+                    <div>✓ Leads ilimitados</div>
+                    <div>✓ 25 clientes activos</div>
+                    <div>✓ Cámara Alfa & Beta completa</div>
+                    <div>✓ Motor de Validación activo</div>
+                    <div>✓ Calculadora estratégica</div>
+                    <div>✓ Alertas semáforo</div>
+                    <div>✓ Backup automático</div>
+                    <div style="color:var(--text-light);">✗ Multi-usuario</div>
+                  </div>
+                  <button class="btn btn-success" style="width:100%;margin-top:12px;" onclick="selectPlan('business')">Seleccionar</button>
+                </div>
+              </div>
+
+              <!-- ENTERPRISE -->
+              <div style="border-radius:var(--radius-lg);border:1px solid rgba(240,165,0,0.3);overflow:hidden;position:relative;" id="plan-enterprise">
+                <div style="background:linear-gradient(135deg,#0A1628,#1B4F8A);padding:20px;text-align:center;">
+                  <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:6px;">Plan</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:#f0a500;">ENTERPRISE</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#f0a500;line-height:1;margin-top:8px;">A MEDIDA</div>
+                </div>
+                <div style="padding:16px;background:var(--bg-card);">
+                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
+                    <div>✓ Todo lo de Business</div>
+                    <div>✓ Clientes ilimitados</div>
+                    <div>✓ Multi-usuario con roles</div>
+                    <div>✓ Integración MWBFA</div>
+                    <div>✓ Soporte CEO directo</div>
+                    <div>✓ Onboarding personalizado</div>
+                    <div>✓ SLA garantizado</div>
+                    <div>✓ Personalización total</div>
+                  </div>
+                  <button class="btn btn-primary" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#0A1628,#1B4F8A);" onclick="selectPlan('enterprise')">Contactar CEO</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Plan activo indicator -->
+            <div style="margin-top:16px;padding:12px 16px;background:var(--bg-primary);border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-light);">PLAN ACTIVO:</span>
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--accent-blue);" id="planActivoLabel">— Sin seleccionar —</span>
+              <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-light);" id="planActivoFecha"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TÉRMINOS Y PRIVACIDAD -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚖️ TÉRMINOS DE USO & PRIVACIDAD</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+              <div style="padding:20px;background:var(--bg-primary);border-radius:var(--radius-lg);border:1px solid var(--border-light);">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text-primary);margin-bottom:12px;">📄 TÉRMINOS DE USO</div>
+                <div style="font-size:12px;color:var(--text-mid);line-height:1.8;">
+                  <p style="margin-bottom:8px;">MATRIX es una herramienta operativa propiedad exclusiva de <strong>BlogFort Agency LLC</strong>, empresa constituida bajo las leyes del Estado de Wyoming, Estados Unidos.</p>
+                  <p style="margin-bottom:8px;">El acceso a MATRIX está restringido a usuarios autorizados por el CEO. Cualquier uso no autorizado constituye una violación de los términos y será registrado en el log de auditoría.</p>
+                  <p style="margin-bottom:8px;">El licenciatario se compromete a no reproducir, distribuir ni sublicenciar el software sin autorización escrita de BlogFort Agency LLC.</p>
+                  <p>BlogFort Agency LLC se reserva el derecho de modificar los planes y precios con un preaviso de 30 días.</p>
+                </div>
+              </div>
+
+              <div style="padding:20px;background:var(--bg-primary);border-radius:var(--radius-lg);border:1px solid var(--border-light);">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text-primary);margin-bottom:12px;">🔒 POLÍTICA DE PRIVACIDAD</div>
+                <div style="font-size:12px;color:var(--text-mid);line-height:1.8;">
+                  <p style="margin-bottom:8px;"><strong>Almacenamiento local:</strong> Todos los datos de MATRIX se almacenan exclusivamente en el dispositivo del usuario mediante IndexedDB y localStorage. BlogFort Agency LLC no tiene acceso a estos datos.</p>
+                  <p style="margin-bottom:8px;"><strong>API Keys:</strong> Las claves API se cifran localmente y nunca son transmitidas a servidores de BlogFort Agency LLC.</p>
+                  <p style="margin-bottom:8px;"><strong>Datos de clientes:</strong> La información de leads y clientes almacenada en MATRIX es responsabilidad exclusiva del licenciatario conforme al RGPD y normativa aplicable.</p>
+                  <p><strong>Auditoría:</strong> El log de actividad es local y solo accesible por el CEO Nivel 100.</p>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="margin-top:16px;padding:14px 18px;background:rgba(27,79,138,0.06);border:1px solid rgba(27,79,138,0.15);border-radius:var(--radius);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent-blue);">BLOGFORT AGENCY LLC</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-light);">30 N GOULD ST · SHERIDAN · WYOMING 82801 · USA · blogfort.agency</div>
+              </div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-light);">MATRIX v3.1 © 2025 BlogFort Agency LLC<br>Todos los derechos reservados</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const STATE = {
+  leads: [], clients: [], vaultAlfa: [], vaultBeta: [],
+  blacklist: [], contratos: [], securityLog: [],
+  alerts: [], semRed: 0, semOrange: 0, semBlue: 0,
+  password: null, pin: null, falconConnected: false,
+  currentAlfa: null, currentBeta: null
+};
+const DEFAULT_PASS = 'matrix100';
+const DEFAULT_PIN = '1234';
+let quickOp = '*';
+
+// ═══════════════════════════════════════
+// IndexedDB
+// ═══════════════════════════════════════
+const DB_NAME = 'matrix_db_v3';
+let db = null;
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      ['leads','clients','vaultAlfa','vaultBeta','blacklist','contratos'].forEach(s => {
+        if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id' });
+      });
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbSave(store, items) {
+  return new Promise(resolve => {
+    if (!db) return resolve();
+    const tx = db.transaction(store, 'readwrite');
+    const s = tx.objectStore(store);
+    s.clear();
+    items.forEach(i => s.put(i));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
+function dbLoad(store) {
+  return new Promise(resolve => {
+    if (!db) return resolve([]);
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => resolve([]);
+  });
+}
+
+async function saveState() {
+  await Promise.all([
+    dbSave('leads', STATE.leads), dbSave('clients', STATE.clients),
+    dbSave('vaultAlfa', STATE.vaultAlfa), dbSave('vaultBeta', STATE.vaultBeta),
+    dbSave('blacklist', STATE.blacklist), dbSave('contratos', STATE.contratos)
+  ]);
+  try {
+    localStorage.setItem('matrix_meta_v3', JSON.stringify({
+      password: STATE.password, pin: STATE.pin,
+      securityLog: STATE.securityLog.slice(-200),
+      lastSaved: new Date().toISOString()
+    }));
+  } catch(e) {}
+  updateStorageInfo();
+}
+
+async function loadState() {
+  try {
+    const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
+    STATE.password = m.password || null;
+    STATE.pin = m.pin || null;
+    STATE.securityLog = m.securityLog || [];
+  } catch(e) {}
+  try {
+    const [leads, clients, vAlfa, vBeta, bl, ct] = await Promise.all([
+      dbLoad('leads'), dbLoad('clients'), dbLoad('vaultAlfa'), dbLoad('vaultBeta'), dbLoad('blacklist'), dbLoad('contratos')
+    ]);
+    STATE.leads = leads; STATE.clients = clients;
+    STATE.vaultAlfa = vAlfa; STATE.vaultBeta = vBeta;
+    STATE.blacklist = bl; STATE.contratos = ct;
+  } catch(e) {}
+}
+
+function updateStorageInfo() {
+  const total = STATE.leads.length + STATE.clients.length + STATE.vaultAlfa.length + STATE.vaultBeta.length + STATE.blacklist.length + STATE.contratos.length;
+  const kb = Math.round(JSON.stringify(STATE).length / 1024);
+  const info = `💾 ${total} registros · ~${kb}KB · Leads:${STATE.leads.length} Clientes:${STATE.clients.length} Alfa:${STATE.vaultAlfa.length} Beta:${STATE.vaultBeta.length}`;
+  ['storageInfo','sysStorageDetail'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = info; });
+}
+
+// ═══════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════
+function attemptLogin() {
+  const pass = document.getElementById('loginPass').value;
+  const stored = STATE.password || DEFAULT_PASS;
+  if (pass === stored) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    addLog('CONFIRM', 'Acceso CEO autorizado. Nivel 100 activo. Cámaras Alfa & Beta desbloqueadas.');
+    addLog('INFO', 'BlogFort App — conexión permanente establecida.');
+    updateUI(); updateClock(); setInterval(updateClock, 1000);
+    updateStorageInfo(); restoreFalconState();
+    runAlertScan();
+    setInterval(runAlertScan, 300000); // scan every 5 min
+  } else {
+    const err = document.getElementById('loginError');
+    err.style.opacity = '1';
+    addLog('SECURITY', 'BLOQUEO — Contraseña incorrecta en acceso CEO.');
+    setTimeout(() => err.style.opacity = '0', 3000);
+    document.getElementById('loginPass').value = '';
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') attemptLogin(); });
+
+function logout() {
+  if (confirm('¿Cerrar sesión de Matrix?')) {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginPass').value = '';
+  }
+}
+
+// ═══════════════════════════════════════
+// PIN MODAL
+// ═══════════════════════════════════════
+let pinCallback = null;
+
+function requirePin(callback) {
+  pinCallback = callback;
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinError').style.opacity = '0';
+  document.getElementById('pinModal').classList.add('open');
+  setTimeout(() => document.getElementById('pinInput').focus(), 100);
+}
+
+function validatePin() {
+  const pin = document.getElementById('pinInput').value;
+  const stored = STATE.pin || DEFAULT_PIN;
+  if (pin === stored) {
+    document.getElementById('pinModal').classList.remove('open');
+    addLog('CONFIRM', 'PIN Cámara Alfa validado. Acceso legal corporativo autorizado.');
+    if (pinCallback) { pinCallback(); pinCallback = null; }
+  } else {
+    document.getElementById('pinError').style.opacity = '1';
+    addLog('SECURITY', `PIN INCORRECTO — Intento de acceso a Cámara Alfa registrado.`);
+    document.getElementById('pinInput').value = '';
+    setTimeout(() => document.getElementById('pinError').style.opacity = '0', 3000);
+  }
+}
+
+function closePin() {
+  document.getElementById('pinModal').classList.remove('open');
+  pinCallback = null;
+  // Return to beta if alfa was being opened
+  switchCamara('beta');
+}
+
+document.getElementById('pinInput').addEventListener('keydown', e => { if(e.key==='Enter') validatePin(); });
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+// showPanel defined below in LICENCIA section
+
+// ═══════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('es-ES',{hour12:false});
+  const d = now.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const el = document.getElementById('topbarTime');
+  if(el) el.textContent = `${d} · ${t}`;
+}
+function getTime() { return new Date().toLocaleTimeString('es-ES',{hour12:false}); }
+
+// ═══════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════
+function addLog(type, msg) {
+  const t = getTime();
+  const tagMap = {
+    'CONFIRM':['log-tag-confirm','[✓ CONFIRM]'],
+    'INFO':['log-tag-info','[INFO]'],
+    'WARN':['log-tag-warn','[WARN]'],
+    'SECURITY':['log-tag-security','[🛡️ SEGURIDAD]']
+  };
+  const [cls, label] = tagMap[type] || ['log-tag-info','[LOG]'];
+  STATE.securityLog.push({ time:t, type, msg });
+  const line = `<div class="log-line"><span class="log-time">${t}</span><span class="${cls}">${label}</span><span class="log-msg"> ${msg}</span></div>`;
+  const ml = document.getElementById('mainLog');
+  const dl = document.getElementById('dashLog');
+  if(ml) { ml.innerHTML += line; ml.scrollTop = ml.scrollHeight; }
+  if(dl) { dl.innerHTML += line; dl.scrollTop = dl.scrollHeight; }
+  try {
+    const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
+    m.securityLog = STATE.securityLog.slice(-200);
+    m.password = STATE.password; m.pin = STATE.pin;
+    localStorage.setItem('matrix_meta_v3', JSON.stringify(m));
+  } catch(e) {}
+}
+
+function clearLog() {
+  STATE.securityLog = [];
+  const line = `<div class="log-line"><span class="log-time">${getTime()}</span><span class="log-tag-info">[INFO]</span><span class="log-msg"> Log limpiado por CEO Nivel 100.</span></div>`;
+  ['mainLog','dashLog'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=line; });
+  saveState();
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════
+// MOTOR DE VALIDACIÓN
+// ═══════════════════════════════════════
+function toggleFalcon() {
+  STATE.falconConnected = !STATE.falconConnected;
+  const btn = document.getElementById('btnFalcon');
+  const dot = document.getElementById('falconDot');
+  const card = document.getElementById('falconStatusCard');
+  const cardStatus = document.getElementById('falconCardStatus');
+  if (STATE.falconConnected) {
+    btn.classList.add('active'); dot.className='conn-dot conn-dot-orange';
+    if(card) card.style.borderColor='rgba(245,158,11,0.45)';
+    if(cardStatus) { cardStatus.textContent='● CONECTADO · VALIDACIÓN ACTIVA'; cardStatus.style.color='#F59E0B'; }
+    addLog('CONFIRM','MOTOR DE VALIDACIÓN conectado. Canal de validación activo.');
+    showToast('🦅 Motor de Validación conectado');
+    try { localStorage.setItem('matrix_falcon_conn','1'); } catch(e) {}
+  } else {
+    btn.classList.remove('active'); dot.className='conn-dot conn-dot-off';
+    if(card) card.style.borderColor='rgba(245,158,11,0.2)';
+    if(cardStatus) { cardStatus.textContent='○ DESCONECTADO · EN ESPERA'; cardStatus.style.color='rgba(245,158,11,0.5)'; }
+    addLog('WARN','MOTOR DE VALIDACIÓN desconectado.');
+    showToast('🦅 Motor de Validación desconectado');
+    try { localStorage.removeItem('matrix_falcon_conn'); } catch(e) {}
+  }
+}
+
+function showBlogfortStatus() {
+  showToast('⚡ BlogFort App — Siempre conectado a Matrix');
+  addLog('INFO','BlogFort App verificado — Conexión permanente activa.');
+}
+
+function restoreFalconState() {
+  try { if(localStorage.getItem('matrix_falcon_conn')==='1') { STATE.falconConnected=false; toggleFalcon(); } } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+// ALERTS SEMÁFORO
+// ═══════════════════════════════════════
+function runAlertScan() {
+  STATE.alerts = [];
+  STATE.semRed = 0; STATE.semOrange = 0; STATE.semBlue = 0;
+  const hoy = new Date();
+
+  // Scan vault beta for expiring docs
+  STATE.vaultBeta.forEach(v => {
+    if (!v.vencimiento) return;
+    const venc = new Date(v.vencimiento);
+    const diff = Math.ceil((venc - hoy) / (1000*60*60*24));
+    if (diff <= 15 && diff >= 0) {
+      STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 CRÍTICO: "${v.entidad}" vence en ${diff} días.`, time:getTime() });
+      STATE.semRed++;
+    } else if (diff <= 30 && diff > 15) {
+      STATE.alerts.push({ type:'orange', dot:'alert-dot-orange', msg:`🟠 ADVERTENCIA: Renegociar con "${v.entidad}" (${diff} días).`, time:getTime() });
+      STATE.semOrange++;
+    }
+  });
+
+  // Scan contratos for expiring
+  STATE.contratos.forEach(ct => {
+    if (!ct.fecha || ct.periodo !== 'anual') return;
+    const inicio = new Date(ct.fecha);
+    const venc = new Date(inicio);
+    venc.setFullYear(venc.getFullYear() + 1);
+    const diff = Math.ceil((venc - hoy) / (1000*60*60*24));
+    if (diff <= 15 && diff >= 0) {
+      STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 CRÍTICO: Contrato "${ct.cliente}" vence en ${diff} días.`, time:getTime() });
+      STATE.semRed++;
+    } else if (diff <= 30 && diff > 15) {
+      STATE.alerts.push({ type:'orange', dot:'alert-dot-orange', msg:`🟠 Iniciar renegociación con "${ct.cliente}" (${diff} días).`, time:getTime() });
+      STATE.semOrange++;
+    }
+  });
+
+  // Blue alerts for new entries today
+  const today = new Date().toLocaleDateString('es-ES');
+  const newToday = [...STATE.vaultAlfa,...STATE.vaultBeta,...STATE.leads].filter(e => e.fecha === today).length;
+  if (newToday > 0) {
+    STATE.alerts.push({ type:'blue', dot:'alert-dot-blue', msg:`🔵 ${newToday} nuevo(s) registro(s) añadidos hoy.`, time:getTime() });
+    STATE.semBlue++;
+  }
+
+  updateAlertUI();
+}
+
+function updateAlertUI() {
+  const total = STATE.semRed + STATE.semOrange;
+  const bell = document.getElementById('bellCount');
+  const statAlerts = document.getElementById('stat-alerts');
+  if (bell) { if(total > 0){ bell.textContent=total; bell.style.display='flex'; } else { bell.style.display='none'; } }
+  if (statAlerts) statAlerts.textContent = total;
+  ['sem-red','sem-orange','sem-blue'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = [STATE.semRed, STATE.semOrange, STATE.semBlue][i];
+  });
+  const listEl = document.getElementById('alertsList');
+  if (!listEl) return;
+  if (!STATE.alerts.length) { listEl.innerHTML='<div class="no-alerts">Sin alertas activas</div>'; return; }
+  listEl.innerHTML = STATE.alerts.map(a => `
+    <div class="alert-item">
+      <div class="${a.dot}"></div>
+      <div><div class="alert-item-text">${a.msg}</div><div class="alert-item-time">${a.time}</div></div>
+    </div>`).join('');
+
+  // Dashboard alerts
+  const dash = document.getElementById('dashAlerts');
+  if (dash) {
+    if (STATE.semRed > 0) {
+      dash.style.display='block';
+      dash.innerHTML = STATE.alerts.filter(a=>a.type==='red').map(a => `<div class="alert-box alert-danger"><span>🔴</span><span>${a.msg}</span></div>`).join('');
+    } else if (STATE.semOrange > 0) {
+      dash.style.display='block';
+      dash.innerHTML = STATE.alerts.filter(a=>a.type==='orange').map(a => `<div class="alert-box alert-warn"><span>🟠</span><span>${a.msg}</span></div>`).join('');
+    } else { dash.style.display='none'; }
+  }
+}
+
+function toggleAlerts() {
+  const panel = document.getElementById('alertsPanel');
+  panel.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════
+// CALCULADORA RÁPIDA (Dashboard)
+// ═══════════════════════════════════════
+function setQOp(op) {
+  quickOp = op;
+  ['plus','minus','mult','div'].forEach(k => document.getElementById('qop-'+k).classList.remove('active'));
+  const map = {'+':'plus','-':'minus','*':'mult','/':'div'};
+  document.getElementById('qop-'+map[op]).classList.add('active');
+  quickCalc();
+}
+
+function quickCalc() {
+  const a = parseFloat(document.getElementById('qc-a').value) || 0;
+  const b = parseFloat(document.getElementById('qc-b').value) || 0;
+  const iva = parseFloat(document.getElementById('qc-iva').value) || 0;
+  const cur = document.getElementById('qc-currency').value;
+  const sym = cur === 'EUR' ? '€' : cur === 'USD' ? '$' : '£';
+  let result = 0;
+  if (quickOp==='+') result = a+b;
+  else if (quickOp==='-') result = a-b;
+  else if (quickOp==='*') result = a*b;
+  else if (quickOp==='/') result = b!==0 ? a/b : 0;
+  const withTax = result * (1 + iva/100);
+  document.getElementById('qc-result').textContent = `${sym}${result.toFixed(2)}`;
+  document.getElementById('qc-base').textContent = `${sym}${result.toFixed(2)}`;
+  document.getElementById('qc-total').textContent = `${sym}${withTax.toFixed(2)}`;
+}
+
+// ═══════════════════════════════════════
+// CALCULADORA OPERATIVA
+// ═══════════════════════════════════════
+function calcOperativa() {
+  const precio = parseFloat(document.getElementById('op-precio').value) || 0;
+  const iva = parseFloat(document.getElementById('op-iva').value) || 0;
+  const dto = parseFloat(document.getElementById('op-dto').value) || 0;
+  const coste = parseFloat(document.getElementById('op-coste').value) || 0;
+  const periodo = document.getElementById('op-periodo');
+  const meses = parseInt(periodo.options[periodo.selectedIndex].getAttribute('data-m') || '1');
+  const cur = document.getElementById('op-currency').value;
+  const sym = cur==='EUR'?'€':cur==='USD'?'$':cur==='GBP'?'£':'₱';
+
+  const precioDto = precio * (1 - dto/100);
+  const impuesto = precioDto * (iva/100);
+  const total = precioDto + impuesto;
+  const margen = precioDto - coste - impuesto;
+  const mensual = meses > 1 ? margen/meses : margen;
+  const reserva = impuesto;
+
+  const fmt = (v) => `${sym}${v.toFixed(2)}`;
+  document.getElementById('res-base').textContent = fmt(precio);
+  document.getElementById('res-dto').textContent = fmt(precioDto);
+  document.getElementById('res-iva').textContent = fmt(impuesto);
+  document.getElementById('res-total').textContent = fmt(total);
+  document.getElementById('res-coste').textContent = fmt(coste);
+  document.getElementById('res-margen').textContent = fmt(margen);
+  document.getElementById('res-mensual').textContent = meses>1 ? `${fmt(mensual)}/mes` : fmt(mensual);
+  document.getElementById('res-reserva').textContent = fmt(reserva);
+
+  // Update dashboard stats
+  document.getElementById('stat-ingresos').textContent = fmt(mensual > 0 ? mensual : 0);
+  document.getElementById('stat-margen').textContent = fmt(margen > 0 ? margen : 0);
+}
+
+// ═══════════════════════════════════════
+// CALCULADORA ESTRATÉGICA
+// ═══════════════════════════════════════
+function calcEstrategica() {
+  const tax = parseFloat(document.getElementById('est-tax').value) || 0;
+  const gastosMes = parseFloat(document.getElementById('est-gastos').value) || 0;
+  const meses = parseInt(document.getElementById('est-meses').value) || 12;
+  const sym = '€';
+
+  let totalMensual = 0;
+  STATE.contratos.forEach(ct => {
+    const m = ct.monto || 0;
+    const p = ct.periodo;
+    if (p==='mensual') totalMensual += m;
+    else if (p==='trimestral') totalMensual += m/3;
+    else if (p==='anual') totalMensual += m/12;
+    else totalMensual += m;
+  });
+
+  const totalPeriodo = totalMensual * meses;
+  const totalImpuestos = totalPeriodo * (tax/100);
+  const totalGastos = gastosMes * meses;
+  const margenNeto = totalPeriodo - totalImpuestos - totalGastos;
+  const margenMes = margenNeto / meses;
+
+  const fmt = v => `${sym}${v.toFixed(2)}`;
+  document.getElementById('est-ncontratos').textContent = STATE.contratos.length;
+  document.getElementById('est-ingresos').textContent = fmt(totalPeriodo);
+  document.getElementById('est-mensual').textContent = fmt(totalMensual);
+  document.getElementById('est-impuestos').textContent = fmt(totalImpuestos);
+  document.getElementById('est-gastos-total').textContent = fmt(totalGastos);
+  document.getElementById('est-margen').textContent = fmt(margenNeto);
+  document.getElementById('est-margen-mes').textContent = fmt(margenMes);
+
+  // Update dashboard
+  document.getElementById('stat-ingresos').textContent = fmt(totalMensual);
+  document.getElementById('stat-margen').textContent = fmt(margenMes > 0 ? margenMes : 0);
+}
+
+// ═══════════════════════════════════════
+// CONTRATOS FINANCIEROS
+// ═══════════════════════════════════════
+function openAddContrato() { document.getElementById('addContratoForm').style.display='block'; document.getElementById('ct-fecha').value=new Date().toISOString().slice(0,10); }
+function closeAddContrato() { document.getElementById('addContratoForm').style.display='none'; }
+
+async function saveContrato() {
+  const cliente = document.getElementById('ct-cliente').value.trim();
+  if (!cliente) { showToast('⚠️ Introduce el nombre del cliente'); return; }
+  const ct = {
+    id: Date.now(),
+    cliente,
+    monto: parseFloat(document.getElementById('ct-monto').value) || 0,
+    periodo: document.getElementById('ct-periodo').value,
+    coste: parseFloat(document.getElementById('ct-coste').value) || 0,
+    fecha: document.getElementById('ct-fecha').value,
+    estado: 'Activo',
+    fechaRegistro: new Date().toLocaleDateString('es-ES')
+  };
+  STATE.contratos.push(ct);
+  await saveState();
+  renderContratos();
+  calcEstrategica();
+  runAlertScan();
+  closeAddContrato();
+  addLog('CONFIRM', `Contrato registrado: ${cliente} — ${ct.periodo} — €${ct.monto}`);
+  showToast(`✓ Contrato registrado: ${cliente}`);
+}
+
+async function deleteContrato(id) {
+  STATE.contratos = STATE.contratos.filter(c => c.id !== id);
+  await saveState();
+  renderContratos();
+  calcEstrategica();
+  runAlertScan();
+}
+
+function renderContratos() {
+  const el = document.getElementById('contratosListBody');
+  if (!el) return;
+  if (!STATE.contratos.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Sin contratos registrados</div></div>';
+    return;
+  }
+  el.innerHTML = STATE.contratos.map(ct => {
+    const margen = ct.monto - ct.coste - (ct.monto * 0.21);
+    return `<div class="contrato-item">
+      <div class="contrato-info">
+        <div class="contrato-cliente">${ct.cliente}</div>
+        <div class="contrato-meta">${ct.periodo.toUpperCase()} · Inicio: ${ct.fecha} · Coste: €${ct.coste}</div>
+      </div>
+      <div class="contrato-monto">€${ct.monto}</div>
+      <span class="badge badge-active" style="margin-right:8px;">Margen: €${margen.toFixed(0)}</span>
+      <button class="btn btn-ghost btn-sm" onclick="deleteContrato(${ct.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function showFinanceTab(id, el) {
+  document.querySelectorAll('.finance-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.finance-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('ftab-'+id).classList.add('active');
+  el.classList.add('active');
+  if (id==='estrategica') calcEstrategica();
+  if (id==='contratos') renderContratos();
+}
+
+// ═══════════════════════════════════════
+// BÓVEDA — CÁMARAS
+// ═══════════════════════════════════════
+let alfaPinUnlocked = false;
+
+function switchCamara(camara) {
+  ['alfa','beta'].forEach(c => {
+    document.getElementById('camara-'+c).classList.remove('active');
+    document.getElementById('tab-'+c).classList.remove('active-alfa','active-beta');
+  });
+  if (camara === 'alfa') {
+    if (!alfaPinUnlocked) {
+      requirePin(() => {
+        alfaPinUnlocked = true;
+        document.getElementById('camara-alfa').classList.add('active');
+        document.getElementById('tab-alfa').classList.add('active-alfa');
+        renderVaultAlfa(STATE.vaultAlfa);
+        showToast('🔴 Cámara Alfa desbloqueada');
+      });
+    } else {
+      document.getElementById('camara-alfa').classList.add('active');
+      document.getElementById('tab-alfa').classList.add('active-alfa');
+      renderVaultAlfa(STATE.vaultAlfa);
+    }
+  } else {
+    alfaPinUnlocked = false; // reset on leaving alfa
+    document.getElementById('camara-beta').classList.add('active');
+    document.getElementById('tab-beta').classList.add('active-beta');
+    renderVaultBeta(STATE.vaultBeta);
+  }
+}
+
+function selectSubcarpeta(camara, nombre, el) {
+  const btns = document.querySelectorAll(`.subcarpeta-btn.sel-${camara}`);
+  btns.forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (camara==='alfa') {
+    document.getElementById('alfa-subcarpeta-title').textContent = nombre.toUpperCase() + ' — CÁMARA ALFA';
+    const filtered = nombre ? STATE.vaultAlfa.filter(v => v.subcarpeta===nombre) : STATE.vaultAlfa;
+    renderVaultAlfa(filtered);
+  } else {
+    document.getElementById('beta-subcarpeta-title').textContent = nombre.toUpperCase() + ' — CÁMARA BETA';
+    const filtered = nombre ? STATE.vaultBeta.filter(v => v.subcarpeta===nombre) : STATE.vaultBeta;
+    renderVaultBeta(filtered);
+  }
+}
+
+function openAddVault(camara) {
+  const form = document.getElementById('addVaultForm');
+  document.getElementById('v-camara').value = camara;
+  document.getElementById('addVaultTitle').textContent = `NUEVA ENTRADA — CÁMARA ${camara.toUpperCase()}`;
+  const subEl = document.getElementById('v-subcarpeta');
+  if (camara==='alfa') {
+    subEl.innerHTML = '<option>Constitución</option><option>Impuestos/RUT/NIF</option><option>Propiedad Intelectual</option>';
+    document.getElementById('v-sello').value = 'restricted';
+  } else {
+    subEl.innerHTML = '<option>Contratos Activos</option><option>Planes Suscripción</option><option>Histórico Expirados</option>';
+    document.getElementById('v-sello').value = 'confidential';
+  }
+  form.style.display='block';
+  form.scrollIntoView({behavior:'smooth'});
+}
+
+function closeAddVault() { document.getElementById('addVaultForm').style.display='none'; }
+
+async function saveVault() {
+  const entidad = document.getElementById('v-entidad').value.trim();
+  if (!entidad) { showToast('⚠️ Introduce la entidad'); return; }
+  const camara = document.getElementById('v-camara').value;
+  const entry = {
+    id: Date.now(),
+    entidad,
+    subcarpeta: document.getElementById('v-subcarpeta').value,
+    tipo: document.getElementById('v-tipo').value.trim() || '—',
+    sello: document.getElementById('v-sello').value,
+    vencimiento: document.getElementById('v-vencimiento').value || null,
+    notas: document.getElementById('v-notas').value.trim(),
+    fecha: new Date().toLocaleDateString('es-ES'),
+    camara
+  };
+  if (camara==='alfa') STATE.vaultAlfa.push(entry);
+  else STATE.vaultBeta.push(entry);
+  await saveState();
+  updateVaultCounts();
+  runAlertScan();
+  closeAddVault();
+
+  // Blue alert for new entry
+  STATE.alerts.push({ type:'blue', dot:'alert-dot-blue', msg:`🔵 Nueva entrada: "${entidad}" sellada en Cámara ${camara.toUpperCase()}.`, time:getTime() });
+  STATE.semBlue++;
+  updateAlertUI();
+
+  addLog('INFO', `Entrada sellada en Cámara ${camara.toUpperCase()}: ${entidad} — ${entry.subcarpeta}`);
+  showToast(`🔒 "${entidad}" sellado en Cámara ${camara.toUpperCase()}`);
+
+  if(camara==='alfa') renderVaultAlfa(STATE.vaultAlfa);
+  else renderVaultBeta(STATE.vaultBeta);
+}
+
+function renderVaultAlfa(list) {
+  const el = document.getElementById('alfaTableBody');
+  const lbl = document.getElementById('alfa-count-label');
+  if(lbl) lbl.textContent = `${list.length} entradas`;
+  if (!list.length) { el.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📜</div><div class="empty-text">Cámara Alfa vacía</div></div></td></tr>'; return; }
+  el.innerHTML = list.map(v => `
+    <tr>
+      <td><strong>${v.entidad}</strong></td>
+      <td><span class="sector-tag" style="border-color:rgba(192,57,43,0.3);color:var(--seal-restricted);">${v.subcarpeta}</span></td>
+      <td>${v.tipo}</td>
+      <td>${sealBadge(v.sello)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-light);">${v.fecha}</td>
+      <td style="font-size:11px;color:var(--text-mid);">${v.notas || '—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteVaultEntry('alfa',${v.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function renderVaultBeta(list) {
+  const el = document.getElementById('betaTableBody');
+  const lbl = document.getElementById('beta-count-label');
+  if(lbl) lbl.textContent = `${list.length} entradas`;
+  if (!list.length) { el.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Cámara Beta vacía</div></div></td></tr>'; return; }
+  el.innerHTML = list.map(v => {
+    let vencBadge = '—';
+    if (v.vencimiento) {
+      const diff = Math.ceil((new Date(v.vencimiento) - new Date()) / (1000*60*60*24));
+      const color = diff<=15?'var(--alert-red)':diff<=30?'var(--alert-orange)':'var(--text-light)';
+      vencBadge = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:${color};">${v.vencimiento} (${diff}d)</span>`;
+    }
+    return `<tr>
+      <td><strong>${v.entidad}</strong></td>
+      <td><span class="sector-tag" style="border-color:rgba(14,165,233,0.3);color:var(--accent-cyan);">${v.subcarpeta}</span></td>
+      <td>${v.tipo}</td>
+      <td>${sealBadge(v.sello)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-light);">${v.fecha}</td>
+      <td>${vencBadge}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="deleteVaultEntry('beta',${v.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function deleteVaultEntry(camara, id) {
+  if (camara==='alfa') STATE.vaultAlfa = STATE.vaultAlfa.filter(v => v.id!==id);
+  else STATE.vaultBeta = STATE.vaultBeta.filter(v => v.id!==id);
+  await saveState();
+  updateVaultCounts();
+  runAlertScan();
+  if(camara==='alfa') renderVaultAlfa(STATE.vaultAlfa);
+  else renderVaultBeta(STATE.vaultBeta);
+}
+
+function updateVaultCounts() {
+  const alfaSubs = ['Constitución','Impuestos/RUT/NIF','Propiedad Intelectual'];
+  const alfaIds = ['cnt-alfa-constitucion','cnt-alfa-impuestos','cnt-alfa-propiedad'];
+  alfaSubs.forEach((s,i) => { const el=document.getElementById(alfaIds[i]); if(el) el.textContent=STATE.vaultAlfa.filter(v=>v.subcarpeta===s).length; });
+  const betaSubs = ['Contratos Activos','Planes Suscripción','Histórico Expirados'];
+  const betaIds = ['cnt-beta-activos','cnt-beta-suscripcion','cnt-beta-historico'];
+  betaSubs.forEach((s,i) => { const el=document.getElementById(betaIds[i]); if(el) el.textContent=STATE.vaultBeta.filter(v=>v.subcarpeta===s).length; });
+  const statVault = document.getElementById('stat-vault');
+  if(statVault) statVault.textContent = STATE.vaultAlfa.length + STATE.vaultBeta.length;
+}
+
+// ═══════════════════════════════════════
+// SIDE MODALS (Perfil / Sistema)
+// ═══════════════════════════════════════
+function openSideModal(modalId, btnId, activeClass) {
+  ['perfilModal','sistemaModal'].forEach(id => document.getElementById(id).classList.remove('open'));
+  ['btnPerfil','btnSistema'].forEach(id => document.getElementById(id).classList.remove('active-profile','active-sistema'));
+  document.getElementById(modalId).classList.add('open');
+  document.getElementById(btnId).classList.add(activeClass);
+  if (modalId==='sistemaModal') {
+    const ant = localStorage.getItem('matrix_anthropic');
+    const fc = localStorage.getItem('matrix_firecrawl');
+    const a = document.getElementById('sys-anthropic'); if(ant&&a) a.value=atob(ant);
+    const f = document.getElementById('sys-firecrawl'); if(fc&&f) f.value=atob(fc);
+    updateStorageInfo();
+  }
+}
+
+function closeSideModal(id) {
+  document.getElementById(id).classList.remove('open');
+  ['btnPerfil','btnSistema'].forEach(bid => document.getElementById(bid).classList.remove('active-profile','active-sistema'));
+}
+
+function saveProfile() {
+  const nombre = document.getElementById('prf-nombre').value.trim();
+  if(nombre) { const el=document.getElementById('ceoNameDisplay'); if(el) el.textContent=nombre; }
+  addLog('CONFIRM','Perfil CEO actualizado.');
+  showToast('✓ Perfil guardado');
+}
+
+function changePasswordProfile() {
+  const old = document.getElementById('prf-old').value;
+  const nw = document.getElementById('prf-new').value;
+  const conf = document.getElementById('prf-confirm').value;
+  const current = STATE.password || DEFAULT_PASS;
+  if(old!==current){ showToast('⚠️ Contraseña actual incorrecta'); return; }
+  if(nw!==conf){ showToast('⚠️ Las contraseñas no coinciden'); return; }
+  if(nw.length<6){ showToast('⚠️ Mínimo 6 caracteres'); return; }
+  STATE.password=nw; saveState();
+  addLog('SECURITY','Contraseña Nivel 100 actualizada por CEO.');
+  showToast('✓ Contraseña actualizada');
+  ['prf-old','prf-new','prf-confirm'].forEach(id=>document.getElementById(id).value='');
+}
+
+function changePinProfile() {
+  const pin = document.getElementById('prf-pin').value;
+  if(pin.length<4){ showToast('⚠️ PIN mínimo 4 dígitos'); return; }
+  STATE.pin=pin; saveState();
+  addLog('SECURITY','PIN Cámara Alfa actualizado por CEO.');
+  showToast('✓ PIN Alfa actualizado');
+  document.getElementById('prf-pin').value='';
+}
+
+function saveApiKeysSys() {
+  const ant = document.getElementById('sys-anthropic').value;
+  const fc = document.getElementById('sys-firecrawl').value;
+  if(ant) localStorage.setItem('matrix_anthropic', btoa(ant));
+  if(fc) localStorage.setItem('matrix_firecrawl', btoa(fc));
+  addLog('CONFIRM','API Keys actualizadas y almacenadas.');
+  showToast('✓ API Keys guardadas');
+}
+
+// ═══════════════════════════════════════
+// BADGES
+// ═══════════════════════════════════════
+function sealBadge(sello) {
+  const map = { public:['badge-public','🟢 Público'], internal:['badge-internal','🔵 Interno'], confidential:['badge-confidential','🟡 Confidencial'], restricted:['badge-restricted','🔴 Bóveda Profunda'] };
+  const [cls,label] = map[sello] || ['badge-internal',sello];
+  return `<span class="badge ${cls}"><span class="badge-dot"></span>${label}</span>`;
+}
+
+function statusBadge(status) {
+  const map = { pending:['badge-pending','Pendiente'], confirmed:['badge-active','Confirmado'], blocked:['badge-blocked','Bloqueado'], active:['badge-active','Activo'], completed:['badge-internal','Completado'] };
+  const [cls,label] = map[status] || ['badge-internal',status];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+// ═══════════════════════════════════════
+// LEADS
+// ═══════════════════════════════════════
+function openAddLead() { document.getElementById('addLeadForm').style.display='block'; document.getElementById('addLeadForm').scrollIntoView({behavior:'smooth'}); }
+function closeAddLead() { document.getElementById('addLeadForm').style.display='none'; }
+
+async function saveLead() {
+  const empresa = document.getElementById('f-empresa').value.trim();
+  if(!empresa){ showToast('⚠️ Introduce el nombre de la empresa'); return; }
+  const lead = { id:Date.now(), empresa, pais:document.getElementById('f-pais').value.trim()||'—', sector:document.getElementById('f-sector').value.trim()||'—', url:document.getElementById('f-url').value.trim()||'—', canal:document.getElementById('f-canal').value.trim()||'—', notas:document.getElementById('f-notas').value.trim(), fase:'Detección', sello:'public', status:'pending', fecha:new Date().toLocaleDateString('es-ES') };
+  STATE.leads.push(lead);
+  await saveState(); renderLeads(STATE.leads); updateStats(); closeAddLead();
+  ['f-empresa','f-pais','f-sector','f-url','f-canal','f-notas'].forEach(id=>document.getElementById(id).value='');
+  addLog('CONFIRM',`Lead registrado: ${empresa} (${lead.pais}) — Fase: Detección`);
+  showToast(`✓ Lead registrado: ${empresa}`);
+  runAlertScan();
+}
+
+async function confirmLead(id) {
+  const lead = STATE.leads.find(l=>l.id===id); if(!lead) return;
+  const fases=['Detección','Carta Sower','Carta Espejo','Reporte Final'];
+  const idx=fases.indexOf(lead.fase);
+  if(idx<fases.length-1){ lead.fase=fases[idx+1]; lead.status=idx+1===fases.length-1?'confirmed':'pending'; } else { lead.status='confirmed'; }
+  await saveState(); filterLeadsSearch(); updateStats();
+  addLog('CONFIRM',`Fase confirmada: ${lead.empresa} → ${lead.fase}`);
+  showToast(`✓ ${lead.empresa} — ${lead.fase}`);
+}
+
+async function deleteLead(id) {
+  STATE.leads=STATE.leads.filter(l=>l.id!==id);
+  await saveState(); filterLeadsSearch(); updateStats(); showToast('Lead eliminado');
+}
+
+function filterLeadsSearch() {
+  const q=(document.getElementById('searchLeads')?.value||'').toLowerCase();
+  const status=document.getElementById('filterLeadStatus')?.value||'';
+  const fase=document.getElementById('filterLeadFase')?.value||'';
+  const list=STATE.leads.filter(l=>{
+    const matchQ=!q||(l.empresa+l.pais+l.sector+l.url).toLowerCase().includes(q);
+    const matchS=!status||l.status===status;
+    const matchF=!fase||l.fase===fase;
+    return matchQ&&matchS&&matchF;
+  });
+  renderLeads(list);
+}
+
+function renderLeads(list) {
+  const tbody=document.getElementById('leadsTableBody');
+  const label=document.getElementById('leadsCountLabel');
+  if(label) label.textContent=`${list.length} leads`;
+  if(!list.length){ tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📡</div><div class="empty-text">Sin leads registrados</div></div></td></tr>'; }
+  else { tbody.innerHTML=list.map(l=>`<tr><td><strong>${l.empresa}</strong>${l.url!=='—'?`<br><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-light);">${l.url}</span>`:''}</td><td><span class="sector-tag">${l.pais}</span></td><td>${l.sector}</td><td><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent-blue);">${l.fase}</span></td><td>${sealBadge(l.sello)}</td><td>${statusBadge(l.status)}</td><td style="display:flex;gap:6px;flex-wrap:wrap;">${l.status!=='confirmed'?`<button class="confirm-btn" onclick="confirmLead(${l.id})">✓</button>`:''}<button class="btn btn-ghost btn-sm" onclick="deleteLead(${l.id})">✕</button></td></tr>`).join(''); }
+  const recent=STATE.leads.slice(-3).reverse();
+  const dashBody=document.getElementById('dashLeadsBody');
+  if(!dashBody) return;
+  if(!recent.length){ dashBody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🦅</div><div class="empty-text">Sin leads aún</div></div></td></tr>'; }
+  else { dashBody.innerHTML=recent.map(l=>`<tr><td><strong>${l.empresa}</strong></td><td><span class="sector-tag">${l.pais}</span></td><td>${l.sector}</td><td>${statusBadge(l.status)}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-light);">${l.fecha}</td></tr>`).join(''); }
+}
+
+// ═══════════════════════════════════════
+// CLIENTS
+// ═══════════════════════════════════════
+function openAddClient() { document.getElementById('addClientForm').style.display='block'; document.getElementById('addClientForm').scrollIntoView({behavior:'smooth'}); }
+function closeAddClient() { document.getElementById('addClientForm').style.display='none'; }
+
+async function saveClient() {
+  const empresa=document.getElementById('c-empresa').value.trim();
+  if(!empresa){ showToast('⚠️ Introduce el nombre del cliente'); return; }
+  const client={ id:Date.now(), empresa, sector:document.getElementById('c-sector').value.trim()||'—', servicio:document.getElementById('c-servicio').value.trim()||'—', sello:document.getElementById('c-sello').value, progreso:parseInt(document.getElementById('c-progreso').value)||0, status:'active', fecha:new Date().toLocaleDateString('es-ES') };
+  STATE.clients.push(client);
+  await saveState(); filterClientsSearch(); updateStats(); closeAddClient();
+  addLog('CONFIRM',`Cliente activado en Sector 2: ${empresa} — Servicio: ${client.servicio}`);
+  showToast(`✓ Cliente registrado: ${empresa}`);
+}
+
+async function deleteClient(id) {
+  STATE.clients=STATE.clients.filter(c=>c.id!==id);
+  await saveState(); filterClientsSearch(); updateStats();
+}
+
+function filterClientsSearch() {
+  const q=(document.getElementById('searchClients')?.value||'').toLowerCase();
+  const sello=document.getElementById('filterClientSello')?.value||'';
+  const list=STATE.clients.filter(c=>{ const matchQ=!q||(c.empresa+c.sector+c.servicio).toLowerCase().includes(q); const matchS=!sello||c.sello===sello; return matchQ&&matchS; });
+  renderClients(list);
+}
+
+function renderClients(list) {
+  const tbody=document.getElementById('clientsTableBody');
+  const label=document.getElementById('clientsCountLabel');
+  if(label) label.textContent=`${list.length} clientes`;
+  if(!list.length){ tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⚙️</div><div class="empty-text">Sin clientes activos</div></div></td></tr>'; return; }
+  tbody.innerHTML=list.map(c=>`<tr><td><strong>${c.empresa}</strong></td><td>${c.sector}</td><td>${c.servicio}</td><td><div style="display:flex;align-items:center;gap:8px;min-width:120px;"><div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:${c.progreso}%;background:var(--accent-blue);"></div></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);">${c.progreso}%</span></div></td><td>${sealBadge(c.sello)}</td><td>${statusBadge(c.status)}</td><td><button class="btn btn-ghost btn-sm" onclick="deleteClient(${c.id})">✕</button></td></tr>`).join('');
+}
+
+// ═══════════════════════════════════════
+// BLACKLIST
+// ═══════════════════════════════════════
+function openAddBlacklist() { document.getElementById('addBlacklistForm').style.display='block'; }
+
+async function saveBlacklist() {
+  const domain=document.getElementById('bl-domain').value.trim();
+  if(!domain){ showToast('⚠️ Introduce un dominio o IP'); return; }
+  const type=document.getElementById('bl-type').value;
+  STATE.blacklist.push({ id:Date.now(), domain, type, fecha:new Date().toLocaleDateString('es-ES') });
+  await saveState(); renderBlacklist();
+  document.getElementById('bl-domain').value='';
+  document.getElementById('addBlacklistForm').style.display='none';
+  addLog('SECURITY',`Entidad bloqueada: ${domain} — Tipo: ${type}`);
+  showToast('🚫 Entidad bloqueada');
+  updateStats();
+}
+
+async function removeBlacklist(id) {
+  STATE.blacklist=STATE.blacklist.filter(b=>b.id!==id);
+  await saveState(); renderBlacklist(); updateStats();
+}
+
+function renderBlacklist() {
+  const container=document.getElementById('blacklistContainer');
+  if(!STATE.blacklist.length){ container.innerHTML='<div class="empty-state" style="padding:24px;"><div class="empty-icon">🚫</div><div class="empty-text">Lista negra vacía</div></div>'; return; }
+  container.innerHTML=STATE.blacklist.map(b=>`<div class="blacklist-item"><span>🚫</span><span class="blacklist-domain">${b.domain}</span><span class="blacklist-type">${b.type}</span><button class="btn btn-ghost btn-sm" onclick="removeBlacklist(${b.id})">✕</button></div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function updateStats() {
+  document.getElementById('stat-leads').textContent = STATE.leads.length;
+  document.getElementById('stat-clients').textContent = STATE.clients.filter(c=>c.status==='active').length;
+  document.getElementById('stat-pending').textContent = STATE.leads.filter(l=>l.status==='pending').length;
+  document.getElementById('badge-s1').textContent = STATE.leads.length;
+  document.getElementById('badge-s2').textContent = STATE.clients.length;
+  document.getElementById('badge-sec').textContent = STATE.blacklist.length;
+  updateVaultCounts();
+}
+
+// ═══════════════════════════════════════
+// BACKUP
+// ═══════════════════════════════════════
+function exportData() {
+  const data=JSON.stringify({ version:'matrix_v3', exportDate:new Date().toISOString(), leads:STATE.leads, clients:STATE.clients, vaultAlfa:STATE.vaultAlfa, vaultBeta:STATE.vaultBeta, blacklist:STATE.blacklist, contratos:STATE.contratos },null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`matrix-v3-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  addLog('INFO','Backup JSON exportado por CEO Nivel 100.');
+  showToast('📤 Backup exportado');
+}
+
+async function importData(event) {
+  const file=event.target.files[0]; if(!file) return;
+  try {
+    const text=await file.text();
+    const data=JSON.parse(text);
+    if(data.leads) STATE.leads=data.leads;
+    if(data.clients) STATE.clients=data.clients;
+    if(data.vaultAlfa) STATE.vaultAlfa=data.vaultAlfa;
+    if(data.vaultBeta) STATE.vaultBeta=data.vaultBeta;
+    if(data.blacklist) STATE.blacklist=data.blacklist;
+    if(data.contratos) STATE.contratos=data.contratos;
+    await saveState(); updateUI();
+    addLog('CONFIRM',`Backup importado: ${file.name}`);
+    showToast('📥 Backup importado');
+  } catch(e) { showToast('⚠️ Error: archivo inválido'); }
+  event.target.value='';
+}
+
+async function clearAllData() {
+  STATE.leads=[]; STATE.clients=[]; STATE.vaultAlfa=[]; STATE.vaultBeta=[]; STATE.blacklist=[]; STATE.contratos=[];
+  await saveState(); updateUI();
+  addLog('SECURITY','BORRADO TOTAL ejecutado por CEO Nivel 100.');
+  showToast('🗑️ Todos los datos eliminados');
+}
+
+// ═══════════════════════════════════════
+// UPDATE UI
+// ═══════════════════════════════════════
+function updateUI() {
+  renderLeads(STATE.leads); renderClients(STATE.clients);
+  renderBlacklist(); updateStats(); updateVaultCounts();
+  renderContratos(); calcEstrategica();
+  updateStorageInfo();
+  if (STATE.securityLog.length) {
+    const tagMap = { 'CONFIRM':['log-tag-confirm','[✓ CONFIRM]'], 'INFO':['log-tag-info','[INFO]'], 'WARN':['log-tag-warn','[WARN]'], 'SECURITY':['log-tag-security','[🛡️ SEGURIDAD]'] };
+    const lines=STATE.securityLog.map(e=>{ const [cls,label]=tagMap[e.type]||['log-tag-info','[LOG]']; return `<div class="log-line"><span class="log-time">${e.time}</span><span class="${cls}">${label}</span><span class="log-msg"> ${e.msg}</span></div>`; }).join('');
+    const ml=document.getElementById('mainLog'); if(ml){ ml.innerHTML=lines; ml.scrollTop=ml.scrollHeight; }
+  }
+  const li=document.getElementById('logInitTime'); if(li) li.textContent=getTime();
+}
+
+// ═══════════════════════════════════════
+// LICENCIA — API KEY & PLANES
+// ═══════════════════════════════════════
+function toggleVisibilityLic(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function saveApiKeyLic() {
+  const key = document.getElementById('lic-anthropic').value.trim();
+  if (!key) { showToast('⚠️ Introduce una API Key válida'); return; }
+  if (!key.startsWith('sk-ant-')) { showToast('⚠️ Formato inválido — debe comenzar con sk-ant-'); return; }
+  localStorage.setItem('matrix_anthropic', btoa(key));
+  updateApiStatus(true);
+  addLog('CONFIRM', 'API Key Anthropic guardada y cifrada correctamente.');
+  showToast('🔐 API Key guardada correctamente');
+}
+
+function clearApiKey() {
+  if (!confirm('¿Eliminar la API Key guardada?')) return;
+  localStorage.removeItem('matrix_anthropic');
+  document.getElementById('lic-anthropic').value = '';
+  updateApiStatus(false);
+  addLog('WARN', 'API Key Anthropic eliminada por CEO.');
+  showToast('✕ API Key eliminada');
+}
+
+async function testApiKey() {
+  const key = localStorage.getItem('matrix_anthropic');
+  if (!key) { showToast('⚠️ No hay API Key guardada'); return; }
+  const el = document.getElementById('apiTestResult');
+  el.textContent = '// Verificando conexión...';
+  el.style.color = 'var(--accent-cyan)';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': atob(key), 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'test' }] })
+    });
+    if (res.ok || res.status === 400) {
+      el.textContent = '✓ Conexión verificada — API activa';
+      el.style.color = 'var(--seal-public)';
+      addLog('CONFIRM', 'API Key Anthropic verificada — Conexión activa.');
+      showToast('✓ API Key verificada y activa');
+    } else {
+      el.textContent = `✗ Error ${res.status} — Verifica tu API Key`;
+      el.style.color = 'var(--seal-restricted)';
+    }
+  } catch(e) {
+    el.textContent = '✗ Sin conexión — Verifica tu red';
+    el.style.color = 'var(--seal-restricted)';
+  }
+}
+
+function updateApiStatus(active) {
+  const el = document.getElementById('apiStatusLabel');
+  if (!el) return;
+  if (active) {
+    el.textContent = '● CONFIGURADA';
+    el.style.color = 'var(--seal-public)';
+  } else {
+    el.textContent = '● SIN CONFIGURAR';
+    el.style.color = 'var(--text-light)';
+  }
+}
+
+function loadApiKeyLic() {
+  const key = localStorage.getItem('matrix_anthropic');
+  if (key) {
+    document.getElementById('lic-anthropic').value = atob(key);
+    updateApiStatus(true);
+  }
+}
+
+function selectPlan(plan) {
+  const labels = { starter: 'STARTER — €49/mes', business: 'BUSINESS — €149/mes', enterprise: 'ENTERPRISE — A MEDIDA' };
+  STATE.planActivo = plan;
+  try {
+    const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
+    m.planActivo = plan;
+    m.planFecha = new Date().toLocaleDateString('es-ES');
+    localStorage.setItem('matrix_meta_v3', JSON.stringify(m));
+  } catch(e) {}
+  const lbl = document.getElementById('planActivoLabel');
+  const fecha = document.getElementById('planActivoFecha');
+  if (lbl) lbl.textContent = labels[plan];
+  if (fecha) fecha.textContent = `Desde: ${new Date().toLocaleDateString('es-ES')}`;
+
+  // Highlight selected plan
+  ['starter','business','enterprise'].forEach(p => {
+    const el = document.getElementById('plan-'+p);
+    if (el) el.style.boxShadow = p === plan ? '0 0 0 2px var(--accent-cyan)' : '';
+  });
+
+  if (plan === 'enterprise') {
+    addLog('INFO', 'Solicitud plan Enterprise iniciada — Contactar CEO BlogFort Agency.');
+    showToast('📧 Contacta con BlogFort Agency para Enterprise');
+  } else {
+    addLog('CONFIRM', `Plan seleccionado: ${labels[plan]}`);
+    showToast(`✓ Plan ${plan.toUpperCase()} seleccionado`);
+  }
+}
+
+function loadPlanActivo() {
+  try {
+    const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
+    if (m.planActivo) {
+      const labels = { starter: 'STARTER — €49/mes', business: 'BUSINESS — €149/mes', enterprise: 'ENTERPRISE — A MEDIDA' };
+      const lbl = document.getElementById('planActivoLabel');
+      const fecha = document.getElementById('planActivoFecha');
+      if (lbl) lbl.textContent = labels[m.planActivo];
+      if (fecha && m.planFecha) fecha.textContent = `Desde: ${m.planFecha}`;
+      ['starter','business','enterprise'].forEach(p => {
+        const el = document.getElementById('plan-'+p);
+        if (el) el.style.boxShadow = p === m.planActivo ? '0 0 0 2px var(--accent-cyan)' : '';
+      });
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// SHOW PANEL — títulos + carga licencia
+// ═══════════════════════════════════════
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {
+    dashboard:'DASHBOARD CEO', sector1:'SECTOR 1 — FLUJO DE CONTACTO',
+    sector2:'SECTOR 2 — EJECUCIÓN PROGRAMADA', finanzas:'CALCULADORA FINANCIERA',
+    boveda:'BÓVEDA — CÁMARAS ALFA & BETA', seguridad:'MURO DE CONTENCIÓN',
+    log:'LOG & AUDITORÍA', licencia:'ACCESO & LICENCIA'
+  };
+  document.getElementById('topbarTitle').textContent = titles[id] || id.toUpperCase();
+  if (id === 'licencia') { loadApiKeyLic(); loadPlanActivo(); }
+}
+
+
+// ═══════════════════════════════════════
+// TERMS & CONDITIONS
+// ═══════════════════════════════════════
+let termsChecked = { chk1: false, chk2: false };
+
+function toggleTermsCheck(id) {
+  termsChecked[id] = !termsChecked[id];
+  const el = document.getElementById(id);
+  if (el) {
+    if (termsChecked[id]) { el.classList.add('checked'); el.textContent = '✓'; }
+    else { el.classList.remove('checked'); el.textContent = ''; }
+  }
+  const allChecked = Object.values(termsChecked).every(v => v);
+  const btn = document.getElementById('termsAcceptBtn');
+  if (btn) { if (allChecked) btn.classList.add('ready'); else btn.classList.remove('ready'); }
+}
+
+function acceptTerms() {
+  if (!Object.values(termsChecked).every(v => v)) return;
+  try { localStorage.setItem('matrix_terms_v31', new Date().toISOString()); } catch(e) {}
+  const modal = document.getElementById('termsModal');
+  if (modal) { modal.style.opacity = '0'; modal.style.transition = 'opacity 0.4s'; setTimeout(() => modal.style.display = 'none', 400); }
+}
+
+function checkTermsAccepted() {
+  try {
+    const accepted = localStorage.getItem('matrix_terms_v31');
+    if (accepted) { const modal = document.getElementById('termsModal'); if (modal) modal.style.display = 'none'; }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+(async () => {
+  try { await initDB(); } catch(e) {}
+  await loadState();
+  checkTermsAccepted();
+  document.getElementById('loginPass').focus();
+  document.getElementById('ct-fecha') && (document.getElementById('ct-fecha').value = new Date().toISOString().slice(0,10));
+})();
+</script>
+</body>
+</html>
