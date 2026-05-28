@@ -1,6 +1,6 @@
 {
   "name": "MATRIX — BlogFort Agency",
-  "short_name": "MATRIX",
+  "short_name": "matrix bf",
   "description": "Sistema central de gestión — BlogFort Agency LLC",
   "start_url": "/matrix/",
   "scope": "/matrix/",
@@ -10,13 +10,13 @@
   "theme_color": "#030810",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "matrix-icon-192-1.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "matrix-icon-512-1.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
