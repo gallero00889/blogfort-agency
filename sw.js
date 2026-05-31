@@ -3,8 +3,8 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/blogfort-logo-transparente-1.png',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/icon-192-2.png',
+  '/icon-512-2.png',
   '/manifest.json'
 ];
 
