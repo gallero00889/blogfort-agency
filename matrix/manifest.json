@@ -1,9 +1,9 @@
 {
   "name": "MATRIX",
   "short_name": "MATRIX",
-  "description": "Sistema central de gestión — BlogFort Agency LLC",
-  "start_url": "/matrix/",
-  "scope": "/matrix/",
+  "description": "Sistema central de gestión - BlogFort Agency",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#030810",
@@ -23,3 +23,4 @@
     }
   ]
 }
+
