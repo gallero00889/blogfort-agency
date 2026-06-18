@@ -16,18 +16,20 @@
 <meta name="msapplication-TileColor" content="#1B4F8A">
 
 <!-- ═══ MANIFEST EXTERNO ═══ -->
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json" crossorigin="use-credentials">
+  
 
 <!-- ═══ SERVICE WORKER ═══ -->
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js', { scope: './' })
-      .then(r => console.log('[MATRIX PWA] SW registrado:', r.scope))
-      .catch(e => console.warn('[MATRIX PWA] SW error:', e));
-  });
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('manifest.json')
+            .then(reg => console.log('PWA Lista', reg))
+            .catch(err => console.error('Error', err));
+    });
 }
 </script>
+  
 
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
