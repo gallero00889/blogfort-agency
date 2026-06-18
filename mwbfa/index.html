@@ -16,39 +16,20 @@
 <meta name="msapplication-TileColor" content="#7C3AED">
 
 <!-- ═══ MANIFEST EXTERNO ═══ -->
-<link rel="manifest" href="mwbfa-manifest.json">
+<link rel="manifest" href="mwbfa-manifest.json" crossorigin="use-credentials">
+  
 
 <!-- ═══ SERVICE WORKER ═══ -->
 <script>
 if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE = 'mwbfa-v2-cache-v1';
-    self.addEventListener('install', e => { self.skipWaiting(); });
-    self.addEventListener('activate', e => {
-      e.waitUntil(caches.keys().then(keys =>
-        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-      ).then(() => self.clients.claim()));
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('mwbfa-manifest.json')
+            .then(reg => console.log('PWA Lista', reg))
+            .catch(err => console.error('Error', err));
     });
-    self.addEventListener('fetch', e => {
-      if (e.request.method !== 'GET') return;
-      e.respondWith(
-        fetch(e.request).then(res => {
-          if (res && res.status === 200) {
-            caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-          }
-          return res;
-        }).catch(() => caches.match(e.request))
-      );
-    });
-  `;
-  const swBlob = new Blob([swCode], { type: 'application/javascript' });
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' })
-      .then(r => console.log('[MWBFA PWA] SW registrado'))
-      .catch(e => console.warn('[MWBFA PWA] SW error:', e));
-  });
 }
 </script>
+
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://js.stripe.com/v3/"></script>
 <style>
