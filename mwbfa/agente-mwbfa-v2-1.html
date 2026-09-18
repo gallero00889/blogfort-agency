@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente MWBFA · BlogFort Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#08070f; --surface:#0f0d1a; --surface2:#161428;
+    --border:#1c1930; --border2:#231f3a;
+    --accent:#a855f7; --accent2:#7c3aed;
+    --gold:#f59e0b; --green:#10b981; --red:#ef4444;
+    --blue:#3b82f6; --cyan:#06b6d4; --pink:#ec4899;
+    --text:#e8e4f4; --text2:#6b6585; --text3:#2e2a45;
+    --mono:'DM Mono',monospace; --raj:'Rajdhani',sans-serif; --sans:'Inter',sans-serif;
+    --radius:7px; --glow:0 0 24px rgba(168,85,247,0.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;}
+
+  /* TOPBAR */
+  .topbar{height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+  .brand{font-family:var(--raj);font-size:20px;font-weight:700;letter-spacing:3px;color:var(--accent);text-shadow:0 0 20px rgba(168,85,247,.4);}
+  .brand-sub{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;}
+  .badge{font-family:var(--mono);font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:3px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.06);color:var(--accent);}
+  .topbar-spacer{flex:1;}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .pulse-lbl{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:1.5px;}
+  .api-btn{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--text2);background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:5px 10px;cursor:pointer;transition:all .2s;}
+  .api-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+  /* SHELL */
+  .shell{display:flex;height:calc(100vh - 52px);}
+
+  /* SIDEBAR */
+  .sidebar{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+  .side-sec{padding:12px 12px 4px;font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:11px;color:var(--text2);}
+  .nav-item:hover{background:rgba(255,255,255,.02);color:var(--text);}
+  .nav-item.active{background:rgba(168,85,247,.05);border-left-color:var(--accent);color:var(--accent);}
+  .nav-icon{font-size:13px;width:16px;text-align:center;}
+
+  /* MODULOS GRID */
+  .mod-grid{padding:6px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+  .mod-btn{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:6px 4px;border-radius:3px;border:1px solid var(--border2);background:var(--surface2);color:var(--text3);cursor:pointer;transition:all .15s;text-align:center;line-height:1.4;}
+  .mod-btn:hover{color:var(--text2);border-color:var(--text3);}
+  .mod-btn.active{background:rgba(168,85,247,.07);border-color:rgba(168,85,247,.3);color:var(--accent);}
+
+  .sidebar-footer{margin-top:auto;padding:10px;border-top:1px solid var(--border);}
+  .stat-row{display:flex;justify-content:space-between;margin-bottom:3px;}
+  .stat-lbl{font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;}
+  .stat-val{font-family:var(--mono);font-size:8px;color:var(--accent);}
+
+  /* MAIN */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* CHAT */
+  .chat-area{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
+  .chat-area::-webkit-scrollbar{width:3px;}
+  .chat-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+  /* MESSAGES */
+  .msg{display:flex;gap:10px;max-width:880px;}
+  .msg.user{flex-direction:row-reverse;align-self:flex-end;}
+  .msg-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid;}
+  .msg.agent .msg-av{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.2);}
+  .msg.user .msg-av{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);}
+  .msg-bub{padding:10px 14px;border-radius:var(--radius);font-size:12px;line-height:1.6;max-width:calc(100% - 42px);}
+  .msg.agent .msg-bub{background:var(--surface);border:1px solid var(--border);border-radius:2px 7px 7px 7px;}
+  .msg.user .msg-bub{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:7px 2px 7px 7px;}
+  .msg-meta{font-family:var(--mono);font-size:7px;color:var(--text3);letter-spacing:1.5px;margin-bottom:4px;}
+  .msg-content{white-space:pre-wrap;word-break:break-word;}
+
+  /* OUTPUT CARD */
+  .out-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);margin-top:8px;overflow:hidden;}
+  .out-head{padding:9px 14px;background:rgba(168,85,247,.05);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .out-title{font-family:var(--raj);font-size:13px;font-weight:600;color:var(--text);letter-spacing:1px;}
+  .out-body{padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:320px;overflow-y:auto;}
+  .out-body::-webkit-scrollbar{width:3px;}
+  .out-body::-webkit-scrollbar-thumb{background:var(--border2);}
+  .out-actions{padding:8px 14px;border-top:1px solid var(--border2);display:flex;gap:5px;flex-wrap:wrap;}
+
+  /* SCORE RING */
+  .score-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .score-pill{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 8px;border-radius:10px;border:1px solid;}
+  .sp-green{color:var(--green);border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.07);}
+  .sp-gold{color:var(--gold);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.07);}
+  .sp-red{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.07);}
+  .sp-purple{color:var(--accent);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.07);}
+
+  /* TEMPLATE CARDS */
+  .tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+  .tpl-card{background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:10px 8px;cursor:pointer;transition:all .15s;text-align:center;}
+  .tpl-card:hover{border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.04);}
+  .tpl-card.selected{border-color:var(--accent);background:rgba(168,85,247,.08);}
+  .tpl-icon{font-size:18px;margin-bottom:4px;}
+  .tpl-name{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text2);}
+  .tpl-cat{font-family:var(--mono);font-size:7px;color:var(--text3);margin-top:2px;}
+
+  /* VOZ PLATFORMS */
+  .plat-row{display:flex;gap:6px;margin:8px 0;}
+  .plat-btn{flex:1;font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:6px 4px;border-radius:3px;border:1px solid var(--border2);background:var(--surface2);color:var(--text3);cursor:pointer;transition:all .15s;text-align:center;}
+  .plat-btn.active{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.3);color:var(--accent);}
+
+  /* CHECK BARS */
+  .check-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
+  .check-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .cd-ok{background:var(--green);}
+  .cd-warn{background:var(--gold);}
+  .cd-fail{background:var(--red);}
+  .check-label{font-size:11px;color:var(--text);flex:1;}
+  .check-detail{font-family:var(--mono);font-size:8px;color:var(--text2);}
+  .check-bar-wrap{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:8px;}
+  .check-bar-fill{height:100%;border-radius:2px;transition:width .6s;}
+
+  /* QUICK & INPUT */
+  .quick-area{padding:10px 22px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:5px;flex-wrap:wrap;}
+  .qa-btn{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:5px 9px;border-radius:3px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .qa-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(168,85,247,.04);}
+
+  .input-area{padding:10px 22px 14px;background:var(--bg);border-top:1px solid var(--border);}
+  .input-wrap{display:flex;gap:8px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:9px 13px;transition:border-color .2s;}
+  .input-wrap:focus-within{border-color:rgba(168,85,247,.35);box-shadow:var(--glow);}
+  .cmd-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:12px;resize:none;max-height:100px;line-height:1.5;}
+  .cmd-input::placeholder{color:var(--text3);}
+  .send-btn{background:var(--accent2);border:none;border-radius:4px;width:32px;height:32px;color:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;align-self:flex-end;}
+  .send-btn:hover{background:var(--accent);transform:scale(1.05);}
+  .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .input-hint{font-family:var(--mono);font-size:7px;color:var(--text3);letter-spacing:1px;margin-top:4px;text-align:center;}
+
+  /* ACT BTNS */
+  .act-btn{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:4px 9px;border-radius:3px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;}
+  .act-btn:hover{color:var(--accent);border-color:rgba(168,85,247,.3);}
+  .act-btn.purple{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.25);color:var(--accent);}
+  .act-btn.green{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:var(--green);}
+  .act-btn.gold{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.25);color:var(--gold);}
+  .act-btn.blue{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.25);color:var(--blue);}
+
+  /* TYPING */
+  .typing{display:flex;gap:4px;align-items:center;padding:6px 0;}
+  .typing span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+  /* WELCOME */
+  .welcome-card{background:linear-gradient(135deg,rgba(168,85,247,.05),rgba(236,72,153,.04));border:1px solid rgba(168,85,247,.15);border-radius:var(--radius);padding:18px;}
+  .welcome-title{font-family:var(--raj);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-bottom:3px;}
+  .welcome-sub{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:10px;}
+  .welcome-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px;}
+  .cap-row{display:flex;gap:5px;flex-wrap:wrap;}
+  .cap-tag{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 7px;border-radius:2px;background:var(--surface2);border:1px solid var(--border2);color:var(--text3);}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.on{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:22px;width:360px;max-width:90vw;}
+  .modal-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:14px;}
+  .modal-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:9px 11px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;margin-bottom:10px;}
+  .modal-input:focus{border-color:var(--accent);}
+  .modal-note{font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.5;}
+  .modal-actions{display:flex;gap:7px;justify-content:flex-end;}
+  .btn-modal{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;padding:6px 12px;border-radius:3px;border:1px solid var(--border2);cursor:pointer;transition:all .2s;}
+  .btn-modal.primary{background:var(--accent2);border-color:var(--accent);color:#fff;}
+  .btn-modal.primary:hover{background:var(--accent);}
+  .btn-modal.cancel{background:transparent;color:var(--text2);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 14px;border-radius:20px;font-size:11px;font-family:var(--mono);letter-spacing:1px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+  .toast.show{opacity:1;}
+
+  @media(max-width:600px){.sidebar{display:none;}.quick-area{padding:7px 10px;}.chat-area{padding:12px 10px;}.input-area{padding:8px 10px 12px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="brand">MWBFA</div>
+    <div class="brand-sub">CONSTRUCTOR WEB · AGENTE INTELIGENTE</div>
+  </div>
+  <div class="badge">🌐 NIVEL 2 CONSTRUCTOR</div>
+  <div class="topbar-spacer"></div>
+  <div class="pulse" id="statusDot"></div>
+  <div class="pulse-lbl" id="statusLbl">ONLINE</div>
+  <button class="api-btn" onclick="openApiModal()">🔑 API KEY</button>
+</div>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="side-sec">Módulos</div>
+    <div class="nav-item active" onclick="setNav('web',this)"><span class="nav-icon">🌐</span><span style="font-size:11px;">Constructor Web</span></div>
+    <div class="nav-item" onclick="setNav('apps',this)"><span class="nav-icon">📱</span><span style="font-size:11px;">Constructor Apps PWA</span></div>
+    <div class="nav-item" onclick="setNav('voz',this)"><span class="nav-icon">🎙️</span><span style="font-size:11px;">Agente de Voz</span></div>
+    <div class="nav-item" onclick="setNav('calidad',this)"><span class="nav-icon">✅</span><span style="font-size:11px;">Comprobador Calidad</span></div>
+    <div class="nav-item" onclick="setNav('ia',this)"><span class="nav-icon">🤖</span><span style="font-size:11px;">Generador IA</span></div>
+    <div class="nav-item" onclick="setNav('idiomas',this)"><span class="nav-icon">🌍</span><span style="font-size:11px;">Multiidioma</span></div>
+    <div class="nav-item" onclick="setNav('exportar',this)"><span class="nav-icon">📦</span><span style="font-size:11px;">Exportar HTML</span></div>
+
+    <div class="side-sec" style="margin-top:6px;">Plantilla activa</div>
+    <div class="mod-grid">
+      <button class="mod-btn active" data-tpl="corporativa" onclick="selectTpl(this)">🏢 Corp.</button>
+      <button class="mod-btn" data-tpl="landing" onclick="selectTpl(this)">🚀 Landing</button>
+      <button class="mod-btn" data-tpl="clinica" onclick="selectTpl(this)">🏥 Clínica</button>
+      <button class="mod-btn" data-tpl="tecnologia" onclick="selectTpl(this)">💻 Tech</button>
+      <button class="mod-btn" data-tpl="tienda" onclick="selectTpl(this)">🛒 Tienda</button>
+      <button class="mod-btn" data-tpl="hotel" onclick="selectTpl(this)">🏨 Hotel</button>
+      <button class="mod-btn" data-tpl="legal" onclick="selectTpl(this)">⚖️ Legal</button>
+      <button class="mod-btn" data-tpl="educacion" onclick="selectTpl(this)">📚 Edu</button>
+    </div>
+
+    <div class="side-sec" style="margin-top:6px;">Idioma</div>
+    <div style="padding:4px 10px;">
+      <select id="langSel" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:3px;padding:6px 7px;font-family:var(--mono);font-size:9px;outline:none;cursor:pointer;">
+        <option value="español">🇪🇸 Español</option>
+        <option value="inglés">🇺🇸 English</option>
+        <option value="portugués">🇧🇷 Português BR</option>
+        <option value="francés">🇫🇷 Français</option>
+        <option value="alemán">🇩🇪 Deutsch</option>
+        <option value="italiano">🇮🇹 Italiano</option>
+        <option value="chino">🇨🇳 中文</option>
+        <option value="árabe">🇸🇦 العربية</option>
+        <option value="japonés">🇯🇵 日本語</option>
+      </select>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="stat-row"><span class="stat-lbl">PROYECTOS:</span><span class="stat-val" id="sf-proy">0</span></div>
+      <div class="stat-row"><span class="stat-lbl">APPS:</span><span class="stat-val" id="sf-apps">0</span></div>
+      <div class="stat-row"><span class="stat-lbl">AGENTES VOZ:</span><span class="stat-val" id="sf-voz">0</span></div>
+      <div class="stat-row"><span class="stat-lbl">EXPORTADOS:</span><span class="stat-val" id="sf-exp">0</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="chat-area" id="chatArea">
+      <div class="welcome-card">
+        <div class="welcome-title">MWBFA</div>
+        <div class="welcome-sub">CONSTRUCTOR WEB · NIVEL 2 PRODUCTOR · BLOGFORT AGENCY</div>
+        <div class="welcome-desc">Constructor web profesional con IA integrada. Domino las 12 plantillas sectoriales, el editor visual de bloques, el constructor de Apps PWA (5 tipos), los Agentes de Voz automatizados (Vapi / Bland AI / Twilio), el Comprobador de Calidad 0–100, exportación HTML autónoma y soporte para 22 idiomas. Sin servidores. Sin cuotas por sitio. HTML puro y limpio.</div>
+        <div class="cap-row">
+          <span class="cap-tag">12 PLANTILLAS</span>
+          <span class="cap-tag">10 BLOQUES</span>
+          <span class="cap-tag">5 TIPOS APP PWA</span>
+          <span class="cap-tag">AGENTE VOZ VAPI/BLAND/TWILIO</span>
+          <span class="cap-tag">COMPROBADOR 0–100</span>
+          <span class="cap-tag">22 IDIOMAS</span>
+          <span class="cap-tag">HTML AUTÓNOMO</span>
+          <span class="cap-tag">SERVERLESS</span>
+          <span class="cap-tag">IMPORTA DE MATRIX</span>
+          <span class="cap-tag">RGPD</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-area">
+      <button class="qa-btn" onclick="qk('Crea el contenido completo para una web corporativa de clínica dental en México llamada Clínica Sonrisa')">🏥 Web Clínica</button>
+      <button class="qa-btn" onclick="qk('Genera la estructura completa para una landing page de alta conversión para agencia de marketing digital')">🚀 Landing Mktg</button>
+      <button class="qa-btn" onclick="qk('Crea una App PWA de menú digital para un restaurante italiano llamado La Dolce Vita en Madrid')">🍽️ App Menú</button>
+      <button class="qa-btn" onclick="qk('Genera un App PWA de sistema de reservas para una peluquería canina llamada Happy Paws')">📅 App Reservas</button>
+      <button class="qa-btn" onclick="qk('Crea el guión completo para un Agente de Voz en Vapi para recepción de llamadas de una clínica dental')">🎙️ Agente Voz</button>
+      <button class="qa-btn" onclick="qk('Genera contenido web completo en inglés para una startup SaaS de tecnología B2B llamada DataFlow')">💻 Tech SaaS EN</button>
+      <button class="qa-btn" onclick="qk('Ejecuta comprobación de calidad completa para una web de inmobiliaria y dame el score con recomendaciones')">✅ Comprobar</button>
+      <button class="qa-btn" onclick="qk('Genera el contenido completo para exportar como HTML autónomo listo para subir al servidor')">📦 Exportar HTML</button>
+      <button class="qa-btn" onclick="syncMatrix()">📡 Sync MATRIX</button>
+      <button class="qa-btn" onclick="syncBlogfort()">📄 Sync BlogFort</button>
+      <button class="qa-btn" onclick="mostrarPlan()">🔑 Plan Activo</button>
+      <button class="qa-btn" onclick="qk('Comprueba la calidad de esta web y dame el score As de Oro completo')">✅ As de Oro QA</button>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea class="cmd-input" id="cmdInput" placeholder="Crea una web, app PWA, agente de voz, traduce contenido, comprueba calidad..." rows="2" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="execute()">➤</button>
+      </div>
+      <div class="input-hint">INTRO = ejecutar · SHIFT+INTRO = nueva línea · 12 plantillas · 5 tipos app · Vapi/Bland/Twilio · 22 idiomas</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL API -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">🔑 API KEY — ANTHROPIC</div>
+    <input type="password" class="modal-input" id="apiInput" placeholder="sk-ant-api03-..." autocomplete="off">
+    <div class="modal-note">Almacenada localmente en tu dispositivo. Conexión directa dispositivo → Anthropic. BlogFort Agency no tiene acceso a tu clave.</div>
+    <div class="modal-actions">
+      <button class="btn-modal cancel" onclick="closeApiModal()">CANCELAR</button>
+      <button class="btn-modal primary" onclick="saveApiKey()">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('mwbfa_agent_key') || '';
+let isLoading = false;
+let currentNav = 'web';
+let selectedTpl = 'corporativa';
+let msgHistory = [];
+
+let S = JSON.parse(localStorage.getItem('mwbfa_agent_state') || JSON.stringify({
+  proyectos: 0, apps: 0, agentesVoz: 0, exportados: 0,
+  plan: 'business' // starter | business | enterprise
+}));
+
+// ─── CONTROL DE LICENCIA ──────────────────────────────────────────────────────
+const PLAN_LIMITS = {
+  starter:    { proyectos: 1, plantillas: 6, idiomas: 5, ia: 'basica', pwa: false, voz: false, matrix: false, blogfort: false },
+  business:   { proyectos: 10, plantillas: 12, idiomas: 22, ia: 'avanzada', pwa: true, voz: true, matrix: true, blogfort: true },
+  enterprise: { proyectos: Infinity, plantillas: 12, idiomas: 22, ia: 'enterprise', pwa: true, voz: true, matrix: true, blogfort: true }
+};
+
+function getPlan() { return PLAN_LIMITS[S.plan] || PLAN_LIMITS.business; }
+
+function checkLicencia(modulo) {
+  const plan = getPlan();
+  const bloqueados = {
+    apps:    !plan.pwa,
+    voz:     !plan.voz,
+    matrix:  !plan.matrix,
+    blogfort:!plan.blogfort
+  };
+  if (bloqueados[modulo]) {
+    const upgMsg = S.plan === 'starter'
+      ? '⛔ Módulo bloqueado en Plan Starter. Actualiza a Plan Business ($99/mes) para desbloquear PWA, Voz y sincronización CRM.'
+      : '⛔ Módulo no disponible en tu plan actual.';
+    appendAgentMsg(upgMsg);
+    return false;
+  }
+  if (modulo === 'web' && S.proyectos >= plan.proyectos) {
+    appendAgentMsg(`⛔ Límite de proyectos alcanzado (${plan.proyectos} en Plan ${S.plan.toUpperCase()}). Actualiza tu plan para continuar.`);
+    return false;
+  }
+  return true;
+}
+
+function saveS() { localStorage.setItem('mwbfa_agent_state', JSON.stringify(S)); }
+
+function mostrarPlan() {
+  const plan = getPlan();
+  const planLabel = { starter:'STARTER — $39/mes', business:'BUSINESS — $99/mes', enterprise:'ENTERPRISE — A MEDIDA' };
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.innerHTML = `
+    <div class="msg-av">🌐</div>
+    <div class="msg-bub" style="max-width:100%;">
+      <div class="msg-meta">MWBFA · CONTROL DE LICENCIA</div>
+      <div class="out-card">
+        <div class="out-head">
+          <div class="out-title">🔑 PLAN ACTIVO: ${planLabel[S.plan]}</div>
+        </div>
+        <div class="out-body" style="font-family:var(--mono);font-size:10px;line-height:1.8;">
+Proyectos: ${plan.proyectos === Infinity ? 'Ilimitados' : plan.proyectos} · Plantillas: ${plan.plantillas} · Idiomas: ${plan.idiomas}
+PWA Constructor: ${plan.pwa ? '✅ Activo' : '⛔ Bloqueado'}
+Agentes de Voz: ${plan.voz ? '✅ Activo' : '⛔ Bloqueado'}
+MATRIX CRM Sync: ${plan.matrix ? '✅ Activo' : '⛔ Bloqueado'}
+BlogFort App Sync: ${plan.blogfort ? '✅ Activo' : '⛔ Bloqueado'}
+        </div>
+        <div class="out-actions">
+          <button class="act-btn plan-btn ${S.plan==='starter'?'purple':''}" data-plan="starter" onclick="cambiarPlan('starter')">Starter $39</button>
+          <button class="act-btn plan-btn ${S.plan==='business'?'purple':''}" data-plan="business" onclick="cambiarPlan('business')">Business $99</button>
+          <button class="act-btn plan-btn ${S.plan==='enterprise'?'purple':''}" data-plan="enterprise" onclick="cambiarPlan('enterprise')">Enterprise $249</button>
+        </div>
+      </div>
+    </div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+}
+
+// ─── DATOS REALES DE MWBFA ────────────────────────────────────────────────────
+const TEMPLATES = {
+  corporativa: { icon:'🏢', sector:'Negocio', desc:'Empresas y grupos con identidad sólida', bloques:['nav','hero','about','services','stats','contact','footer'] },
+  landing:     { icon:'🚀', sector:'Negocio', desc:'Alta conversión para campañas y productos', bloques:['nav','hero','services','cta','testimonios','contact','footer'] },
+  portfolio:   { icon:'🎨', sector:'Negocio', desc:'Creativos, agencias y profesionales', bloques:['nav','hero','gallery','about','testimonios','contact','footer'] },
+  tienda:      { icon:'🛒', sector:'Comercio', desc:'E-commerce con catálogo y pagos', bloques:['nav','hero','services','gallery','cta','contact','footer'] },
+  restaurante: { icon:'🍽️', sector:'Servicios', desc:'Menú digital, reservas y galería', bloques:['nav','hero','gallery','services','testimonios','contact','footer'] },
+  clinica:     { icon:'🏥', sector:'Servicios', desc:'Clínicas, dentistas y centros de salud', bloques:['nav','hero','about','services','testimonios','contact','footer'] },
+  legal:       { icon:'⚖️', sector:'Servicios', desc:'Bufetes y despachos de abogados', bloques:['nav','hero','about','services','stats','contact','footer'] },
+  inmobiliaria:{ icon:'🏘️', sector:'Comercio', desc:'Propiedades y agencias inmobiliarias', bloques:['nav','hero','gallery','services','cta','contact','footer'] },
+  tecnologia:  { icon:'💻', sector:'Negocio', desc:'Startups, SaaS y empresas tech', bloques:['nav','hero','about','services','stats','cta','footer'] },
+  ong:         { icon:'🌱', sector:'Especial', desc:'Organizaciones sin ánimo de lucro', bloques:['nav','hero','about','services','stats','contact','footer'] },
+  educacion:   { icon:'📚', sector:'Especial', desc:'Academias, cursos y centros formativos', bloques:['nav','hero','services','about','testimonios','contact','footer'] },
+  hotel:       { icon:'🏨', sector:'Especial', desc:'Hoteles, apartamentos y agencias de viaje', bloques:['nav','hero','gallery','services','testimonios','contact','footer'] }
+};
+
+const BLOQUES = ['nav','hero','about','services','cta','contact','footer','gallery','testimonios','stats'];
+
+const APP_TYPES = {
+  menu:     { label:'Menú Digital', desc:'Categorías, platos con descripción/precios, contacto' },
+  reservas: { label:'Sistema de Reservas', desc:'Calendario, selector horario, confirmación de citas' },
+  catalogo: { label:'Catálogo de Productos', desc:'Grid filtrable, ficha de producto, botón compra' },
+  servicios:{ label:'Presentación de Servicios', desc:'Tarjetas visuales, testimonios, formulario contacto' },
+  loyalty:  { label:'Tarjeta Fidelización', desc:'Puntos/sellos, historial visitas, recompensas' }
+};
+
+const VOZ_PLATFORMS = {
+  vapi:   { name:'Vapi', desc:'IA conversacional avanzada, bajo latencia' },
+  bland:  { name:'Bland AI', desc:'Llamadas masivas y automatización de ventas' },
+  twilio: { name:'Twilio', desc:'Telefonía empresarial robusta y escalable' }
+};
+
+const IDIOMAS_22 = ['Español','English','Français','Deutsch','Português','Italiano','中文','العربية','日本語','Русский','한국어','Nederlands','Svenska','Polski','Türkçe','हिन्दी','Português BR','Español MX','English AU','English CA','Deutsch CH','Français BE'];
+
+// ─── SYSTEM PROMPT MAESTRO MWBFA ──────────────────────────────────────────────
+function buildSystem() {
+  const lang = document.getElementById('langSel').value;
+  const planActivo = S.plan || 'business';
+  const planCaps = getPlan();
+  const tpl = TEMPLATES[selectedTpl];
+  const mod = currentNav;
+
+  const tplInfo = Object.entries(TEMPLATES).map(([id,t])=>
+    `  ${t.icon} ${id.toUpperCase()} (${t.sector}): ${t.desc} — Bloques: ${t.bloques.join(', ')}`
+  ).join('\n');
+
+  const appInfo = Object.entries(APP_TYPES).map(([id,a])=>
+    `  • ${a.label}: ${a.desc}`
+  ).join('\n');
+
+  const modInstructions = {
+    web: `MÓDULO: CONSTRUCTOR WEB — HABILIDAD 1 (ARQUITECTURA Y MAQUETACIÓN)
+Genera contenido web profesional completo por bloques. Reglas absolutas:
+1. RESPONSIVE OBLIGATORIO: verifica mentalmente que cada bloque funciona en Desktop, Tablet y Móvil. PROHIBIDO aprobar diseños con desbordamientos en móvil.
+2. COPY PERSUASIVO: para cada bloque (nav, hero, about, services, cta, testimonios, stats, gallery, contact, footer) entrega: H1/H2 de alto impacto, textos de párrafo, CTAs optimizados, datos de contacto, nombres de servicios con beneficios tangibles, estadísticas creíbles.
+3. TONO POR SECTOR: formal/técnico para legal y salud, cercano y cálido para hostelería, innovador y directo para tech, emocional para ONG y educación.
+4. SEO NATIVO: title tag optimizado, meta descripción 155 caracteres, slugs limpios, estructura H1→H2→H3 correcta.
+5. ZERO VENDOR LOCK-IN: el HTML exportado debe ser 100% autónomo, sin scripts de rastreo, sin dependencias SaaS.
+6. Al final marca: ── SCORE: X/100 | ESTADO: ok/warn/fail ──`,
+
+    apps: `MÓDULO: CONSTRUCTOR PWA — HABILIDAD 4 (INGENIERÍA MÓVIL)
+Genera aplicaciones web progresivas completas en un SOLO archivo HTML. Arquitecturas disponibles:
+• MENÚ DIGITAL: categorías, platos con descripción/foto placeholder/precios, botón de pedido, contacto directo.
+• RESERVAS: calendario visual, selector horario, formulario de datos, confirmación automática 24/7.
+• CATÁLOGO: grid filtrable por categoría, ficha de producto con detalles, botón contacto rápido.
+• SERVICIOS: tarjetas visuales de servicios, testimonios, formulario de contacto, mapa.
+• FIDELIZACIÓN: contador de puntos/sellos, historial de visitas, pantalla de recompensas.
+Requisitos técnicos OBLIGATORIOS:
+- PWA meta tags completos: manifest.json inline, service worker registrado, theme-color, apple-touch-icon.
+- Mobile-first: diseño optimizado para pantalla de 375px mínimo.
+- Funcionalidad JavaScript REAL y operativa (no comentarios, no placeholders de código).
+- Datos de ejemplo realistas y adaptados al sector.
+- Compatibilidad Android e iOS para instalación directa desde navegador.
+- CSS embebido en el mismo archivo, sin dependencias externas.`,
+
+    voz: `MÓDULO: AGENTE DE VOZ — HABILIDAD 5 (TELEFONÍA E IA CONVERSACIONAL)
+Diseña guiones técnicos completos para: Vapi (IA conversacional, bajo latencia), Bland AI (campañas masivas), Twilio (infraestructura empresarial).
+Estructura OBLIGATORIA de cada guión:
+1. SALUDO CORPORATIVO: personalizado al sector, máximo 15 segundos, natural y cálido.
+2. ÁRBOL CONVERSACIONAL: mínimo 4 ramas (información, citas/reservas, precios, emergencias/urgencias).
+3. FAQs: mínimo 5 preguntas frecuentes del sector con respuestas naturales en milisegundos.
+4. GESTIÓN DE OBJECIONES: mínimo 3 objeciones típicas con respuestas empáticas y resolutivas.
+5. CIERRE PROTOCOLARIO: confirmación de acción tomada, agradecimiento, despedida profesional.
+6. NOTAS TÉCNICAS: configuración específica para la plataforma (temperatura, velocidad, voz recomendada de ElevenLabs, webhook endpoints).
+TONO: adapta la personalidad auditiva al sector. Calibra: formal para legal/salud, cercano para hostelería/retail, innovador para tech.
+IDIOMA: genera el guión directamente en el idioma seleccionado con naturalidad nativa.`,
+
+    calidad: `MÓDULO: AS DE ORO QA — HABILIDAD 6 (CONTROL DE CALIDAD)
+Eres el filtro supervisor definitivo. CERO tolerancia a entregar productos con errores. Auditoría holística en 3 frentes:
+
+WEB (si aplica): ✓ HTML semántico válido | ✓ Responsive Desktop+Tablet+Móvil | ✓ SEO: title, meta, slugs | ✓ Core Web Vitals estimados | ✓ SSL recomendado | ✓ RGPD: formularios con aviso legal | ✓ Accesibilidad: alt en imágenes, contraste | ✓ Sin dependencias externas huérfanas | ✓ Mobile-first | ✓ Velocidad de carga estimada.
+
+PWA (si aplica): ✓ Manifest.json correcto | ✓ Service Worker registrado | ✓ Funcionalidad offline | ✓ Instalabilidad Android/iOS | ✓ Rendimiento JavaScript | ✓ UX mobile-first | ✓ Theme-color y splash screen.
+
+AGENTE DE VOZ (si aplica): ✓ Claridad y naturalidad del guión | ✓ Árbol conversacional completo | ✓ Cobertura de FAQs | ✓ Gestión de objeciones | ✓ Configuración técnica correcta | ✓ Latencia estimada | ✓ Cumplimiento normativo telecom.
+
+FORMATO DE ENTREGA OBLIGATORIO:
+- Score global 0-100
+- Lista ítem por ítem con estado: ✓ OK | ⚠ ADVERTENCIA | ✗ FALLO
+- Correcciones priorizadas por impacto (crítico → importante → recomendado)
+- Parche de código directo para cada FALLO detectado
+- Al final: ── SCORE: X/100 | ESTADO: ok/warn/fail ──`,
+
+    ia: `MÓDULO: GENERADOR DE CONTENIDO IA — HABILIDAD 2 (INGENIERÍA DE CONTENIDO)
+Genera contenido web orientado a conversión y SEO. Estructura por secciones:
+• HERO: H1 de alto impacto (máximo 8 palabras), subtítulo persuasivo, CTA principal irresistible.
+• SOBRE NOSOTROS: narrativa de marca con propuesta de valor diferencial, no genérica.
+• SERVICIOS: para cada servicio: nombre, beneficio principal, descripción 40 palabras, icono sugerido.
+• TESTIMONIOS: 3 testimonios realistas con nombre, cargo, empresa y frase impactante.
+• STATS: 4 métricas de credibilidad (años de experiencia, clientes, proyectos, satisfacción).
+• CTA SECUNDARIO: urgencia sin presión, beneficio claro, fricción cero.
+• FOOTER: links legales, RGPD, redes sociales, contacto directo.
+Adapta tono por sector: formal para legal/salud | cercano para hostelería | innovador para tech | emocional para ONG.
+Genera metadatos SEO: title tag + meta descripción + 5 keywords primarias.`,
+
+    idiomas: `MÓDULO: MULTIIDIOMA — HABILIDAD 3 (LOCALIZACIÓN GLOBAL)
+Adaptas contenido web a 22 idiomas con naturalidad nativa. Reglas absolutas:
+1. ADAPTACIÓN CULTURAL REAL: no traducción literal. Usa modismos locales, referencias culturales apropiadas, tono del mercado objetivo.
+2. INDESTRUCTIBILIDAD DE CÓDIGO: aísla las cadenas de texto del código fuente. NUNCA alteres clases CSS, atributos HTML, IDs ni selectores JavaScript.
+3. VARIANTES DIALECTALES: Español MX ≠ Español ES ≠ Español AR. English US ≠ English UK ≠ English AU. Português BR ≠ Português PT.
+4. RGPD POR REGIÓN: adapta los avisos legales de formularios al marco normativo de cada país.
+5. DIRECCIÓN DEL TEXTO: para Árabe (AR) indica dir="rtl" y para Hebreo aplica la misma lógica.
+6. DEVUELVE el bloque traducido completo, listo para reemplazar, sin romper ningún atributo original.`,
+
+    exportar: `MÓDULO: EXPORTACIÓN HTML — HABILIDAD 1.4 (ZERO VENDOR LOCK-IN)
+Prepara el entregable final para producción. Checklist OBLIGATORIO antes de exportar:
+✓ HTML semántico bien formado (DOCTYPE, charset, viewport, title, meta descripción)
+✓ CSS 100% embebido en <style>, sin @import externos ni CDN
+✓ JavaScript inline, sin dependencias de librerías externas
+✓ CERO scripts de rastreo (Google Analytics, Pixel, Hotjar, etc.)
+✓ CERO vendor lock-in: el archivo funciona en cualquier servidor o hosting
+✓ Imágenes: sustituye placeholders por instrucciones claras de reemplazo
+✓ Formularios: acción apuntando al endpoint correcto del cliente
+✓ RGPD: aviso de cookies y política de privacidad incluidos
+✓ Compatible: Chrome, Firefox, Safari, Edge modernos
+✓ Tamaño optimizado: minifica CSS y JS inline si supera 200KB
+Entrega el HTML completo listo para despliegue inmediato.`
+  };
+
+  return `Eres el Agente MWBFA de BlogFort Agency LLC — constructor web de Nivel 2, garante absoluto de calidad, velocidad y excelencia de marca. Operas bajo filosofía de CERO ERRORES y TOLERANCIA CERO a fallos de código. De tu precisión milimétrica dependen la reputación técnica de BlogFort Agency y la confianza de los clientes finales.
+
+MÓDULO ACTIVO: ${mod.toUpperCase()}
+PLANTILLA SELECCIONADA: ${selectedTpl.toUpperCase()} ${tpl?.icon || ''} — ${tpl?.desc || ''}
+BLOQUES DE ESTA PLANTILLA: ${tpl?.bloques?.join(' → ') || ''}
+IDIOMA DE TRABAJO: ${lang}
+
+INSTRUCCIÓN ESPECÍFICA PARA ESTE MÓDULO:
+${modInstructions[mod] || modInstructions.web}
+
+═══════════════════════════════════
+CAPACIDADES COMPLETAS DE MWBFA
+═══════════════════════════════════
+
+12 PLANTILLAS SECTORIALES:
+${tplInfo}
+
+10 BLOQUES DISPONIBLES: ${BLOQUES.join(', ')}
+
+5 TIPOS DE APP PWA:
+${appInfo}
+
+3 PLATAFORMAS DE VOZ:
+  • Vapi — IA conversacional avanzada, bajo latencia, ideal para atención al cliente
+  • Bland AI — llamadas masivas, automatización de ventas y seguimiento
+  • Twilio — telefonía empresarial robusta, máxima compatibilidad
+
+22 IDIOMAS: ${IDIOMAS_22.join(', ')}
+
+COMPROBADOR DE CALIDAD — ÍTEMS QUE EVALÚAS:
+  Web: responsive, velocidad, SEO title, meta descripción, SSL, accesibilidad, enlaces, RGPD, mobile-first, Core Web Vitals
+  App PWA: manifest, service worker, offline, instalabilidad, rendimiento, UX mobile
+  Voz: claridad guión, árbol conversacional, cobertura FAQs, gestión objeciones, naturalidad, configuración técnica
+
+VENTAJAS COMPETITIVAS QUE SIEMPRE APLICAS:
+  ✅ Sin servidores externos — todo local en el navegador del usuario
+  ✅ Sin cuota mensual por sitio publicado
+  ✅ HTML exportado sin dependencias SaaS ni scripts de rastreo
+  ✅ Compatible con RGPD — sin datos enviados a servidores externos
+  ✅ Integración con MATRIX CRM — importa datos del cliente directamente
+
+PLAN DE LICENCIA ACTIVO: ${planActivo.toUpperCase()}
+  Proyectos disponibles: ${planCaps.proyectos === Infinity ? 'Ilimitados' : planCaps.proyectos}
+  Plantillas: ${planCaps.plantillas} | Idiomas: ${planCaps.idiomas} | IA: ${planCaps.ia}
+  PWA: ${planCaps.pwa ? 'Habilitado' : 'BLOQUEADO'} | Voz: ${planCaps.voz ? 'Habilitado' : 'BLOQUEADO'}
+  Si el usuario solicita un módulo bloqueado en su plan, recuérdalo con amabilidad y sugiere el upgrade.
+
+MARCO LEGAL:
+  Las API Keys de telefonía (Vapi, Bland AI, Twilio) son propias del usuario. BlogFort Agency LLC no almacena ni gestiona estas claves. El usuario es responsable del cumplimiento de normativas locales de telecomunicaciones.
+
+PRECIOS MWBFA:
+  Starter: $39/mes | Business: $99/mes | Enterprise: a medida
+  Anual (–20%): $31 | $78 | $199 / mes
+  Modelo dual: suscripción agencia + pago único por proyecto de cliente
+
+SEGURIDAD Y CUMPLIMIENTO LEGAL:
+  • API Keys (Anthropic, Vapi, Bland AI, Twilio): almacenadas SOLO en localStorage cifrado del navegador del usuario. PROHIBIDO transmitirlas, logearlas o exponerlas. La conexión viaja directa y cifrada del navegador al endpoint oficial del proveedor.
+  • RGPD: todos los formularios de contacto, bases de datos móviles y grabaciones de agentes de voz deben incluir aviso legal, consentimiento explícito y política de privacidad conforme a la normativa UE y telecomunicaciones locales.
+  • Arquitectura serverless: CERO datos de usuarios enviados a servidores de BlogFort Agency. Todo procesa en el navegador del cliente.
+
+INTERCONEXIÓN DEL ECOSISTEMA:
+  • MATRIX CRM → MWBFA: importas datos de clientes (nombre, sector, país, propuesta de valor) para auto-poblar plantillas eliminando errores de transcripción manual.
+  • BlogFort App → MWBFA: recibes contenido SEO optimizado para poblar secciones de blog, artículos y carruseles.
+  • MWBFA → As de Oro QA: antes de entregar CUALQUIER producto (web, PWA, guión de voz) ejecutas auditoría de calidad obligatoria.
+
+FORMATO DE RESPUESTA:
+1. Entrega el contenido o código DIRECTAMENTE sin preámbulos
+2. Para contenido web: estructura por bloques con separadores ═══ BLOQUE: NOMBRE ═══
+3. Para apps PWA: código HTML COMPLETO y 100% funcional desde la primera línea
+4. Para agentes de voz: guión estructurado con etiquetas [SALUDO] [RAMA-1] [FAQ] [OBJECIÓN] [CIERRE] [CONFIG TÉCNICA]
+5. Para comprobador As de Oro: score global + tabla ítem por ítem + parches de código para cada fallo
+6. Al final SIEMPRE: ── SCORE: X/100 | ESTADO: ✓ APROBADO / ⚠ REVISAR / ✗ REQUIERE CORRECCIÓN ──
+7. ESTÁNDAR DE CALIDAD ABSOLUTO: nunca entregues contenido mediocre, incompleto o con errores. Eres la garantía de reputación de BlogFort Agency.`;
+}
+
+// ─── EXECUTE ──────────────────────────────────────────────────────────────────
+async function execute() {
+  if (isLoading) return;
+  const cmd = document.getElementById('cmdInput').value.trim();
+  if (!cmd) return;
+  if (!apiKey) { openApiModal(); return; }
+  // Control de licencia por módulo
+  if (['apps','voz'].includes(currentNav) && !checkLicencia(currentNav)) return;
+
+  document.getElementById('cmdInput').value = '';
+  document.getElementById('cmdInput').style.height = 'auto';
+
+  appendUserMsg(cmd);
+  const typId = appendTyping();
+  setLoading(true);
+
+  try {
+    msgHistory.push({ role:'user', content: cmd });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-5',
+        max_tokens:4000,
+        system: buildSystem(),
+        messages: msgHistory.slice(-10)
+      })
+    });
+
+    if (!resp.ok) {
+      const e = await resp.json().catch(()=>({}));
+      throw new Error(e.error?.message || `Error ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const reply = data.content?.[0]?.text || '';
+    msgHistory.push({ role:'assistant', content:reply });
+
+    removeTyping(typId);
+    renderResponse(reply);
+
+    // Actualizar stats
+    if (currentNav==='web') S.proyectos++;
+    else if (currentNav==='apps') S.apps++;
+    else if (currentNav==='voz') S.agentesVoz++;
+    else if (currentNav==='exportar') S.exportados++;
+    saveS(); updateStats();
+
+  } catch(e) {
+    removeTyping(typId);
+    appendAgentMsg(`⚠️ ${e.message}`);
+    if (e.message.includes('401')) openApiModal();
+  }
+  setLoading(false);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderResponse(text) {
+  const area = document.getElementById('chatArea');
+
+  // Detectar score en la respuesta
+  const scoreMatch = text.match(/SCORE[:\s]+(\d+)\/100/i);
+  const score = scoreMatch ? parseInt(scoreMatch[1]) : null;
+
+  // Detectar si es código de app (HTML largo)
+  const isCode = text.includes('<!DOCTYPE') || text.includes('<html') || text.length > 1500;
+
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+
+  let extraHTML = '';
+
+  // Score bar para comprobador
+  if (score !== null) {
+    const scoreClass = score >= 80 ? 'sp-green' : score >= 60 ? 'sp-gold' : 'sp-red';
+    const barColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+    extraHTML = `
+      <div class="score-strip" style="margin-top:10px;">
+        <span class="score-pill ${scoreClass}">SCORE ${score}/100</span>
+        <span class="score-pill sp-purple">MÓDULO: ${currentNav.toUpperCase()}</span>
+        <span class="score-pill ${score>=80?'sp-green':score>=60?'sp-gold':'sp-red'}">${score>=80?'✓ APROBADO':score>=60?'⚠ REVISAR':'✗ REQUIERE CORRECCIÓN'}</span>
+      </div>
+      <div class="check-bar-wrap" style="margin-top:6px;">
+        <div class="check-bar-fill" style="width:${score}%;background:${barColor};"></div>
+      </div>`;
+  }
+
+  // Plantillas grid para módulo web
+  if (currentNav === 'web' && !score) {
+    const tplEntries = Object.entries(TEMPLATES); // 12 plantillas completas
+    extraHTML = `
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;margin-top:10px;margin-bottom:5px;">PLANTILLAS DISPONIBLES</div>
+      <div class="tpl-grid">
+        ${tplEntries.map(([id,t])=>`
+          <div class="tpl-card ${selectedTpl===id?'selected':''}" onclick="selectTplById('${id}')">
+            <div class="tpl-icon">${t.icon}</div>
+            <div class="tpl-name">${id.toUpperCase()}</div>
+            <div class="tpl-cat">${t.sector}</div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // Plataformas voz
+  if (currentNav === 'voz') {
+    extraHTML = `
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;margin-top:10px;margin-bottom:4px;">PLATAFORMA DE VOZ</div>
+      <div class="plat-row">
+        ${Object.entries(VOZ_PLATFORMS).map(([id,p])=>`
+          <div class="plat-btn ${selectedVozPlatform===id?'active':''}" onclick="selectVoz('${id}',this)">${p.name}</div>`).join('')}
+      </div>`;
+  }
+
+  const contentDisplay = isCode
+    ? `<pre style="font-family:var(--mono);font-size:10px;color:var(--green);white-space:pre-wrap;word-break:break-all;">${escHtml(text.substring(0,2000))}${text.length>2000?'\n... [contenido completo disponible para copiar]':''}</pre>`
+    : escHtml(text);
+
+  div.innerHTML = `
+    <div class="msg-av">🌐</div>
+    <div class="msg-bub" style="max-width:100%;">
+      <div class="msg-meta">AGENTE MWBFA · ${currentNav.toUpperCase()} · ${selectedTpl.toUpperCase()}</div>
+      <div class="out-card">
+        <div class="out-head">
+          <div class="out-title">${getModuleLabel()} — ${TEMPLATES[selectedTpl]?.icon || '🌐'} ${selectedTpl.toUpperCase()}</div>
+          <span style="font-family:var(--mono);font-size:7px;color:var(--text2);">🌍 ${document.getElementById('langSel').value}</span>
+        </div>
+        <div class="out-body">${contentDisplay}</div>
+        ${extraHTML}
+        <div class="out-actions">
+          <button class="act-btn purple" onclick="copyFull(this)">📋 Copiar todo</button>
+          ${isCode ? `<button class="act-btn green" onclick="downloadHTML(this,'${selectedTpl}')">⬇️ Descargar HTML</button>` : ''}
+          <button class="act-btn gold" onclick="sendToChecker(this)">✅ Comprobar calidad</button>
+          ${currentNav==='web' ? `<button class="act-btn blue" onclick="switchToExport()">📦 Exportar</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+
+  div.__fullText = text;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+let selectedVozPlatform = 'vapi';
+function selectVoz(id, el) {
+  selectedVozPlatform = id;
+  document.querySelectorAll('.plat-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+function getModuleLabel() {
+  const labels = {
+    web:'CONSTRUCTOR WEB', apps:'APP PWA', voz:'AGENTE DE VOZ',
+    calidad:'COMPROBADOR', ia:'GENERADOR IA', idiomas:'MULTIIDIOMA', exportar:'EXPORTACIÓN HTML'
+  };
+  return labels[currentNav] || currentNav.toUpperCase();
+}
+
+function copyFull(btn) {
+  const card = btn.closest('.msg-bub');
+  const div = card.closest('div');
+  const text = div.__fullText || card.querySelector('.out-body')?.textContent || '';
+  navigator.clipboard.writeText(text).then(() => toast('📋 Contenido completo copiado'));
+}
+
+function downloadHTML(btn, name) {
+  const card = btn.closest('div');
+  const text = card.__fullText || '';
+  if (!text.includes('<') ) { toast('⚠️ No hay código HTML para descargar'); return; }
+  const blob = new Blob([text], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name}-mwbfa.html`;
+  a.click();
+  S.exportados++; saveS(); updateStats();
+  toast('⬇️ HTML descargado');
+}
+
+function sendToChecker(btn) {
+  const card = btn.closest('div');
+  const text = card.__fullText || '';
+  setNav('calidad', document.querySelectorAll('.nav-item')[3]);
+  qk(`Comprueba la calidad de este contenido y dame el score detallado:\n\n${text.substring(0,1000)}`);
+}
+
+function switchToExport() {
+  setNav('exportar', document.querySelectorAll('.nav-item')[6]);
+  qk('Prepara el contenido para exportación como HTML autónomo limpio y listo para despliegue');
+}
+
+// ─── DOM HELPERS ──────────────────────────────────────────────────────────────
+function appendUserMsg(text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="msg-av">👤</div><div class="msg-bub"><div class="msg-meta">CEO · COMANDO</div><div class="msg-content">${escHtml(text)}</div></div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+}
+
+function appendAgentMsg(text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.innerHTML = `<div class="msg-av">🌐</div><div class="msg-bub"><div class="msg-meta">AGENTE MWBFA</div><div class="msg-content">${escHtml(text)}</div></div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+}
+
+function appendTyping() {
+  const area = document.getElementById('chatArea');
+  const id = 'typing-'+Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg agent'; div.id = id;
+  div.innerHTML = `<div class="msg-av">🌐</div><div class="msg-bub"><div class="msg-meta">MWBFA · CONSTRUYENDO</div><div class="typing"><span></span><span></span><span></span></div></div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) { const el=document.getElementById(id); if(el) el.remove(); }
+function escHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function qk(text) { document.getElementById('cmdInput').value=text; execute(); }
+
+// ─── UI ───────────────────────────────────────────────────────────────────────
+function setNav(nav, el) {
+  currentNav = nav;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const placeholders = {
+    web:'Crea una web para [tipo negocio] llamada [nombre] en [país]...',
+    apps:'Crea una app PWA de [tipo] para [nombre del negocio]...',
+    voz:'Crea un agente de voz en [plataforma] para [sector] en [idioma]...',
+    calidad:'Pega la URL, código o guión para comprobar su calidad...',
+    ia:'Genera contenido para la sección [bloque] de una web de [sector]...',
+    idiomas:'Traduce este contenido al [idioma] con adaptación cultural...',
+    exportar:'Prepara el contenido para exportar como HTML autónomo...'
+  };
+  document.getElementById('cmdInput').placeholder = placeholders[nav] || 'Escribe tu instrucción...';
+}
+
+function selectTpl(el) {
+  document.querySelectorAll('.mod-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  selectedTpl = el.dataset.tpl;
+  toast(`✓ Plantilla ${selectedTpl.toUpperCase()} seleccionada`);
+}
+
+function selectTplById(id) {
+  selectedTpl = id;
+  document.querySelectorAll('.mod-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tpl===id);
+  });
+  toast(`✓ Plantilla ${id.toUpperCase()} seleccionada`);
+}
+
+function updateStats() {
+  document.getElementById('sf-proy').textContent = S.proyectos;
+  document.getElementById('sf-apps').textContent = S.apps;
+  document.getElementById('sf-voz').textContent = S.agentesVoz;
+  document.getElementById('sf-exp').textContent = S.exportados;
+}
+
+function setLoading(on) {
+  isLoading = on;
+  document.getElementById('sendBtn').disabled = on;
+  const dot=document.getElementById('statusDot'), lbl=document.getElementById('statusLbl');
+  if(on){
+    dot.style.cssText='background:var(--accent);box-shadow:0 0 8px var(--accent);';
+    lbl.style.color='var(--accent)'; lbl.textContent='CONSTRUYENDO';
+  } else {
+    dot.style.cssText='background:var(--green);box-shadow:0 0 8px var(--green);';
+    lbl.style.color='var(--green)'; lbl.textContent='ONLINE';
+  }
+}
+
+function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+function handleKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();execute();} }
+function toast(msg,dur=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+
+function openApiModal(){ document.getElementById('apiInput').value=apiKey?'••••••••':''; document.getElementById('apiModal').classList.add('on'); setTimeout(()=>document.getElementById('apiInput').focus(),100); }
+function closeApiModal(){ document.getElementById('apiModal').classList.remove('on'); }
+function saveApiKey(){
+  const val=document.getElementById('apiInput').value.trim();
+  if(val&&val!=='••••••••'){ apiKey=val; localStorage.setItem('mwbfa_agent_key',apiKey); toast('✅ API Key guardada'); }
+  closeApiModal();
+}
+document.getElementById('apiModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeApiModal(); });
+
+// ─── SYNC MATRIX CRM ──────────────────────────────────────────────────────────
+function syncMatrix() {
+  if (!checkLicencia('matrix')) return;
+  const clientes = JSON.parse(localStorage.getItem('matrix_agent_v2') || '{}');
+  const leads = (clientes.clients || []).concat(clientes.leads || []);
+  if (!leads.length) {
+    toast('⚠️ Sin datos de clientes en MATRIX — Asegúrate de que MATRIX está activo');
+    appendAgentMsg('No se encontraron datos de clientes en MATRIX CRM.\n\nVerifica que el Agente MATRIX esté activo y tenga clientes registrados.');
+    return;
+  }
+  const resumen = leads.slice(0,5).map((l,i) =>
+    `${i+1}. ${l.empresa || l.nombre || '—'} | ${l.pais || '—'} | ${l.sector || '—'}`
+  ).join('\n');
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.innerHTML = `
+    <div class="msg-av">🌐</div>
+    <div class="msg-bub" style="max-width:100%;">
+      <div class="msg-meta">MWBFA · SYNC MATRIX CRM · [✓ CONECTADO]</div>
+      <div class="out-card">
+        <div class="out-head">
+          <div class="out-title">📡 DATOS IMPORTADOS DE MATRIX</div>
+          <span style="font-family:var(--mono);font-size:7px;color:var(--green);">${leads.length} registros</span>
+        </div>
+        <div class="out-body" style="font-family:var(--mono);font-size:10px;">${resumen}
+
+→ Selecciona un cliente para auto-poblar la plantilla web.</div>
+        <div class="out-actions">
+          ${leads.slice(0,4).map((l,i)=>`<button class="act-btn purple" onclick="cargarClienteMatrix(${i})">${l.empresa || l.nombre || 'Cliente '+(i+1)}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+  // Guardar leads en scope para acceso posterior
+  window._matrixLeads = leads;
+  toast('📡 MATRIX CRM sincronizado');
+}
+
+function cargarClienteMatrix(idx) {
+  const l = (window._matrixLeads || [])[idx];
+  if (!l) return;
+  const empresa = l.empresa || l.nombre || '';
+  const sector = l.sector || '';
+  const pais = l.pais || '';
+  const tplMatch = Object.keys(TEMPLATES).find(k =>
+    TEMPLATES[k].sector.toLowerCase().includes(sector.toLowerCase()) ||
+    sector.toLowerCase().includes(TEMPLATES[k].sector.toLowerCase())
+  ) || selectedTpl;
+  selectTplById(tplMatch);
+  qk(`Crea una web profesional para "${empresa}", empresa de sector ${sector} en ${pais}. Usa la plantilla ${tplMatch.toUpperCase()} completa con todos los bloques. Genera contenido persuasivo y adaptado al sector.`);
+  toast(`✓ Cliente "${empresa}" cargado desde MATRIX`);
+}
+
+// ─── SYNC BLOGFORT APP ────────────────────────────────────────────────────────
+function syncBlogfort() {
+  if (!checkLicencia('blogfort')) return;
+  const articulos = JSON.parse(localStorage.getItem('blogfort_articulos') || '[]');
+  const ultimoArticulo = localStorage.getItem('blogfort_ultimo_articulo') || '';
+  if (!ultimoArticulo && !articulos.length) {
+    toast('⚠️ Sin contenido SEO en BlogFort App');
+    appendAgentMsg('No se encontró contenido SEO en BlogFort App.\n\nGenera artículos en el Agente BlogFort App primero para poder importarlos aquí.');
+    return;
+  }
+  const contenido = ultimoArticulo || (articulos[0]?.contenido || '');
+  const extracto = contenido.substring(0, 800);
+  qk(`Tengo este contenido SEO generado por BlogFort App. Intégralo como sección de blog/artículos en la plantilla ${selectedTpl.toUpperCase()} activa. Adapta el formato para web:
+
+${extracto}`);
+  toast('📄 Contenido BlogFort App importado');
+}
+
+// ─── CAMBIO DE PLAN ────────────────────────────────────────────────────────────
+function cambiarPlan(plan) {
+  S.plan = plan;
+  saveS();
+  const planNames = { starter:'Starter ($39/mes)', business:'Business ($99/mes)', enterprise:'Enterprise (a medida)' };
+  toast(`✅ Plan cambiado a ${planNames[plan]}`);
+  appendAgentMsg(`Plan actualizado: ${planNames[plan]}
+
+Capacidades activas:
+${plan==='starter'?'• 1 proyecto · 6 plantillas · 5 idiomas · Módulos PWA, Voz y CRM bloqueados':plan==='business'?'• 10 proyectos · 12 plantillas · 22 idiomas · PWA · Voz · MATRIX Sync · BlogFort Sync':'• Proyectos ilimitados · 12 plantillas · 22 idiomas · Todos los módulos · Marca blanca · SLA garantizado'}`);
+  document.querySelectorAll('.plan-btn').forEach(b => b.classList.toggle('active', b.dataset.plan === plan));
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  updateStats();
+  if(!apiKey){
+    setTimeout(()=>appendAgentMsg('⚠️ Agente MWBFA requiere API Key de Anthropic.\n\nHaz clic en 🔑 API KEY para configurarla.'),500);
+  } else {
+    setTimeout(()=>appendAgentMsg(`Agente MWBFA operativo ✅ — Nivel 2 Constructor activo.\n\n12 plantillas sectoriales listas. 5 tipos de App PWA. Agentes de Voz para Vapi, Bland AI y Twilio. Comprobador de Calidad 0–100. 22 idiomas con adaptación cultural. Exportación HTML autónoma sin dependencias.\n\nPlantilla activa: ${selectedTpl.toUpperCase()} ${TEMPLATES[selectedTpl].icon}\n\n¿Construimos una web, una app, un agente de voz o comprobamos calidad?`),400);
+  }
+});
+</script>
+</body>
+</html>
