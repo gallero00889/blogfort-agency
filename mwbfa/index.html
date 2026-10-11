@@ -1298,6 +1298,7 @@ if ('serviceWorker' in navigator) {
                   <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:4px;">PLAN</div>
                   <div class="plan-name">STARTER</div>
                   <div class="plan-price">$39<span style="font-size:16px;opacity:0.7;">/mes</span></div>
+                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $33/mes facturado anualmente (−15 %)</div>
                 </div>
                 <div class="plan-body">
                   <div class="plan-feature yes">✓ 3 proyectos web</div>
@@ -1320,6 +1321,7 @@ if ('serviceWorker' in navigator) {
                   <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.5);margin-bottom:4px;">PLAN</div>
                   <div class="plan-name">BUSINESS</div>
                   <div class="plan-price">$99<span style="font-size:16px;opacity:0.7;">/mes</span></div>
+                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $84/mes facturado anualmente (−15 %)</div>
                 </div>
                 <div class="plan-body">
                   <div class="plan-feature yes">✓ Proyectos ilimitados</div>
@@ -3357,5 +3359,190 @@ setTimeout(() => {
   <div class="mwbfa-modal-wrap" id="mwbfaModalWrap"></div>
 </div>
 
+<script>window.BFH_TOOL='MWBFA';</script>
+<script>
+/* ═══ BlogFort · Salud de datos v1 ═══
+   Monitor de almacenamiento, protección de datos, estado de la caché sin conexión
+   y copia de seguridad (JSON). Todo local: no envía nada a ningún servidor. */
+(function () {
+  if (window.__bfHealth) return;
+  window.__bfHealth = true;
+  var TOOL = window.BFH_TOOL || document.title || 'BlogFort';
+  var NS = 'bfh_';
+  var SECRET = /key|token|pin|pass|secret|stripe|auth/i;
+
+  function $(id) { return document.getElementById(id); }
+  function fmt(b) {
+    if (!b) return '0 KB';
+    if (b < 1024 * 1024) return Math.max(1, Math.round(b / 1024)) + ' KB';
+    if (b < 1024 * 1024 * 1024) return (b / 1048576).toFixed(1) + ' MB';
+    return (b / 1073741824).toFixed(2) + ' GB';
+  }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  async function stats() {
+    var est = {};
+    try { if (navigator.storage && navigator.storage.estimate) est = await navigator.storage.estimate(); } catch (e) {}
+    var lsBytes = 0, lsKeys = 0;
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k.indexOf(NS) === 0) continue;
+        lsKeys++;
+        lsBytes += (k.length + (localStorage.getItem(k) || '').length) * 2;
+      }
+    } catch (e) {}
+    var persisted = false;
+    try { if (navigator.storage && navigator.storage.persisted) persisted = await navigator.storage.persisted(); } catch (e) {}
+    var caches_ = 0;
+    try { if (window.caches) caches_ = (await caches.keys()).length; } catch (e) {}
+    var sw = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+    return { usage: est.usage || 0, quota: est.quota || 0, lsBytes: lsBytes, lsKeys: lsKeys, persisted: persisted, caches: caches_, sw: sw };
+  }
+
+  function dumpLocal() {
+    var out = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k.indexOf(NS) === 0 || SECRET.test(k)) continue;
+        out[k] = localStorage.getItem(k);
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  async function dumpIDB() {
+    var out = {};
+    if (!window.indexedDB || !indexedDB.databases) return out;
+    var dbs = [];
+    try { dbs = await indexedDB.databases(); } catch (e) { return out; }
+    for (var d = 0; d < dbs.length; d++) {
+      var name = dbs[d].name;
+      if (!name) continue;
+      try {
+        out[name] = await new Promise(function (res, rej) {
+          var r = indexedDB.open(name);
+          r.onerror = function () { rej(r.error); };
+          r.onsuccess = function () {
+            var db = r.result, names = [].slice.call(db.objectStoreNames), data = {};
+            if (!names.length) { db.close(); return res(data); }
+            var tx = db.transaction(names, 'readonly'), left = names.length;
+            names.forEach(function (n) {
+              var g = tx.objectStore(n).getAll();
+              g.onsuccess = function () { data[n] = g.result; if (--left === 0) { db.close(); res(data); } };
+              g.onerror = function () { data[n] = 'ERROR'; if (--left === 0) { db.close(); res(data); } };
+            });
+          };
+        });
+      } catch (e) { out[name] = 'ERROR'; }
+    }
+    return out;
+  }
+
+  async function backup() {
+    var payload = {
+      herramienta: TOOL,
+      generado: new Date().toISOString(),
+      aviso: 'Copia local. Excluye claves API, PIN y tokens por seguridad.',
+      localStorage: dumpLocal(),
+      indexedDB: await dumpIDB()
+    };
+    var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    var a = document.createElement('a');
+    var slug = TOOL.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'copia-' + slug + '-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    lsSet(NS + 'lastBackup', String(Date.now()));
+  }
+
+  function css() {
+    var s = document.createElement('style');
+    s.textContent =
+      '#bfh-btn{position:fixed;left:12px;bottom:12px;z-index:2147483000;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,179,0,.7);background:#0a1830;color:#ffb300;font:700 16px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);opacity:.85}' +
+      '#bfh-btn:hover{opacity:1}#bfh-btn.warn{background:#ffb300;color:#0a1830;opacity:1}' +
+      '#bfh-ov{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}' +
+      '#bfh-ov.on{display:flex}' +
+      '#bfh-box{background:#0a1830;color:#eef1f7;border:1px solid rgba(255,179,0,.5);border-radius:10px;max-width:440px;width:100%;padding:22px;font:14px/1.5 Arial,sans-serif;max-height:90vh;overflow:auto}' +
+      '#bfh-box h3{margin:0 0 4px;font-size:17px;color:#ffd54a}#bfh-box .s{color:#9fb0cc;font-size:12px;margin-bottom:14px}' +
+      '#bfh-bar{height:10px;border-radius:6px;background:#12244a;overflow:hidden;margin:6px 0 4px}#bfh-fill{height:100%;background:#ffb300;width:0}' +
+      '#bfh-box .r{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid rgba(255,255,255,.08)}' +
+      '#bfh-box .r b{color:#ffd54a;font-weight:600;text-align:right}' +
+      '#bfh-box button{font:700 13px Arial,sans-serif;padding:10px 14px;border-radius:4px;border:1px solid rgba(255,179,0,.6);background:transparent;color:#eef1f7;cursor:pointer;margin:12px 8px 0 0}' +
+      '#bfh-box button.p{background:#ffb300;color:#0a1830;border-color:#ffb300}' +
+      '#bfh-tip{font-size:12px;color:#ffd54a;margin-top:10px}#bfh-toast{position:fixed;left:12px;bottom:60px;z-index:2147483002;background:#ffb300;color:#0a1830;font:600 13px Arial,sans-serif;padding:10px 14px;border-radius:6px;max-width:280px;display:none}';
+    document.head.appendChild(s);
+  }
+
+  var pct = 0;
+  async function render() {
+    var s = await stats();
+    pct = s.quota ? Math.min(100, Math.round(s.usage / s.quota * 100)) : 0;
+    $('bfh-fill').style.width = Math.max(pct, 1) + '%';
+    $('bfh-use').textContent = s.quota ? fmt(s.usage) + ' de ' + fmt(s.quota) + ' (' + pct + '%)' : 'No disponible en este navegador';
+    $('bfh-ls').textContent = s.lsKeys + ' registros · ' + fmt(s.lsBytes);
+    $('bfh-per').textContent = s.persisted ? 'Sí, protegido' : 'No (el navegador podría borrarlo si falta espacio)';
+    $('bfh-cache').textContent = (s.sw || s.caches) ? 'Activa (' + (s.caches || 1) + ')' : 'No activa todavía';
+    var lb = parseInt(lsGet(NS + 'lastBackup') || '0', 10);
+    $('bfh-last').textContent = lb ? new Date(lb).toLocaleDateString() : 'Nunca';
+    $('bfh-pbtn').style.display = s.persisted ? 'none' : 'inline-block';
+    $('bfh-tip').textContent = pct >= 70 ? 'Espacio alto: descarga una copia y archiva o elimina proyectos antiguos.' : '';
+    $('bfh-btn').className = pct >= 70 ? 'warn' : '';
+    return s;
+  }
+
+  function toast(msg) {
+    var t = $('bfh-toast'); t.textContent = msg; t.style.display = 'block';
+    setTimeout(function () { t.style.display = 'none'; }, 7000);
+  }
+
+  function build() {
+    css();
+    var b = document.createElement('button');
+    b.id = 'bfh-btn'; b.title = 'Salud de datos'; b.setAttribute('aria-label', 'Salud de datos'); b.textContent = '⛨';
+    var ov = document.createElement('div'); ov.id = 'bfh-ov';
+    ov.innerHTML =
+      '<div id="bfh-box" role="dialog" aria-label="Salud de datos">' +
+      '<h3>Salud de datos</h3><div class="s">' + TOOL + ' · todo se guarda en este dispositivo</div>' +
+      '<div>Almacenamiento usado</div><div id="bfh-bar"><div id="bfh-fill"></div></div><div id="bfh-use" style="font-size:12px;color:#9fb0cc"></div>' +
+      '<div class="r" style="margin-top:10px"><span>Datos de la herramienta</span><b id="bfh-ls"></b></div>' +
+      '<div class="r"><span>Almacenamiento protegido</span><b id="bfh-per"></b></div>' +
+      '<div class="r"><span>Caché sin conexión</span><b id="bfh-cache"></b></div>' +
+      '<div class="r"><span>Última copia de seguridad</span><b id="bfh-last"></b></div>' +
+      '<div id="bfh-tip"></div>' +
+      '<button class="p" id="bfh-bk">Descargar copia (JSON)</button><button id="bfh-pbtn">Proteger datos</button><button id="bfh-x">Cerrar</button>' +
+      '<div class="s" style="margin-top:12px">La copia excluye claves API, PIN y tokens por seguridad. No se envía nada a ningún servidor.</div></div>';
+    var t = document.createElement('div'); t.id = 'bfh-toast';
+    document.body.appendChild(b); document.body.appendChild(ov); document.body.appendChild(t);
+    b.addEventListener('click', function () { ov.classList.add('on'); render(); });
+    $('bfh-x').addEventListener('click', function () { ov.classList.remove('on'); });
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('on'); });
+    $('bfh-bk').addEventListener('click', async function () { await backup(); render(); toast('Copia descargada.'); });
+    $('bfh-pbtn').addEventListener('click', async function () {
+      try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {}
+      render();
+    });
+  }
+
+  function start() {
+    try { build(); } catch (e) { return; }
+    setTimeout(async function () {
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+      var s = await render();
+      var today = new Date().toDateString();
+      if (lsGet(NS + 'lastWarn') === today) return;
+      var lb = parseInt(lsGet(NS + 'lastBackup') || '0', 10);
+      var old = !lb || (Date.now() - lb) > 14 * 86400000;
+      if (pct >= 70) { toast('Almacenamiento al ' + pct + '%. Abre ⛨ y descarga una copia.'); lsSet(NS + 'lastWarn', today); }
+      else if (old && s.lsKeys > 5) { toast('Tus datos viven en este dispositivo. Haz una copia con ⛨.'); lsSet(NS + 'lastWarn', today); }
+    }, 5000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+</script>
 </body>
 </html>

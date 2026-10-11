@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refund & Cancellation Policy — BlogFort Agency LLC</title>
+<meta name="description" content="Refund and cancellation policy of BlogFort Agency LLC.">
+<link rel="icon" type="image/png" href="icon-192-2.png">
+
+<style>
+:root{--navy:#0a1830;--navy-deep:#060f20;--navy-light:#12244a;--gold:#ffb300;--gold-light:#ffd54a;--text-light:#eef1f7;--text-muted:#9fb0cc}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html[lang="en"] [data-l="es"],html[lang="es"] [data-l="en"]{display:none !important}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--navy-deep);color:var(--text-light);line-height:1.6}
+a{color:var(--gold-light);text-decoration:none}
+a:hover{text-decoration:underline}
+header{position:sticky;top:0;z-index:10;background:rgba(6,15,32,.94);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,179,0,.25)}
+.nav{max-width:1100px;margin:0 auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{font-size:1.3rem;font-weight:bold;letter-spacing:.5px;color:var(--text-light);white-space:nowrap}
+.brand span{color:var(--gold);margin-left:4px}
+.brand:hover{text-decoration:none}
+.nav-right{display:flex;align-items:center;gap:24px}
+.nav-links{display:flex;gap:22px;font-family:Arial,sans-serif;font-size:.9rem}
+.nav-links a{color:var(--text-muted)}
+.nav-links a:hover{color:var(--gold-light);text-decoration:none}
+#lang-switch{background:var(--navy-light);color:var(--text-light);border:1px solid rgba(255,179,0,.4);border-radius:4px;padding:7px 10px;font-family:Arial,sans-serif;font-size:.85rem;cursor:pointer}
+.hero{max-width:1100px;margin:0 auto;padding:84px 24px 64px;text-align:center}
+.eyebrow{font-family:Arial,sans-serif;letter-spacing:3px;text-transform:uppercase;font-size:.75rem;color:var(--gold);margin-bottom:14px}
+.hero h1{font-size:2.6rem;font-weight:normal;line-height:1.25;max-width:800px;margin:0 auto 20px}
+.hero h1 em{font-style:italic;color:var(--gold-light)}
+.lead{font-family:Arial,sans-serif;font-size:1.05rem;color:var(--text-muted);max-width:640px;margin:0 auto 32px}
+.cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{font-family:Arial,sans-serif;display:inline-block;padding:13px 28px;border-radius:3px;font-size:.92rem;font-weight:bold;letter-spacing:.4px;cursor:pointer;border:none;text-align:center}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--gold);color:var(--navy-deep)}
+.btn-primary:hover{background:var(--gold-light)}
+.btn-outline{border:1px solid rgba(255,179,0,.55);color:var(--text-light);background:transparent}
+.btn-outline:hover{border-color:var(--gold-light);color:var(--gold-light)}
+.btn-sm{padding:9px 18px;font-size:.82rem}
+section{padding:64px 24px;max-width:1100px;margin:0 auto}
+.section-head{text-align:center;margin-bottom:44px}
+.section-head h2{font-size:1.9rem;font-weight:normal}
+.section-head p{font-family:Arial,sans-serif;color:var(--text-muted);max-width:620px;margin:14px auto 0;font-size:.98rem}
+.band{background:var(--navy);border-radius:2px}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.about-grid h2{font-size:1.7rem;font-weight:normal;margin-bottom:18px}
+.about-grid p{font-family:Arial,sans-serif;color:var(--text-muted);margin-bottom:16px;font-size:.98rem}
+.stats-list{display:grid;gap:16px}
+.stat-box{background:var(--navy-light);border:1px solid rgba(255,179,0,.2);border-radius:4px;padding:22px 26px}
+.stat-box .num{font-size:1.4rem;color:var(--gold-light)}
+.stat-box .label{font-family:Arial,sans-serif;font-size:.85rem;color:var(--text-muted);margin-top:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px}
+.card{background:var(--navy);border:1px solid rgba(255,179,0,.18);border-radius:6px;padding:30px 26px;display:flex;flex-direction:column}
+.card .tag{font-family:Arial,sans-serif;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:block}
+.card h3{font-size:1.25rem;font-weight:normal;margin-bottom:10px}
+.card p{font-family:Arial,sans-serif;font-size:.92rem;color:var(--text-muted)}
+.card ul{font-family:Arial,sans-serif;font-size:.88rem;color:var(--text-muted);margin:14px 0 18px 18px}
+.card li{margin-bottom:6px}
+.card .from{margin-top:auto;font-family:Arial,sans-serif;font-size:.9rem;color:var(--text-light)}
+.card .from strong{color:var(--gold-light);font-size:1.15rem;font-weight:normal;font-family:Georgia,serif}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
+.step{border-left:2px solid var(--gold);padding:4px 0 4px 18px}
+.step b{display:block;font-weight:normal;font-size:1.1rem;margin-bottom:6px}
+.step p{font-family:Arial,sans-serif;font-size:.9rem;color:var(--text-muted)}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.price-card{background:var(--navy);border:1px solid rgba(255,179,0,.25);border-radius:6px;padding:28px 24px}
+.price-card h3{font-size:1.3rem;font-weight:normal;margin-bottom:6px}
+.price-card .sub{font-family:Arial,sans-serif;font-size:.85rem;color:var(--text-muted);margin-bottom:18px}
+.plan{display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:center;padding:14px 0;border-top:1px solid rgba(255,179,0,.15)}
+.plan .name{font-family:Arial,sans-serif;font-weight:bold;font-size:.95rem}
+.plan .desc{font-family:Arial,sans-serif;font-size:.8rem;color:var(--text-muted);display:block;font-weight:normal;margin-top:2px}
+.plan .amt{font-size:1.5rem;color:var(--gold-light);text-align:right;white-space:nowrap}
+.plan .amt small{font-family:Arial,sans-serif;font-size:.75rem;color:var(--text-muted)}
+.plan .amt .alt{display:block;font-family:Arial,sans-serif;font-size:.72rem;color:var(--text-muted)}
+.plan .pf{grid-column:1 / -1;list-style:none;margin:4px 0 6px 0;font-family:Arial,sans-serif;font-size:.8rem;color:var(--text-muted)}
+.plan .pf li{margin:0 0 4px 0;padding-left:16px;position:relative}
+.plan .pf li:before{content:"\2713";color:var(--gold);position:absolute;left:0}
+.brand img{height:42px;width:auto;vertical-align:middle;margin-right:8px}
+.brand{display:flex;align-items:center}
+.plan .act{grid-column:1 / -1}
+.plan .act .btn{width:100%}
+.notes{max-width:820px;margin:36px auto 0;font-family:Arial,sans-serif;font-size:.88rem;color:var(--text-muted)}
+.notes li{margin:0 0 8px 20px}
+.svc{max-width:820px;margin:0 auto;text-align:center}
+.svc h2{font-size:1.7rem;font-weight:normal;margin-bottom:14px}
+.svc p{font-family:Arial,sans-serif;color:var(--text-muted);margin-bottom:12px}
+.svc ul{font-family:Arial,sans-serif;color:var(--text-muted);list-style:none;display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:18px 0 26px;font-size:.92rem}
+.svc li:before{content:"\25C6";color:var(--gold);margin-right:8px;font-size:.7rem}
+#growth{text-align:center;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-deep) 100%)}
+#growth h2{font-size:1.7rem;font-weight:normal;margin-bottom:16px}
+#growth p{font-family:Arial,sans-serif;color:var(--text-muted);max-width:640px;margin:0 auto;font-size:.98rem}
+.contact-card{background:var(--navy);border:1px solid rgba(255,179,0,.25);border-radius:6px;padding:46px 30px;max-width:680px;margin:0 auto;text-align:center}
+.contact-card h2{font-size:1.7rem;font-weight:normal;margin-bottom:14px}
+.contact-card p.l{font-family:Arial,sans-serif;color:var(--text-muted);margin-bottom:26px}
+.contact-line{font-family:Arial,sans-serif;font-size:1rem;margin-bottom:10px}
+.contact-line strong{color:var(--gold-light);font-weight:normal;margin-right:6px}
+.contact-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+footer{border-top:1px solid rgba(255,179,0,.15);padding:30px 24px;text-align:center;font-family:Arial,sans-serif;font-size:.82rem;color:var(--text-muted)}
+footer .flinks{margin-bottom:10px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
+.legal{max-width:820px;margin:0 auto;padding:56px 24px 40px}
+.legal h1{font-size:2rem;font-weight:normal;margin-bottom:8px}
+.legal .upd{font-family:Arial,sans-serif;font-size:.85rem;color:var(--text-muted);margin-bottom:34px}
+.legal h2{font-size:1.2rem;font-weight:normal;color:var(--gold-light);margin:30px 0 10px}
+.legal p,.legal li{font-family:Arial,sans-serif;font-size:.94rem;color:#c9d3e6;margin-bottom:10px}
+.legal ul{margin:0 0 10px 22px}
+.legal .back{font-family:Arial,sans-serif;font-size:.88rem;display:inline-block;margin-bottom:22px}
+@media (max-width:720px){.hero h1{font-size:1.9rem}.about-grid{grid-template-columns:1fr}.nav-links{display:none}.nav{padding:14px 16px}section{padding:48px 16px}.hero{padding:56px 16px 44px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html"><img src="logo.png" alt="BlogFort Agency logo">BlogFort<span>Agency</span></a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="index.html#about"><span data-l="en">About</span><span data-l="es">Nosotros</span></a>
+        <a href="index.html#tools"><span data-l="en">Tools</span><span data-l="es">Herramientas</span></a>
+        <a href="index.html#pricing"><span data-l="en">Pricing</span><span data-l="es">Precios</span></a>
+        <a href="index.html#services"><span data-l="en">Services</span><span data-l="es">Servicios</span></a>
+        <a href="index.html#contact"><span data-l="en">Contact</span><span data-l="es">Contacto</span></a>
+      </nav>
+      <select id="lang-switch" aria-label="Language / Idioma">
+        <option value="en">EN — English</option>
+        <option value="es">ES — Español</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main class="legal">
+  <a class="back" href="index.html">← <span data-l="en">Back to home</span><span data-l="es">Volver al inicio</span></a>
+  <h1><span data-l="en">Refund & Cancellation Policy</span><span data-l="es">Política de Reembolsos y Cancelación</span></h1>
+  <div class="upd"><span data-l="en">Last updated: October 7, 2026</span><span data-l="es">Última actualización: 7 de octubre de 2026</span></div>
+  <h2><span data-l="en">1. Cancelling a subscription</span><span data-l="es">1. Cancelar una suscripción</span></h2><div data-l="en"><p>You can cancel at any time by emailing <a href='mailto:hello@blogfort.agency'>hello@blogfort.agency</a> from the address used to subscribe. We confirm cancellations within two business days. Your access continues until the end of the period you have already paid for, and you will not be charged again.</p></div><div data-l="es"><p>Puedes cancelar en cualquier momento escribiendo a <a href='mailto:hello@blogfort.agency'>hello@blogfort.agency</a> desde la dirección con la que te suscribiste. Confirmamos las cancelaciones en un máximo de dos días laborables. Tu acceso continúa hasta el final del periodo ya pagado y no se te volverá a cobrar.</p></div><h2><span data-l="en">2. 14-day refund on your first payment</span><span data-l="es">2. Reembolso de 14 días en tu primer pago</span></h2><div data-l="en"><p>If you are a new customer and the Tool does not suit you, you can request a full refund of your first subscription payment (monthly or annual) within 14 days of purchase. No reason is required.</p></div><div data-l="es"><p>Si eres cliente nuevo y la Herramienta no se ajusta a lo que necesitas, puedes solicitar el reembolso completo de tu primer pago de suscripción (mensual o anual) dentro de los 14 días siguientes a la compra. No es necesario indicar el motivo.</p></div><h2><span data-l="en">3. Renewals</span><span data-l="es">3. Renovaciones</span></h2><div data-l="en"><p>Monthly renewals are not refundable for a period that has already started; cancel before the next renewal to avoid further charges. If an annual plan renews and you did not intend it to, tell us within 7 days of the charge and we will refund it in full.</p></div><div data-l="es"><p>Las renovaciones mensuales no son reembolsables una vez iniciado el periodo; cancela antes de la siguiente renovación para evitar nuevos cargos. Si un plan anual se renueva y no era tu intención, avísanos en los 7 días siguientes al cargo y te lo reembolsaremos íntegramente.</p></div><h2><span data-l="en">4. Billing errors</span><span data-l="es">4. Errores de facturación</span></h2><div data-l="en"><p>Duplicate or incorrect charges are refunded in full as soon as we confirm them.</p></div><div data-l="es"><p>Los cargos duplicados o incorrectos se reembolsan íntegramente en cuanto los confirmamos.</p></div><h2><span data-l="en">5. Managed Services</span><span data-l="es">5. Servicios Gestionados</span></h2><div data-l="en"><p>Refunds for Managed Services follow the written quote. Work that has been delivered and accepted is not refundable; if we cannot deliver part of the agreed work, we refund the undelivered portion. Revisions included in the quote are provided before any refund is considered. Optional maintenance or management plans can be cancelled at any time with effect from the end of the current billing period.</p></div><div data-l="es"><p>Los reembolsos de los Servicios Gestionados se rigen por el presupuesto escrito. El trabajo entregado y aceptado no es reembolsable; si no podemos entregar una parte del trabajo acordado, reembolsamos la parte no entregada. Las revisiones incluidas en el presupuesto se realizan antes de valorar cualquier reembolso. Los planes opcionales de mantenimiento o gestión pueden cancelarse en cualquier momento con efecto al final del periodo de facturación en curso.</p></div><h2><span data-l="en">6. Third-party costs</span><span data-l="es">6. Costes de terceros</span></h2><div data-l="en"><p>AI usage billed by Anthropic to your own account is not part of our prices and cannot be refunded by us.</p></div><div data-l="es"><p>El uso de IA que Anthropic factura a tu propia cuenta no forma parte de nuestros precios y no podemos reembolsarlo.</p></div><h2><span data-l="en">7. How to request a refund</span><span data-l="es">7. Cómo solicitar un reembolso</span></h2><div data-l="en"><p>Email <a href='mailto:hello@blogfort.agency'>hello@blogfort.agency</a> with your name, the email used at purchase and the plan. We reply within two business days. Approved refunds are returned to the original payment method through Stripe and usually appear within 5–10 business days, depending on your bank.</p></div><div data-l="es"><p>Escribe a <a href='mailto:hello@blogfort.agency'>hello@blogfort.agency</a> indicando tu nombre, el correo usado en la compra y el plan. Respondemos en un máximo de dos días laborables. Los reembolsos aprobados se devuelven al método de pago original a través de Stripe y suelen reflejarse en 5–10 días laborables, según tu banco.</p></div><h2><span data-l="en">8. Enterprise</span><span data-l="es">8. Enterprise</span></h2><div data-l="en"><p>Enterprise plans are governed by the written agreement signed with you, which prevails over this policy.</p></div><div data-l="es"><p>Los planes Enterprise se rigen por el acuerdo escrito firmado contigo, que prevalece sobre esta política.</p></div>
+</main>
+
+<footer>
+  <div class="flinks">
+    <a href="terms.html"><span data-l="en">Terms of Service</span><span data-l="es">Términos del Servicio</span></a>
+    <a href="privacy.html"><span data-l="en">Privacy Policy</span><span data-l="es">Política de Privacidad</span></a>
+    <a href="refunds.html"><span data-l="en">Refund &amp; Cancellation Policy</span><span data-l="es">Política de Reembolsos y Cancelación</span></a>
+  </div>
+  <div><span data-l="en">© 2026 BlogFort Agency LLC. All rights reserved.</span><span data-l="es">© 2026 BlogFort Agency LLC. Todos los derechos reservados.</span></div>
+  <div style="margin-top:6px">BlogFort Agency LLC · 30 N Gould St, Ste N, Sheridan, WY 82801, USA · Wyoming Filing ID 2026-001954197</div>
+</footer>
+<script>
+(function(){
+  var sel=document.getElementById('lang-switch');
+  function setLang(l){document.documentElement.lang=l;try{localStorage.setItem('blogfort-lang',l)}catch(e){}}
+  var saved=null;try{saved=localStorage.getItem('blogfort-lang')}catch(e){}
+  if(!saved){saved=((navigator.language||'en').slice(0,2)==='es')?'es':'en'}
+  sel.value=saved;setLang(saved);
+  sel.addEventListener('change',function(e){setLang(e.target.value)});
+})();
+</script>
+</body>
+</html>

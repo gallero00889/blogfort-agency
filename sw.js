@@ -1,32 +1,11 @@
-const CACHE_NAME = 'blogfort-v7';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/blogfort-logo-transparente-1.png',
-  '/icon-192-2.png',
-  '/icon-512-2.png',
-  '/manifest.json'
-];
-
-self.addEventListener('install', event => {
-  self.skipWaiting();
+// Limpia el antiguo service worker de la BlogFort App que vivía en la raíz (ahora está en /app/).
+self.addEventListener('install', function(){ self.skipWaiting(); });
+self.addEventListener('activate', function(event){
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k =>
-        caches.delete(k)
-      ))
-    ).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.keys()
+      .then(function(keys){ return Promise.all(keys.map(function(k){ return caches.delete(k); })); })
+      .then(function(){ return self.registration.unregister(); })
+      .then(function(){ return self.clients.matchAll(); })
+      .then(function(clients){ clients.forEach(function(c){ c.navigate(c.url); }); })
   );
 });
