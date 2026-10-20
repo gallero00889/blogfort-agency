@@ -1,0 +1,55 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Verificar autenticidad — BlogFort Agency</title>
+<style>
+body{margin:0;background:#0A1628;color:#e8eef8;font:15px/1.55 Arial,sans-serif;padding:16px}.w{max-width:720px;margin:0 auto}
+h1{font-size:20px;letter-spacing:2px;margin:6px 0}p{color:#9fb0c9}.c{background:#101f38;border:1px solid #1B4F8A;border-radius:12px;padding:16px;margin:12px 0}
+textarea,input{width:100%;box-sizing:border-box;background:#0A1628;color:#e8eef8;border:1px solid #2b4a78;border-radius:8px;padding:10px;font:12px monospace}textarea{min-height:120px}
+button{background:#1B4F8A;color:#fff;border:0;border-radius:8px;padding:12px 16px;font-weight:700;cursor:pointer;margin-top:8px}
+.ok{border-color:#1e9e6a;background:rgba(30,158,106,.12)}.bad{border-color:#c0392b;background:rgba(192,57,43,.14)}.warn{border-color:#d4a017;background:rgba(212,160,23,.12)}
+td{padding:4px 8px 4px 0;vertical-align:top;font-size:14px}td:first-child{color:#9fb0c9;white-space:nowrap}label{font-size:12px;color:#9fb0c9}
+</style></head><body><div class="w">
+<h1>VERIFICAR AUTENTICIDAD</h1><p>BlogFort Agency LLC · Comprueba si un documento o un email con firma de BlogFort es genuino. La comprobación se hace en tu navegador; no se envía nada.</p>
+<div class="c"><label>Pega aquí la firma completa (empieza por BF1.)</label><textarea id="t" spellcheck="false" placeholder="BF1.…"></textarea>
+<label style="display:block;margin-top:10px">Huella del contenido impresa en el documento (opcional, para comparar)</label><input id="h" placeholder="Huella SHA-256">
+<button id="b">VERIFICAR</button></div>
+<div id="r"></div>
+<p style="font-size:12px">Qué demuestra y qué no: confirma que la firma fue creada con una licencia emitida por BlogFort (o directamente por BlogFort, en el caso de emails) y que el contenido firmado no se ha alterado. No impide que alguien edite un PDF en otro programa: por eso, compara siempre la huella impresa con la de esta página.</p>
+</div>
+<script>
+var PUB={"kty":"EC","crv":"P-256","x":"2SMR8WAsGLuzqpG7p5oAhZoftAptruKlu9-5XG8UD_c","y":"mgfi2M2_FLECMHL4ajIl6xH6G_xk3xcUQ7kDreq4A7M"};
+function b64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function txt(a){return new TextDecoder().decode(a)}
+function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+async function vk(jwk){return crypto.subtle.importKey('jwk',jwk,{name:'ECDSA',namedCurve:'P-256'},false,['verify'])}
+async function ver(key,sig,data){return crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},key,sig,data)}
+function show(cls,title,rows){document.getElementById('r').innerHTML='<div class="c '+cls+'"><b>'+title+'</b>'+(rows?'<table>'+rows.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+esc(x[1])+'</td></tr>'}).join('')+'</table>':'')+'</div>'}
+async function revocadas(){try{var r=await fetch('revocadas.json',{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+document.getElementById('b').onclick=async function(){
+ var s=document.getElementById('t').value.replace(/\s+/g,'');var hp=document.getElementById('h').value.trim().toLowerCase();
+ try{
+  var base=await vk(PUB);
+  if(s.indexOf('BF1M.')===0){
+   var p=s.split('.');var data=b64u(p[1]);
+   if(!(await ver(base,b64u(p[2]),data))) return show('bad','✗ FIRMA NO VÁLIDA — no la ha emitido BlogFort',null);
+   var o=JSON.parse(txt(data));
+   return show('ok','✓ AUTÉNTICO — firmado por BlogFort Agency LLC',[['Tipo','Email de BlogFort'],['Destinatario',o.to],['Fecha',o.iat],['Referencia',o.re],['Identificador',o.id]]);
+  }
+  if(s.indexOf('BF1.')===0){
+   var q=s.split('.');var certB=b64u(q[1]);
+   if(!(await ver(base,b64u(q[2]),certB))) return show('bad','✗ La licencia que firmó este documento NO fue emitida por BlogFort',null);
+   var cert=JSON.parse(txt(certB));var docB=b64u(q[3]);
+   var ck=await vk({kty:'EC',crv:'P-256',x:cert.pk.x,y:cert.pk.y,ext:true});
+   if(!(await ver(ck,b64u(q[4]),docB))) return show('bad','✗ El contenido firmado ha sido alterado o la firma no corresponde a la licencia',null);
+   var d=JSON.parse(txt(docB));var rows=[['Documento',d.title],['Tipo',d.kind],['Herramienta',d.tool],['Generado',d.ts],['Identificador',d.id],['Licencia',cert.id+' · plan '+cert.pl],['Licencia válida hasta',cert.exp],['Huella del contenido',d.h]];
+   var cls='ok',tit='✓ AUTÉNTICO — generado por una herramienta BlogFort con licencia válida',notes=[];
+   var gen=new Date(d.ts).getTime(),end=new Date(cert.exp+'T23:59:59').getTime()+3*864e5;
+   if(!isNaN(gen)&&gen>end){cls='warn';tit='⚠ Firma correcta, pero el documento es posterior a la caducidad de la licencia';}
+   var rv=await revocadas();if(rv&&rv.indexOf(cert.id)>=0){cls='bad';tit='✗ Licencia REVOCADA por BlogFort';}
+   if(hp){ if(hp===String(d.h).toLowerCase()) rows.push(['Comparación de huella','✓ coincide con la impresa']); else {cls='bad';tit='✗ La huella impresa NO coincide con la firmada: el documento ha sido modificado';rows.push(['Comparación de huella','✗ NO coincide']);} }
+   else rows.push(['Comparación de huella','Pega la huella impresa en el documento para comprobar que no se ha cambiado']);
+   if(rv===null) rows.push(['Revocaciones','No se pudo consultar la lista (sin conexión)']);
+   return show(cls,tit,rows);
+  }
+  show('bad','Formato no reconocido: debe empezar por BF1. o BF1M.',null);
+ }catch(e){show('bad','✗ No se pudo verificar: la firma está incompleta o dañada',null)}
+};
+</script></body></html>
