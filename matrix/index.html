@@ -3,7 +3,288 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MATRIX v3.1 — BlogFort Agency LLC</title>
+<title>MATRIX v3.2 — BlogFort Agency LLC</title>
+<script id="bfLicenseGate">/* BlogFort — control de licencia (firma ECDSA P-256). Verifica el código sin servidor. */
+(function(){
+  var PUB = {"kty":"EC","crv":"P-256","x":"2SMR8WAsGLuzqpG7p5oAhZoftAptruKlu9-5XG8UD_c","y":"mgfi2M2_FLECMHL4ajIl6xH6G_xk3xcUQ7kDreq4A7M"};
+  var PRODUCT = 'matrix';
+  var KEY = 'bf_license';
+  var GRACE_DAYS = 3;
+  var BUY = 'https://blogfort.agency';
+  var MAIL = 'hello@blogfort.agency';
+  function b64u(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; var b=atob(s), a=new Uint8Array(b.length); for(var i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a; }
+  async function check(code){
+    try{
+      var parts=String(code||'').trim().split('.'); if(parts.length!==3) return {ok:false,msg:'Código no válido.'};
+      var key=await crypto.subtle.importKey('jwk',PUB,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+      var good=await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},key,b64u(parts[1]),b64u(parts[0]));
+      if(!good) return {ok:false,msg:'Código no válido.'};
+      var p=JSON.parse(new TextDecoder().decode(b64u(parts[0])));
+      if(p.v!==2 || !p.prods || p.prods.indexOf(PRODUCT)<0) return {ok:false,msg:'Este código no incluye esta herramienta.'};
+      var end=new Date(p.exp+'T23:59:59').getTime()+GRACE_DAYS*864e5;
+      if(isNaN(end) || Date.now()>end) return {ok:false,msg:'Este código caducó el '+p.exp+'. Renueva tu suscripción y solicita uno nuevo.',expired:true};
+      // La firma de activación debe coincidir: la clave privada entregada tiene que corresponder a la pública certificada por BlogFort
+      var MISMATCH={ok:false,msg:'La firma de activación no coincide con la licencia. Código rechazado.'};
+      var priv;
+      try{
+        priv=await crypto.subtle.importKey('jwk',{kty:'EC',crv:'P-256',x:p.pk.x,y:p.pk.y,d:parts[2],ext:true},{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+        var pub=await crypto.subtle.importKey('jwk',{kty:'EC',crv:'P-256',x:p.pk.x,y:p.pk.y,ext:true},{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+        var test=crypto.getRandomValues(new Uint8Array(16));
+        var sg=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},priv,test);
+        if(!(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pub,sg,test))) return MISMATCH;
+      }catch(e2){ return MISMATCH; }
+      return {ok:true,p:p,parts:parts,priv:priv,daysLeft:Math.ceil((new Date(p.exp+'T23:59:59').getTime()-Date.now())/864e5)};
+    }catch(e){ return {ok:false,msg:'No se pudo comprobar el código en este navegador.'}; }
+  }
+  function b64uEnc(buf){ var a=new Uint8Array(buf),s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+  async function sha256hex(str){ var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str)); return Array.prototype.map.call(new Uint8Array(h),function(x){return ('0'+x.toString(16)).slice(-2)}).join(''); }
+  // Sello de autenticidad de un documento: certificado de la licencia (firmado por BlogFort) + firma del documento con la clave de esa licencia
+  function makeApi(r){
+    return {
+      license:{id:r.p.id,plan:r.p.pl,exp:r.p.exp,email:r.p.e,prods:r.p.prods},
+      sha256:sha256hex,
+      verify:async function(seal){
+        try{
+          var q=String(seal||'').split('.'); if(q[0]!=='BF1'||q.length!==5) return {ok:false,msg:'Sello no válido.'};
+          var pub=await crypto.subtle.importKey('jwk',PUB,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+          if(!(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pub,b64u(q[2]),b64u(q[1])))) return {ok:false,msg:'El certificado del sello no es de BlogFort.'};
+          var cert=JSON.parse(new TextDecoder().decode(b64u(q[1])));
+          var ck=await crypto.subtle.importKey('jwk',{kty:'EC',crv:'P-256',x:cert.pk.x,y:cert.pk.y,ext:true},{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+          if(!(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},ck,b64u(q[4]),b64u(q[3])))) return {ok:false,msg:'La firma del contenido no coincide.'};
+          return {ok:true,cert:cert,doc:JSON.parse(new TextDecoder().decode(b64u(q[3])))};
+        }catch(e){ return {ok:false,msg:'Sello no válido.'}; }
+      },
+      seal:async function(doc){
+        // vuelve a comprobar la correspondencia antes de firmar
+        var again=await check(localStorage.getItem(KEY)); if(!again.ok) throw new Error('Licencia no válida: documento no sellado.');
+        var docStr=JSON.stringify(doc);
+        var sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},r.priv,new TextEncoder().encode(docStr));
+        var seal='BF1.'+[r.parts[0],r.parts[1],b64uEnc(new TextEncoder().encode(docStr)),b64uEnc(sig)].join('.');
+        return {seal:seal,short:'BF-'+(await sha256hex(seal)).slice(0,12).toUpperCase().replace(/(.{4})(?=.)/g,'$1-')};
+      }
+    };
+  }
+  function css(){ var s=document.createElement('style'); s.textContent='#bfLic{position:fixed;inset:0;z-index:2147483000;background:#0A1628;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Arial,sans-serif}#bfLic .b{max-width:420px;width:100%;background:#101f38;border:1px solid #1B4F8A;border-radius:14px;padding:26px;color:#e8eef8;text-align:center}#bfLic h1{font-size:20px;margin:0 0 6px;letter-spacing:2px}#bfLic p{font-size:13px;line-height:1.5;color:#9fb0c9;margin:8px 0}#bfLic textarea{width:100%;box-sizing:border-box;height:96px;margin:10px 0;background:#0A1628;color:#e8eef8;border:1px solid #2b4a78;border-radius:8px;padding:10px;font:11px monospace;resize:none}#bfLic button{width:100%;padding:12px;border:0;border-radius:8px;background:#1B4F8A;color:#fff;font-weight:700;letter-spacing:1px;cursor:pointer}#bfLic .e{color:#ff8a7a;font-size:12px;min-height:16px}#bfLic a{color:#6fb3ff}#bfLicBar{position:fixed;left:0;right:0;bottom:0;z-index:2147482000;background:#E6B800;color:#222;font:12px Arial;padding:6px 10px;text-align:center}'; document.head.appendChild(s); }
+  function gate(msg){
+    css(); var d=document.createElement('div'); d.id='bfLic';
+    d.innerHTML='<div class="b"><h1>'+PRODUCT.toUpperCase()+' · BLOGFORT AGENCY</h1><p>Introduce tu código de licencia. Lo recibes por email al contratar tu plan.</p><textarea id="bfLicIn" placeholder="Pega aquí tu código" spellcheck="false"></textarea><div class="e" id="bfLicErr"></div><button id="bfLicBtn">ACTIVAR</button><p>¿Aún no tienes plan? <a href="'+BUY+'">Ver planes</a> · <a href="mailto:'+MAIL+'">'+MAIL+'</a></p></div>';
+    document.body.appendChild(d);
+    var err=d.querySelector('#bfLicErr'); if(msg) err.textContent=msg;
+    d.querySelector('#bfLicBtn').onclick=async function(){
+      var code=d.querySelector('#bfLicIn').value; var r=await check(code);
+      if(!r.ok){ err.textContent=r.msg; return; }
+      try{ localStorage.setItem(KEY,code.trim()); }catch(e){}
+      d.remove(); done(r);
+    };
+  }
+  function done(r){
+    window.BF_LICENSE={email:r.p.e,plan:r.p.pl,exp:r.p.exp,daysLeft:r.daysLeft,prods:r.p.prods}; window.BF=makeApi(r); try{ window.dispatchEvent(new Event('bf-license-ready')); }catch(e){}
+    if(r.daysLeft<=7){ var b=document.createElement('div'); b.id='bfLicBar'; b.textContent=(r.daysLeft<0?'Licencia caducada: periodo de cortesía. ':'Tu licencia vence el '+r.p.exp+'. ')+'Renueva tu plan y solicita el código nuevo en '+MAIL; document.body.appendChild(b); }
+  }
+  async function init(){
+    var saved=null; try{ saved=localStorage.getItem(KEY); }catch(e){}
+    if(saved){ var r=await check(saved); if(r.ok){ done(r); return; } gate(r.msg); return; }
+    gate('');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+<script id="bfReports">/* BlogFort — motor de informes (datos reales → documento con sello). Compartido por MATRIX y su agente. */
+(function(){
+  var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var REPORTS={
+    conta:{label:'Contabilidad (año o mes)',alfa:true},
+    leads:{label:'Pipeline de leads',alfa:false},
+    clientes:{label:'Clientes y contratos',alfa:false},
+    camaras:{label:'Documentos de las cámaras',alfa:true}
+  };
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function num(v){v=parseFloat(v);return isNaN(v)?0:v}
+  function money(n,cur){var a=Math.abs(n).toFixed(2).split('.');var ent=a[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');var s=ent+','+a[1];return cur==='EUR'?((n<0?'-':'')+s+' €'):((n<0?'-':'')+'$'+s)}
+  function pct(n){return n.toFixed(1).replace('.',',')+' %'}
+  function ddmmyyyy(iso){var d=new Date(iso);return isNaN(d)?String(iso||'—'):d.toLocaleDateString('es-ES')}
+  function daysTo(iso){var d=new Date(iso+'T23:59:59');return isNaN(d)?null:Math.ceil((d-Date.now())/864e5)}
+
+  /* ---------- validación estricta de la orden (la IA solo propone; esto decide) ---------- */
+  function validateSpec(sp,now){
+    now=now||new Date();var out={},err=[];
+    if(!sp||typeof sp!=='object') return {ok:false,error:'Orden no válida.'};
+    if(!REPORTS[sp.report]) return {ok:false,error:'No puedo generar ese tipo de informe. Disponibles: '+Object.keys(REPORTS).map(function(k){return REPORTS[k].label}).join(', ')+'.'};
+    out.report=sp.report;
+    var y=parseInt(sp.year,10); out.year=(y>=2000&&y<=2100)?y:now.getFullYear();
+    var m=parseInt(sp.month,10); out.month=(m>=1&&m<=12)?m:null;
+    ['fase','estado','pais','sector'].forEach(function(k){ if(typeof sp[k]==='string'&&sp[k].trim()) out[k]=sp[k].trim().slice(0,60); });
+    out.camara=(sp.camara==='alfa'||sp.camara==='beta')?sp.camara:'ambas';
+    if(typeof sp.titulo==='string'&&sp.titulo.trim()) out.titulo=sp.titulo.trim().slice(0,90);
+    return {ok:true,spec:out};
+  }
+  function describe(sp){
+    var t=REPORTS[sp.report].label;var p=[];
+    if(sp.report==='conta') p.push(sp.month?('mes de '+MONTHS[sp.month-1]+' de '+sp.year):('año '+sp.year));
+    if(sp.report==='leads'){ if(sp.fase)p.push('fase '+sp.fase); if(sp.estado)p.push('estado '+sp.estado); if(sp.pais)p.push('país '+sp.pais); if(sp.sector)p.push('sector '+sp.sector); }
+    if(sp.report==='camaras') p.push(sp.camara==='ambas'?'Cámara Alfa y Beta':'Cámara '+(sp.camara==='alfa'?'Alfa':'Beta'));
+    return t+(p.length?' — '+p.join(', '):'');
+  }
+  function needsAlfa(sp){ return sp.report==='conta' || (sp.report==='camaras' && sp.camara!=='beta'); }
+
+  /* ---------- constructores de informe ---------- */
+  function contaSummary(DATA,year,month){
+    var p=DATA.conta.params,ing=0,gDed=0,gNo=0,rep=0,sop=0,n=0;
+    DATA.conta.movs.forEach(function(m){var d=new Date(m.fecha);if(d.getFullYear()!==year||(month!=null&&d.getMonth()!==month))return;n++;
+      var base=num(m.base),imp=base*num(m.tasa)/100;
+      if(m.tipo==='ingreso'){ing+=base;rep+=imp}else if(m.deducible){gDed+=base;sop+=imp}else{gNo+=base+imp}});
+    var ben=ing-gDed,impB=Math.max(0,ben)*num(p.tasaBeneficio)/100,iva=rep-sop,extra=Math.max(0,ben)*num(p.reserva)/100;
+    return {n:n,ing:ing,gDed:gDed,gNo:gNo,rep:rep,sop:sop,iva:iva,ben:ben,impB:impB,margen:ing>0?ben/ing*100:0,neto:ing-gDed-gNo-impB,apartar:Math.max(0,iva)+impB+extra};
+  }
+  function buildConta(sp,DATA){
+    var cur=DATA.conta.params.moneda,p=DATA.conta.params,month=sp.month?sp.month-1:null,S=contaSummary(DATA,sp.year,month);
+    var secs=[{h:'Resumen',kv:[
+      ['Ingresos (sin impuesto)',money(S.ing,cur)],['Gastos deducibles',money(S.gDed,cur)],['Gastos no deducibles',money(S.gNo,cur)],
+      ['Beneficio antes de impuestos',money(S.ben,cur)],['Impuesto sobre beneficio estimado ('+num(p.tasaBeneficio)+' %)',money(S.impB,cur)],
+      ['Impuesto repercutido (ventas)',money(S.rep,cur)],['Impuesto soportado (compras)',money(S.sop,cur)],['Impuesto indirecto neto',money(S.iva,cur)],
+      ['Neto tras impuestos',money(S.neto,cur)],['Margen',pct(S.margen)],['Importe a apartar para impuestos',money(S.apartar,cur)]]}];
+    if(month==null){
+      var rows=[];for(var i=0;i<12;i++){var r=contaSummary(DATA,sp.year,i);if(r.n)rows.push([MONTHS[i],money(r.ing,cur),money(r.gDed+r.gNo,cur),money(r.ben,cur),money(r.impB,cur)])}
+      secs.push({h:'Detalle por mes',table:{head:['Mes','Ingresos','Gastos','Beneficio','Impuesto est.'],rows:rows}});
+    }
+    var mv=DATA.conta.movs.filter(function(m){var d=new Date(m.fecha);return d.getFullYear()===sp.year&&(month==null||d.getMonth()===month)}).sort(function(a,b){return a.fecha<b.fecha?-1:1}).map(function(m){
+      var base=num(m.base),imp=base*num(m.tasa)/100;
+      return [m.fecha,m.tipo==='ingreso'?'Ingreso':'Gasto'+(m.deducible?'':' (no deducible)'),m.concepto||'',m.categoria||'',money(base,cur),num(m.tasa)+' %',money(imp,cur),money(base+imp,cur)]});
+    secs.push({h:'Libro de movimientos',table:{head:['Fecha','Tipo','Concepto','Categoría','Base','%','Impuesto','Total'],rows:mv}});
+    secs.push({p:'Cálculo orientativo con los porcentajes configurados por el usuario. No constituye asesoramiento fiscal: confírmalo con tu gestor.'});
+    return {title:sp.titulo||('Informe de contabilidad — '+(month==null?sp.year:(MONTHS[month]+' '+sp.year))),kind:'contabilidad',period:month==null?String(sp.year):(MONTHS[month]+' '+sp.year),sections:secs};
+  }
+  function buildLeads(sp,DATA){
+    var L=DATA.leads.filter(function(l){
+      if(sp.fase&&String(l.fase).toLowerCase()!==sp.fase.toLowerCase())return false;
+      if(sp.estado){var st=String(l.status).toLowerCase(),want=sp.estado.toLowerCase();var map={pendiente:'pending',pendientes:'pending',confirmado:'confirmed',confirmados:'confirmed'};if(st!==(map[want]||want))return false}
+      if(sp.pais&&String(l.pais).toLowerCase().indexOf(sp.pais.toLowerCase())<0)return false;
+      if(sp.sector&&String(l.sector).toLowerCase().indexOf(sp.sector.toLowerCase())<0)return false;return true});
+    var byFase={};L.forEach(function(l){byFase[l.fase]=(byFase[l.fase]||0)+1});
+    var secs=[{h:'Resumen',kv:[['Leads incluidos',String(L.length)]].concat(Object.keys(byFase).map(function(k){return ['Fase: '+k,String(byFase[k])]}))},
+      {h:'Leads',table:{head:['Empresa','País','Sector','Fase','Estado','Origen','Registrado'],rows:L.map(function(l){return [l.empresa,l.pais,l.sector,l.fase,l.status==='confirmed'?'Confirmado':'Pendiente',l.canal||'—',l.fecha||'—']})}}];
+    return {title:sp.titulo||'Informe de pipeline de leads',kind:'leads',period:'Datos a '+new Date().toLocaleDateString('es-ES'),sections:secs};
+  }
+  function nextRenewal(ct){
+    var ini=new Date(ct.fecha);if(isNaN(ini))return null;var now=new Date();
+    if(ct.periodo==='anual'){var v=new Date(ini);v.setFullYear(v.getFullYear()+1);while(v<now)v.setFullYear(v.getFullYear()+1);return v}
+    if(ct.periodo==='mensual'){var n=new Date(ini);while(n<=now)n.setMonth(n.getMonth()+1);return n}
+    return null;
+  }
+  function buildClientes(sp,DATA){
+    var cur=DATA.conta.params.moneda;
+    var C=DATA.clients.map(function(c){return [c.empresa,c.sector,c.servicio,(c.progreso||0)+' %',c.status==='active'?'Activo':c.status,c.fecha||'—']});
+    var K=DATA.contratos.map(function(ct){var r=nextRenewal(ct);var rs=r?r.toISOString().slice(0,10):'—';var d=r?daysTo(rs):null;
+      return [ct.cliente,money(num(ct.monto),cur),ct.periodo,ct.fecha||'—',r?(ddmmyyyy(rs)+(d!=null?' ('+d+' días)':'')):'—',ct.estado||'—']});
+    return {title:sp.titulo||'Informe de clientes y contratos',kind:'clientes',period:'Datos a '+new Date().toLocaleDateString('es-ES'),sections:[
+      {h:'Resumen',kv:[['Clientes activos',String(DATA.clients.length)],['Contratos registrados',String(DATA.contratos.length)]]},
+      {h:'Clientes',table:{head:['Cliente','Sector','Servicio','Progreso','Estado','Alta'],rows:C}},
+      {h:'Contratos y suscripciones',table:{head:['Cliente','Importe','Periodicidad','Inicio','Próxima renovación / vencimiento','Estado'],rows:K}}]};
+  }
+  function buildCamaras(sp,DATA){
+    function rows(arr){return arr.map(function(v){var d=v.vencimiento?daysTo(v.vencimiento):null;return [v.entidad,v.subcarpeta,v.tipo,v.sello,v.vencimiento?(ddmmyyyy(v.vencimiento)+(d!=null?' ('+d+' días)':'')):'—',v.fecha||'—']})}
+    var head=['Entidad','Subcarpeta','Tipo','Sello','Vencimiento','Registrado'],secs=[];
+    if(sp.camara!=='beta')secs.push({h:'Cámara Alfa — documentos legales y contabilidad',table:{head:head,rows:rows(DATA.vaultAlfa)}});
+    if(sp.camara!=='alfa')secs.push({h:'Cámara Beta — contratos y suscripciones',table:{head:head,rows:rows(DATA.vaultBeta)}});
+    secs.push({p:'Este listado no incluye el contenido de las notas de cada entrada.'});
+    return {title:sp.titulo||'Informe de documentos de las cámaras',kind:'camaras',period:'Datos a '+new Date().toLocaleDateString('es-ES'),sections:secs};
+  }
+  function build(sp,DATA){
+    var v=validateSpec(sp);if(!v.ok)throw new Error(v.error);sp=v.spec;
+    var d=sp.report==='conta'?buildConta(sp,DATA):sp.report==='leads'?buildLeads(sp,DATA):sp.report==='clientes'?buildClientes(sp,DATA):buildCamaras(sp,DATA);
+    d.spec=sp;return d;
+  }
+  function canonical(doc){return JSON.stringify({title:doc.title,kind:doc.kind,period:doc.period,sections:doc.sections})}
+
+  /* ---------- HTML (pantalla y PDF por impresión) ---------- */
+  function sectionHtml(s){
+    var o='';if(s.h)o+='<h2>'+esc(s.h)+'</h2>';
+    if(s.kv)o+='<table class="kv">'+s.kv.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td><b>'+esc(r[1])+'</b></td></tr>'}).join('')+'</table>';
+    if(s.table){o+='<table class="tb"><thead><tr>'+s.table.head.map(function(h){return '<th>'+esc(h)+'</th>'}).join('')+'</tr></thead><tbody>'+(s.table.rows.length?s.table.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>'}).join('')+'</tr>'}).join(''):'<tr><td colspan="'+s.table.head.length+'" style="text-align:center;color:#888">Sin registros</td></tr>')+'</tbody></table>'}
+    if(s.p)o+='<p class="note">'+esc(s.p)+'</p>';return o;
+  }
+  function html(doc,seal,meta){
+    return '<div class="rp-page"><div class="rp-head"><div><div class="rp-brand">BLOGFORT AGENCY LLC</div><div class="rp-sub">'+esc(meta.tool)+' · Documento generado y sellado</div></div><div class="rp-code">'+esc(seal.short)+'</div></div>'+
+    '<h1>'+esc(doc.title)+'</h1><div class="rp-meta">'+esc(doc.period)+' · Generado el '+esc(new Date(meta.ts).toLocaleString('es-ES'))+(meta.who?' · '+esc(meta.who):'')+'</div>'+
+    doc.sections.map(sectionHtml).join('')+
+    '<div class="rp-seal"><b>Sello de autenticidad BlogFort</b> — Código '+esc(seal.short)+'<br>Huella del contenido (SHA-256): <code>'+esc(meta.h)+'</code><br>Verifica este documento en <b>blogfort.agency/verificar</b> pegando el sello completo:<div class="rp-full">'+esc(seal.seal)+'</div></div></div>';
+  }
+  var CSS='#reportPrint{position:fixed;inset:0;z-index:9000;background:#e9edf3;overflow:auto;font-family:Arial,sans-serif;color:#1a2433}'+
+  '#reportPrint .rp-bar{position:sticky;top:0;z-index:2;background:#0A1628;padding:10px;display:flex;gap:8px;flex-wrap:wrap}'+
+  '#reportPrint .rp-bar button{background:#1B4F8A;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}#reportPrint .rp-bar button.g{background:#2b3a55}'+
+  '#reportPrint .rp-page{position:relative;z-index:1;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'380\' height=\'240\'><text x=\'20\' y=\'150\' transform=\'rotate(-25 190 120)\' font-family=\'Arial\' font-weight=\'700\' font-size=\'22\' letter-spacing=\'3\' fill=\'%231B4F8A\' fill-opacity=\'0.08\'>BLOGFORT AGENCY</text></svg>");max-width:820px;margin:14px auto;padding:30px 34px;box-shadow:0 2px 14px rgba(0,0,0,.15)}'+
+    '#reportPrint h1{font-size:22px;margin:14px 0 2px}#reportPrint h2{font-size:15px;color:#1B4F8A;border-bottom:1px solid #1B4F8A;padding-bottom:3px;margin:20px 0 8px}'+
+  '#reportPrint .rp-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1B4F8A;padding-bottom:8px}#reportPrint .rp-brand{font-weight:700;letter-spacing:3px;color:#1B4F8A}#reportPrint .rp-sub,#reportPrint .rp-meta{font-size:12px;color:#5b6b85}#reportPrint .rp-code{font:700 12px monospace;border:1px solid #1B4F8A;padding:4px 8px;border-radius:5px}'+
+  '#reportPrint table{border-collapse:collapse;width:100%;font-size:12px}#reportPrint .tb th{background:#eaf0fa;text-align:left}#reportPrint .tb th,#reportPrint .tb td{border:1px solid #cfd8e6;padding:5px 6px}#reportPrint .kv td{padding:3px 8px 3px 0;border-bottom:1px dotted #cfd8e6}#reportPrint .kv td:first-child{color:#5b6b85}'+
+  '#reportPrint .note{font-size:11px;color:#5b6b85}#reportPrint .rp-seal{margin-top:26px;border:1px solid #1B4F8A;border-radius:6px;padding:10px;font-size:11px}#reportPrint .rp-full{font:7px/1.25 monospace;word-break:break-all;margin-top:6px;color:#333}'+
+  '@media print{html,body{background:#fff!important;height:auto!important;min-height:0!important}body>*:not(#reportPrint){display:none!important}#reportPrint{position:static;background:#fff;overflow:visible}#reportPrint .rp-bar{display:none}#reportPrint .rp-page{box-shadow:none;margin:0;max-width:none;padding:0}@page{margin:16mm 14mm}}';
+
+  /* ---------- Word (.docx real, sin librerías) ---------- */
+  function xe(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'')}
+  var CRC=(function(){var t=[],c,n,k;for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+  function crc32(b){var c=0xFFFFFFFF;for(var i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+  function zipStore(files){
+    var enc=new TextEncoder(),parts=[],cd=[],off=0;
+    function u16(v){return [v&255,(v>>>8)&255]}function u32(v){return [v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255]}
+    files.forEach(function(f){var name=enc.encode(f.name),data=enc.encode(f.data),crc=crc32(data);
+      var lh=[].concat(u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0));
+      parts.push(new Uint8Array(lh),name,data);
+      cd.push({name:name,crc:crc,len:data.length,off:off});off+=lh.length+name.length+data.length});
+    var cdStart=off,cdBytes=[];
+    cd.forEach(function(e){var h=[].concat(u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(e.crc),u32(e.len),u32(e.len),u16(e.name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(e.off));
+      cdBytes.push(new Uint8Array(h),e.name);off+=h.length+e.name.length});
+    var end=new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(cd.length),u16(cd.length),u32(off-cdStart),u32(cdStart),u16(0)));
+    return new Blob(parts.concat(cdBytes,[end]),{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  }
+  function wp(text,o){o=o||{};var rp='<w:rPr>'+(o.b?'<w:b/>':'')+(o.color?'<w:color w:val="'+o.color+'"/>':'')+(o.sz?'<w:sz w:val="'+o.sz+'"/>':'')+(o.mono?'<w:rFonts w:ascii="Courier New" w:hAnsi="Courier New"/>':'')+'</w:rPr>';
+    return '<w:p><w:pPr>'+(o.style?'<w:pStyle w:val="'+o.style+'"/>':'')+(o.after!=null?'<w:spacing w:after="'+o.after+'"/>':'')+'</w:pPr><w:r>'+rp+'<w:t xml:space="preserve">'+xe(text)+'</w:t></w:r></w:p>'}
+  function wtable(head,rows,widths){
+    var tw=9360,n=head.length;widths=widths||head.map(function(){return Math.floor(tw/n)});
+    function cell(t,w,hd){return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(hd?'<w:shd w:val="clear" w:color="auto" w:fill="EAF0FA"/>':'')+'</w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr><w:r><w:rPr>'+(hd?'<w:b/>':'')+'<w:sz w:val="16"/></w:rPr><w:t xml:space="preserve">'+xe(t)+'</w:t></w:r></w:p></w:tc>'}
+    var b='<w:tblBorders>'+['top','left','bottom','right','insideH','insideV'].map(function(x){return '<w:'+x+' w:val="single" w:sz="4" w:space="0" w:color="CFD8E6"/>'}).join('')+'</w:tblBorders>';
+    return '<w:tbl><w:tblPr><w:tblW w:w="'+tw+'" w:type="dxa"/>'+b+'<w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>'+widths.map(function(w){return '<w:gridCol w:w="'+w+'"/>'}).join('')+'</w:tblGrid>'+
+      '<w:tr><w:trPr><w:tblHeader/></w:trPr>'+head.map(function(h,i){return cell(h,widths[i],true)}).join('')+'</w:tr>'+
+      (rows.length?rows.map(function(r){return '<w:tr>'+r.map(function(c,i){return cell(c,widths[i],false)}).join('')+'</w:tr>'}).join(''):'<w:tr>'+cell('Sin registros',tw,false)+'</w:tr>')+'</w:tbl>'+wp('',{after:60});
+  }
+  var NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w10="urn:schemas-microsoft-com:office:word"';
+  function docx(doc,seal,meta){
+    var body='';
+    body+=wp('BLOGFORT AGENCY LLC',{b:1,color:'1B4F8A',sz:22,after:0});
+    body+=wp(meta.tool+' · Documento generado y sellado · Código '+seal.short,{color:'5B6B85',sz:16,after:120});
+    body+=wp(doc.title,{style:'Title'});
+    body+=wp(doc.period+' · Generado el '+new Date(meta.ts).toLocaleString('es-ES')+(meta.who?' · '+meta.who:''),{color:'5B6B85',sz:18,after:160});
+    doc.sections.forEach(function(s){
+      if(s.h)body+=wp(s.h,{style:'Heading1'});
+      if(s.kv)body+=wtable(['Concepto','Valor'],s.kv,[5400,3960]);
+      if(s.table){var n=s.table.head.length,w=s.table.head.map(function(){return Math.floor(9360/n)});body+=wtable(s.table.head,s.table.rows,w)}
+      if(s.p)body+=wp(s.p,{color:'5B6B85',sz:18});
+    });
+    body+=wp('Sello de autenticidad BlogFort — Código '+seal.short,{b:1,sz:18,after:20});
+    body+=wp('Huella del contenido (SHA-256): '+meta.h,{sz:16,after:20});
+    body+=wp('Verifica este documento en blogfort.agency/verificar pegando el sello completo:',{sz:16,after:20});
+    body+=wp(seal.seal,{mono:1,sz:10,after:0});
+    var sect='<w:sectPr><w:headerReference w:type="default" r:id="rId2"/><w:footerReference w:type="default" r:id="rId3"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1300" w:right="1273" w:bottom="1200" w:left="1273" w:header="600" w:footer="500" w:gutter="0"/></w:sectPr>';
+    var document='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+NS+'><w:body>'+body+sect+'</w:body></w:document>';
+    var wm='<w:p><w:pPr><w:pStyle w:val="Header"/></w:pPr><w:r><w:rPr><w:noProof/></w:rPr><w:pict>'+
+      '<v:shapetype id="_x0000_t136" coordsize="21600,21600" o:spt="136" adj="10800" path="m@7,l@8,m@5,21600l@6,21600e"><v:formulas><v:f eqn="sum #0 0 10800"/><v:f eqn="prod #0 2 1"/><v:f eqn="sum 21600 0 @1"/><v:f eqn="sum 0 0 @2"/><v:f eqn="sum 21600 0 @3"/><v:f eqn="if @0 @3 0"/><v:f eqn="if @0 21600 @1"/><v:f eqn="if @0 0 @2"/><v:f eqn="if @0 @4 21600"/><v:f eqn="mid @5 @6"/><v:f eqn="mid @8 @5"/><v:f eqn="mid @7 @8"/><v:f eqn="mid @6 @7"/><v:f eqn="sum @6 0 @5"/></v:formulas><v:path textpathok="t" o:connecttype="custom" o:connectlocs="@9,0;@10,10800;@11,21600;@12,10800" o:connectangles="270,180,90,0"/><v:textpath on="t" fitshape="t"/><v:handles><v:h position="#0,bottomRight" xrange="6629,14971"/></v:handles><o:lock v:ext="edit" text="t" shapetype="t"/></v:shapetype>'+
+      '<v:shape id="PowerPlusWaterMarkObject1" o:spid="_x0000_s2049" type="#_x0000_t136" style="position:absolute;margin-left:0;margin-top:0;width:430pt;height:70pt;rotation:315;z-index:-251658752;mso-position-horizontal:center;mso-position-horizontal-relative:margin;mso-position-vertical:center;mso-position-vertical-relative:margin" o:allowincell="f" fillcolor="#b8c7dc" stroked="f"><v:fill opacity=".4"/><v:textpath style="font-family:&quot;Arial&quot;;font-size:1pt" string="BLOGFORT AGENCY"/><w10:wrap anchorx="margin" anchory="margin"/></v:shape></w:pict></w:r></w:p>';
+    var header='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr '+NS+'>'+wm+'</w:hdr>';
+    var footer='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '+NS+'>'+wp('BlogFort Agency LLC · Sello '+seal.short+' · Verificar en blogfort.agency/verificar',{color:'5B6B85',sz:14,after:0})+'</w:ftr>';
+    var styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="21"/><w:lang w:val="es-ES"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="259" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'+
+      '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>'+
+      '<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="40"/></w:pPr><w:rPr><w:b/><w:sz w:val="44"/></w:rPr></w:style>'+
+      '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="1B4F8A"/></w:pBdr><w:spacing w:before="280" w:after="100"/></w:pPr><w:rPr><w:b/><w:color w:val="1B4F8A"/><w:sz w:val="28"/></w:rPr></w:style>'+
+      '<w:style w:type="paragraph" w:styleId="Header"><w:name w:val="header"/><w:basedOn w:val="Normal"/></w:style></w:styles>';
+    var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>';
+    var rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>';
+    var drels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>';
+    var core='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>'+xe(doc.title)+'</dc:title><dc:creator>BlogFort Agency LLC</dc:creator><dc:description>Sello '+xe(seal.short)+' · SHA-256 '+xe(meta.h)+'</dc:description><dcterms:created xsi:type="dcterms:W3CDTF">'+new Date(meta.ts).toISOString()+'</dcterms:created></cp:coreProperties>';
+    return zipStore([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'word/document.xml',data:document},{name:'word/_rels/document.xml.rels',data:drels},{name:'word/styles.xml',data:styles},{name:'word/header1.xml',data:header},{name:'word/footer1.xml',data:footer},{name:'docProps/core.xml',data:core}]);
+  }
+
+  window.BFR={REPORTS:REPORTS,validateSpec:validateSpec,describe:describe,needsAlfa:needsAlfa,build:build,canonical:canonical,html:html,css:CSS,docx:docx,months:MONTHS};
+})();
+</script>
 
 <!-- ═══ PWA META TAGS ═══ -->
 <meta name="theme-color" content="#1B4F8A">
@@ -45,7 +326,7 @@ if ('serviceWorker' in navigator) {
     --seal-confidential: #F39C12;
     --seal-restricted: #C0392B;
     --alert-red: #C0392B;
-    --alert-orange: #E67E22;
+    --alert-orange: #D4A017;
     --alert-blue: #0EA5E9;
     --text-primary: #0A1628;
     --text-mid: #4A5568;
@@ -129,9 +410,9 @@ if ('serviceWorker' in navigator) {
   .conn-btn { display: flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid; text-transform: uppercase; transition: all 0.25s; position: relative; white-space: nowrap; }
   .conn-blogfort { background: rgba(0,184,148,0.10); border-color: rgba(0,184,148,0.45); color: #00B894; }
   .conn-blogfort:hover { background: rgba(0,184,148,0.18); border-color: rgba(0,184,148,0.7); box-shadow: 0 0 12px rgba(0,184,148,0.25); }
-  .conn-falcon { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.35); color: rgba(245,158,11,0.6); }
-  .conn-falcon.active { background: rgba(245,158,11,0.14); border-color: rgba(245,158,11,0.55); color: #F59E0B; box-shadow: 0 0 10px rgba(245,158,11,0.2); }
-  .conn-falcon:hover { border-color: rgba(245,158,11,0.6); color: #F59E0B; }
+  .conn-validator { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.35); color: rgba(245,158,11,0.6); }
+  .conn-validator.active { background: rgba(245,158,11,0.14); border-color: rgba(245,158,11,0.55); color: #F59E0B; box-shadow: 0 0 10px rgba(245,158,11,0.2); }
+  .conn-validator:hover { border-color: rgba(245,158,11,0.6); color: #F59E0B; }
   .conn-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; transition: all 0.3s; }
   .conn-dot-green { background: #00B894; animation: pulseGlow 2s infinite; }
   .conn-dot-orange { background: #F59E0B; animation: pulseGlow 2.5s infinite; }
@@ -330,7 +611,7 @@ if ('serviceWorker' in navigator) {
   .camara-alfa-header { background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.2); border-bottom: none; }
   .camara-beta-header { background: rgba(14,165,233,0.06); border: 1px solid rgba(14,165,233,0.2); border-bottom: none; }
 
-  .camara-subcarpetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .camara-subcarpetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .subcarpeta-btn { padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; text-align: center; transition: all 0.2s; }
   .subcarpeta-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
   .subcarpeta-btn.sel-alfa { border-color: rgba(192,57,43,0.3); }
@@ -522,8 +803,19 @@ if ('serviceWorker' in navigator) {
   .matrix-success-desc{font-family:'DM Mono',monospace;font-size:10px;color:#94A3B8;letter-spacing:1px;line-height:1.9;margin-bottom:20px;}
   .matrix-success-btn{width:100%;padding:12px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;border-radius:6px;cursor:pointer;border:1px solid #00a8ff;background:transparent;color:#00a8ff;transition:all .2s;}
   .matrix-success-btn:hover{background:#00a8ff;color:#030810;}
+
+  /* ── AJUSTE MÓVIL LOGIN ── */
+  @media (max-width: 600px) {
+    #loginScreen { overflow-y: auto; justify-content: flex-start; padding: 24px 0; }
+    .login-box { width: calc(100% - 32px); max-width: 380px; margin: auto; padding: 28px 18px; }
+    .login-logo { font-size: 34px; letter-spacing: 4px; }
+    .login-sub { font-size: 9px; letter-spacing: 2px; margin-bottom: 24px; }
+    .login-label { font-size: 9px; letter-spacing: 1.5px; }
+    .login-input { font-size: 16px; letter-spacing: 3px; }
+    .login-btn { font-size: 16px; letter-spacing: 2px; }
+    .login-footer { font-size: 8px; letter-spacing: 1px; margin-top: 20px; }
+  }
 </style>
-<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -533,7 +825,7 @@ if ('serviceWorker' in navigator) {
     <div class="terms-header">
       <div class="terms-logo-row">
         <div class="terms-logo">MATRIX</div>
-        <div class="terms-version">v3.1</div>
+        <div class="terms-version">v3.2</div>
       </div>
       <div class="terms-headline">// Términos de uso, privacidad y conformidad — Lectura obligatoria</div>
     </div>
@@ -550,7 +842,7 @@ if ('serviceWorker' in navigator) {
       <div class="terms-section">
         <div class="terms-section-title">⚖️ 1. PROPIEDAD INTELECTUAL Y AUTORÍA</div>
         <div class="terms-text">
-          <strong>MATRIX v3.1</strong> es un software propietario creado, diseñado y desarrollado íntegramente por <strong>Aníbal Juan Alonso Sesma</strong>, fundador y CEO de <strong>BlogFort Agency LLC</strong>, empresa registrada bajo las leyes del Estado de Wyoming, Estados Unidos (EIN registrado). Todos los derechos de propiedad intelectual, diseño, arquitectura de datos y lógica operativa pertenecen exclusiva y permanentemente a su creador. Queda estrictamente prohibida su reproducción, redistribución, ingeniería inversa o uso no autorizado bajo cualquier jurisdicción aplicable.
+          <strong>MATRIX v3.2</strong> es un software propietario creado, diseñado y desarrollado íntegramente por <strong>Aníbal Juan Alonso Sesma</strong>, fundador y CEO de <strong>BlogFort Agency LLC</strong>, empresa registrada bajo las leyes del Estado de Wyoming, Estados Unidos (EIN registrado). Todos los derechos de propiedad intelectual, diseño, arquitectura de datos y lógica operativa pertenecen exclusiva y permanentemente a su creador. Queda estrictamente prohibida su reproducción, redistribución, ingeniería inversa o uso no autorizado bajo cualquier jurisdicción aplicable.
         </div>
       </div>
 
@@ -594,7 +886,7 @@ if ('serviceWorker' in navigator) {
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.5);line-height:1.7;">
           30 N Gould St · Sheridan · Wyoming 82801 · USA<br>
           Creador: Aníbal Juan Alonso Sesma · CEO & Founder<br>
-          MATRIX v3.1 © 2025 BlogFort Agency LLC · Todos los derechos reservados
+          MATRIX v3.2 © 2026 BlogFort Agency LLC · Todos los derechos reservados
         </div>
       </div>
 
@@ -602,14 +894,14 @@ if ('serviceWorker' in navigator) {
     <div class="terms-footer-bar">
       <div class="terms-check-row" onclick="toggleTermsCheck('chk1')">
         <div class="terms-check" id="chk1"></div>
-        <div class="terms-check-label">He leído y acepto los Términos de Uso, la Política de Privacidad y la Declaración de Soberanía de Datos de MATRIX v3.1 — BlogFort Agency LLC.</div>
+        <div class="terms-check-label">He leído y acepto los Términos de Uso, la Política de Privacidad y la Declaración de Soberanía de Datos de MATRIX v3.2 — BlogFort Agency LLC.</div>
       </div>
       <div class="terms-check-row" onclick="toggleTermsCheck('chk2')">
         <div class="terms-check" id="chk2"></div>
         <div class="terms-check-label">Entiendo que BlogFort Agency LLC no se responsabiliza de las decisiones tomadas a partir de los cálculos de la IA o la Calculadora Estratégica, y que opero bajo un modelo de Soberanía Root asumiendo control total de mis datos.</div>
       </div>
       <button class="terms-accept-btn" id="termsAcceptBtn" onclick="acceptTerms()">✓ CONFIRMAR Y ACCEDER A MATRIX</button>
-      <div class="terms-legal-note">Al aceptar, queda registrada su conformidad · MATRIX v3.1 · BlogFort Agency LLC · Wyoming USA · © 2025 Aníbal Juan Alonso Sesma</div>
+      <div class="terms-legal-note">Al aceptar, queda registrada su conformidad · MATRIX v3.2 · BlogFort Agency LLC · Wyoming USA · © 2026 Aníbal Juan Alonso Sesma</div>
     </div>
   </div>
 </div>
@@ -622,22 +914,29 @@ if ('serviceWorker' in navigator) {
   <div class="login-box">
     <div class="login-logo">MATRIX</div>
     <div class="login-sub">BlogFort Agency LLC — CEO Access</div>
-    <div class="login-label">Contraseña Nivel 100</div>
-    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" maxlength="32">
-    <button class="login-btn" onclick="attemptLogin()">ACCEDER AL SISTEMA</button>
-    <div class="login-error" id="loginError">// ACCESO DENEGADO — PROTOCOLO DE SILENCIO ACTIVADO</div>
-    <div class="login-footer">MATRIX v3.1 · BLOGFORT AGENCY LLC · WYOMING USA</div>
+    <div id="setupIntro" style="display:none;font-family:'DM Mono',monospace;font-size:10px;line-height:1.7;color:rgba(255,255,255,0.6);margin-bottom:14px;text-align:center;">PRIMER USO — crea tu contraseña y tu PIN de Bóveda Alfa.<br>Quedan guardados solo en este dispositivo. Si los olvidas no se pueden recuperar.</div>
+    <div class="login-label" id="loginLabel">Contraseña de acceso</div>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" maxlength="32" autocomplete="off">
+    <div id="setupBlock" style="display:none;">
+      <div class="login-label" style="margin-top:12px;">Repite la contraseña</div>
+      <input class="login-input" type="password" id="setupPass2" placeholder="••••••••" maxlength="32" autocomplete="off">
+      <div class="login-label" style="margin-top:12px;">PIN Bóveda Alfa (4 a 8 dígitos)</div>
+      <input class="login-input" type="password" id="setupPin" placeholder="••••" maxlength="8" inputmode="numeric" autocomplete="off">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="attemptLogin()">ACCEDER AL SISTEMA</button>
+    <div class="login-error" id="loginError">// ACCESO DENEGADO</div>
+    <div class="login-footer">MATRIX v3.2 · BLOGFORT AGENCY LLC · WYOMING USA</div>
   </div>
 </div>
 
 <!-- ── PIN MODAL — CÁMARA ALFA ── -->
 <div id="pinModal">
   <div class="pin-box">
-    <div class="pin-title">🔐 CÁMARA ALFA</div>
+    <div class="pin-title" id="pinTitle">🔐 CÁMARA ALFA</div>
     <div class="pin-sub">// Acceso Legal Corporativo — Solo CEO</div>
     <input class="pin-input" type="password" id="pinInput" placeholder="••••" maxlength="8">
     <button class="pin-btn" onclick="validatePin()">VALIDAR ACCESO</button>
-    <div class="pin-error" id="pinError">// PIN INCORRECTO — INTENTO REGISTRADO</div>
+    <div class="pin-error" id="pinError">// PIN INCORRECTO</div>
     <button class="pin-cancel" onclick="closePin()">Cancelar</button>
   </div>
 </div>
@@ -674,7 +973,7 @@ if ('serviceWorker' in navigator) {
     </div>
     <div class="side-section">
       <div class="side-section-title">PIN Bóveda Alfa</div>
-      <div class="side-form-group"><label class="side-label">Nuevo PIN (mín. 4 dígitos)</label><input class="side-input" type="password" id="prf-pin" placeholder="••••" maxlength="8"></div>
+      <div class="side-form-group"><label class="side-label">Nuevo PIN (4 a 8 dígitos)</label><input class="side-input" type="password" id="prf-pin" placeholder="••••" maxlength="8"></div>
       <button class="side-btn" onclick="changePinProfile()">✓ ACTUALIZAR PIN ALFA</button>
     </div>
   </div>
@@ -740,6 +1039,10 @@ if ('serviceWorker' in navigator) {
         <div class="nav-icon">🧮</div>
         <span class="nav-label">Calculadora</span>
       </div>
+      <div class="nav-item" onclick="showPanel('informes', this)">
+        <div class="nav-icon">📄</div>
+        <span class="nav-label">Informes</span>
+      </div>
       <div class="nav-section">Seguridad</div>
       <div class="nav-item" onclick="showPanel('boveda', this)">
         <div class="nav-icon">🛡️</div>
@@ -784,17 +1087,13 @@ if ('serviceWorker' in navigator) {
         🔔
         <span class="alert-bell-count" id="bellCount">0</span>
       </button>
-      <button class="conn-btn conn-falcon" id="btnFalcon" onclick="toggleFalcon()" title="Motor de validación de datos">
-        <span class="conn-dot conn-dot-off" id="falconDot"></span>
-        <span class="conn-label">VALIDADOR</span>
+      <button class="conn-btn conn-validator" id="btnValidator" onclick="openValidator()" title="Motor de Validación: bandeja de datos recibidos">
+        <span class="conn-dot conn-dot-off" id="validatorDot"></span>
+        <span class="conn-label" id="validatorLabel">VALIDADOR</span>
       </button>
-      <button class="conn-btn conn-blogfort" onclick="showBlogfortStatus()">
-        <span class="conn-dot conn-dot-green"></span>
-        <span class="conn-label">BLOGFORT</span>
-      </button>
-      <div class="security-indicator">
-        <div class="security-dot"></div>
-        <span class="security-text">Activo</span>
+      <div class="security-indicator" id="securityIndicator">
+        <div class="security-dot" id="securityDot"></div>
+        <span class="security-text" id="securityText">Protegido</span>
       </div>
     </div>
 
@@ -808,7 +1107,7 @@ if ('serviceWorker' in navigator) {
             <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> CLIENTES · OFFLINE</div>
             <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> BÓVEDA · OFFLINE</div>
             <div class="storage-item storage-ok"><span class="storage-dot dot-green"></span> FINANZAS · OFFLINE</div>
-            <div class="storage-item storage-na"><span class="storage-dot dot-grey"></span> IA · ONLINE</div>
+            <div class="storage-item storage-na" id="aiIndicator"><span class="storage-dot dot-grey"></span> <span id="aiIndicatorText">IA · SIN CLAVE</span></div>
           </div>
           <div style="color:var(--text-light);font-size:10px;" id="storageInfo">💾 CARGANDO...</div>
         </div>
@@ -816,19 +1115,12 @@ if ('serviceWorker' in navigator) {
         <!-- Alertas activas dashboard -->
         <div id="dashAlerts" style="display:none;margin-bottom:16px;"></div>
 
-        <div id="connStatusPanel" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
-          <div style="background:rgba(0,184,148,0.06);border:1px solid rgba(0,184,148,0.2);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-            <span style="font-size:20px;">⚡</span>
-            <div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#00B894;">BLOGFORT APP</div>
-              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(0,184,148,0.7);">● CONECTADO · PRODUCCIÓN</div>
-            </div>
-          </div>
-          <div id="falconStatusCard" style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="toggleFalcon()">
+        <div id="connStatusPanel" style="margin-bottom:20px;">
+          <div id="validatorCard" style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="openValidator()">
             <span style="font-size:20px;">🦅</span>
             <div>
               <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#F59E0B;">MOTOR DE VALIDACIÓN</div>
-              <div id="falconCardStatus" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(245,158,11,0.5);">○ DESCONECTADO · EN ESPERA</div>
+              <div id="validatorCardStatus" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(245,158,11,0.6);">○ SIN DATOS RECIBIDOS</div>
             </div>
           </div>
         </div>
@@ -938,6 +1230,15 @@ if ('serviceWorker' in navigator) {
           <button class="btn btn-primary" onclick="openAddLead()">+ Nuevo Lead</button>
         </div>
         <div class="alert-box alert-info" style="font-size:12px;"><span>🦅</span><span><strong>Motor de Validación activo.</strong> Los datos se guardan automáticamente y persisten sin conexión.</span></div>
+        <div class="card" id="validatorBox">
+          <div class="card-header"><div class="card-title">🦅 BANDEJA DEL MOTOR DE VALIDACIÓN</div><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);">Pendientes: <span id="validatorPendingCount">0</span></span></div>
+          <div id="validatorTray" style="padding:0;"></div>
+          <div class="card-body" style="border-top:1px solid var(--border-light);">
+            <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:8px;">Aquí llegan los datos de tu sistema de búsqueda. Si funciona en este mismo navegador, se escriben solos en la clave <code>bf_matrix_queue</code>; si está en otro dispositivo, sube o pega el JSON. Formato: lista de objetos con <code>titulo</code> (o <code>empresa</code>), <code>url</code>, <code>sector</code>, <code>pais</code>, <code>oportunidad_blogfort</code>. Nada entra en tus leads hasta que lo aceptas.</div>
+            <textarea class="form-input form-input-mono" id="validatorJson" rows="3" placeholder='[{"titulo":"Empresa","url":"https://…","sector":"Dental","pais":"España","oportunidad_blogfort":"…"}]'></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="importValidatorJSON()">⬇ Recibir JSON</button><label class="btn btn-ghost btn-sm" style="cursor:pointer;">📂 Subir archivo .json<input type="file" accept=".json,application/json" style="display:none;" onchange="importValidatorFile(this)"></label></div>
+          </div>
+        </div>
         <div class="search-bar">
           <input class="search-input" id="searchLeads" placeholder="Buscar empresa, país, sector..." oninput="filterLeadsSearch()">
           <select class="search-select" id="filterLeadStatus" onchange="filterLeadsSearch()"><option value="">Todos los estados</option><option value="pending">Pendientes</option><option value="confirmed">Confirmados</option></select>
@@ -1109,7 +1410,7 @@ if ('serviceWorker' in navigator) {
                 <div class="form-group"><label class="form-label">Monto total ($)</label><input class="form-input" type="number" id="ct-monto" placeholder="0.00"></div>
                 <div class="form-group"><label class="form-label">Periodicidad</label>
                   <select class="form-input" id="ct-periodo">
-                    <option value="mensual">Mensual</option><option value="trimestral">Trimestral</option><option value="anual">Anual</option><option value="otros">Otros / Hito</option>
+                    <option value="mensual">Mensual</option><option value="anual">Anual</option><option value="otros">Otros / Hito</option>
                   </select>
                 </div>
               </div>
@@ -1159,8 +1460,14 @@ if ('serviceWorker' in navigator) {
                 <div class="subcarpeta-name">Propiedad Intelectual</div>
                 <div class="subcarpeta-count" id="cnt-alfa-propiedad">0</div>
               </div>
+              <div class="subcarpeta-btn sel-alfa" id="sub-alfa-conta" onclick="selectSubcarpeta('alfa','Contabilidad',this)">
+                <div class="subcarpeta-icon">🧮</div>
+                <div class="subcarpeta-name">Contabilidad</div>
+                <div class="subcarpeta-count" id="cnt-alfa-conta">0</div>
+              </div>
             </div>
-            <div class="card" style="margin-bottom:0;">
+            <div id="alfaConta" style="display:none;"></div>
+            <div class="card" style="margin-bottom:0;" id="alfaDocsCard">
               <div class="card-header"><div class="card-title" id="alfa-subcarpeta-title">TODOS — CÁMARA ALFA</div><span id="alfa-count-label" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);">0 entradas</span></div>
               <div style="padding:0;"><table class="data-table"><thead><tr><th>Entidad</th><th>Subcarpeta</th><th>Tipo</th><th>Sello</th><th>Fecha</th><th>Notas</th><th>Acción</th></tr></thead>
               <tbody id="alfaTableBody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📜</div><div class="empty-text">Cámara Alfa vacía</div></div></td></tr></tbody></table></div>
@@ -1230,19 +1537,11 @@ if ('serviceWorker' in navigator) {
 
       <!-- ══ SEGURIDAD ══ -->
       <div class="panel" id="panel-seguridad">
-        <div class="page-header"><div class="page-title">MURO DE CONTENCIÓN</div><div class="page-subtitle">// Protocolo de Silencio Administrativo activo</div></div>
+        <div class="page-header"><div class="page-title">MURO DE CONTENCIÓN</div><div class="page-subtitle">// Protección local de acceso — estado real</div></div>
         <div class="grid-2" style="margin-bottom:20px;">
           <div class="card" style="margin-bottom:0;">
             <div class="card-header"><div class="card-title">ESTADO DEL PROTOCOLO</div></div>
-            <div class="card-body">
-              <div class="alert-box alert-success"><span>🛡️</span><div><strong>Protocolo de Silencio: ACTIVO</strong><br><small>Entidades no autorizadas reciben respuesta nula.</small></div></div>
-              <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">Modo Espejo</span><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">Persistencia Offline</span><span class="badge badge-active"><span class="badge-dot"></span>Activa</span></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">PIN Bóveda Alfa</span><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><span style="font-size:12px;font-weight:600;">Sensores de Alerta</span><span class="badge badge-active"><span class="badge-dot"></span>Activos</span></div>
-              </div>
-            </div>
+            <div class="card-body" id="muroBody"></div>
           </div>
           <div class="card" style="margin-bottom:0;">
             <div class="card-header"><div class="card-title">BLACKLIST</div><button class="btn btn-danger btn-sm" onclick="openAddBlacklist()">+ Añadir</button></div>
@@ -1264,12 +1563,12 @@ if ('serviceWorker' in navigator) {
               <div style="padding:16px;border-radius:var(--radius);background:rgba(192,57,43,0.06);border:1px solid rgba(192,57,43,0.2);text-align:center;">
                 <div style="font-size:24px;margin-bottom:6px;">🔴</div>
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--alert-red);" id="sem-red">0</div>
-                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(192,57,43,0.7);">CRÍTICO ≤15 días</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(192,57,43,0.7);">ROJO ≤7 días</div>
               </div>
-              <div style="padding:16px;border-radius:var(--radius);background:rgba(230,126,34,0.06);border:1px solid rgba(230,126,34,0.2);text-align:center;">
-                <div style="font-size:24px;margin-bottom:6px;">🟠</div>
+              <div style="padding:16px;border-radius:var(--radius);background:rgba(212,160,23,0.06);border:1px solid rgba(212,160,23,0.2);text-align:center;">
+                <div style="font-size:24px;margin-bottom:6px;">🟡</div>
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--alert-orange);" id="sem-orange">0</div>
-                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(230,126,34,0.7);">ADVERTENCIA ≤30 días</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(212,160,23,0.7);">AMARILLO ≤30 días</div>
               </div>
               <div style="padding:16px;border-radius:var(--radius);background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.2);text-align:center;">
                 <div style="font-size:24px;margin-bottom:6px;">🔵</div>
@@ -1281,12 +1580,47 @@ if ('serviceWorker' in navigator) {
         </div>
       </div>
 
+      <!-- ══ INFORMES ══ -->
+      <div class="panel" id="panel-informes">
+        <div class="page-header"><div class="page-title">📄 INFORMES</div><div class="page-subtitle">// PDF y Word con marca de agua y sello de autenticidad BlogFort</div></div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">PEDIR INFORME POR ORDEN</div></div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:8px;">Escribe lo que necesitas, por ejemplo: <i>"contabilidad del mes de marzo"</i> o <i>"leads de España en fase Carta Sower"</i>. La IA solo interpreta la orden; las cifras salen siempre de tus datos guardados. Usa tu clave de Anthropic y solo envía el texto de la orden, nunca tus datos.</div>
+            <textarea class="form-input" id="inf-orden" rows="2" placeholder="Ej.: informe de contabilidad de todo el año"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="informeInterpretar()">Interpretar orden</button></div>
+            <div id="inf-interp" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg-primary);border-radius:var(--radius);font-size:13px;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">INFORME FIJO</div></div>
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="form-group"><label class="form-label">Informe</label><select class="form-input" id="inf-tipo" onchange="informeUI()"><option value="conta">Contabilidad (Cámara Alfa · pide PIN)</option><option value="leads">Pipeline de leads</option><option value="clientes">Clientes y contratos</option><option value="camaras">Documentos de las cámaras</option></select></div>
+              <div class="form-group" id="inf-g-year"><label class="form-label">Año</label><input class="form-input" type="number" id="inf-year"></div>
+              <div class="form-group" id="inf-g-month"><label class="form-label">Mes</label><select class="form-input" id="inf-month"><option value="0">Año completo</option><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
+              <div class="form-group" id="inf-g-cam" style="display:none;"><label class="form-label">Cámara</label><select class="form-input" id="inf-cam"><option value="ambas">Alfa y Beta (pide PIN)</option><option value="beta">Solo Beta</option><option value="alfa">Solo Alfa (pide PIN)</option></select></div>
+            </div>
+            <button class="btn btn-primary" onclick="informeFijo()">Generar informe</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">PAQUETE DE DATOS PARA EL AGENTE</div></div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:8px;">Genera un archivo sellado con tus datos (leads, clientes, contratos, Cámara Beta y contabilidad). El agente de MATRIX lo carga y produce los informes exactamente con esos datos. La Cámara Alfa solo se incluye si lo marcas y confirmas tu PIN.</div>
+            <label style="font-size:12px;display:flex;gap:8px;align-items:center;margin-bottom:8px;"><input type="checkbox" id="pkg-alfa"> Incluir Cámara Alfa (documentos legales y contabilidad) · pide PIN</label>
+            <button class="btn btn-primary" onclick="paqueteExportar()">📦 Exportar paquete para el agente</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-light);line-height:1.6;">Cada informe lleva marca de agua y un sello firmado con la clave de tu licencia. Se verifica en blogfort.agency/verificar. Para PDF, usa "Guardar como PDF" en el cuadro de impresión. Si la licencia no es válida, MATRIX no emite el documento.</div>
+      </div>
+
       <!-- ══ LOG & AUDITORÍA ══ -->
       <div class="panel" id="panel-log">
         <div class="page-header"><div class="page-title">🧠 LOG & AUDITORÍA</div><div class="page-subtitle">// Registro de trazabilidad total — Cada movimiento queda registrado</div></div>
         <div class="card">
-          <div class="card-header"><div class="card-title">LOG DE MATRIX — TIEMPO REAL</div><button class="btn btn-ghost btn-sm" onclick="clearLog()">Limpiar</button></div>
-          <div style="padding:0;"><div class="log-terminal" id="mainLog" style="max-height:500px;border-radius:0;border:none;"><div class="log-line"><span class="log-time" id="logInitTime"></span><span class="log-tag-info">[MATRIX]</span><span class="log-msg"> Sistema v3.1 inicializado. Cámaras Alfa & Beta activas.</span></div></div></div>
+          <div class="card-header"><div class="card-title">LOG DE MATRIX</div><button class="btn btn-ghost btn-sm" onclick="clearLog()">Limpiar</button></div>
+          <div style="padding:0;"><div class="log-terminal" id="mainLog" style="max-height:500px;border-radius:0;border:none;"><div class="log-line"><span class="log-time" id="logInitTime"></span><span class="log-tag-info">[MATRIX]</span><span class="log-msg"> Sistema v3.2 inicializado. Cámaras Alfa & Beta activas.</span></div></div></div>
         </div>
       </div>
 
@@ -1306,7 +1640,7 @@ if ('serviceWorker' in navigator) {
           <div class="card-body">
             <div class="alert-box alert-info" style="font-size:12px;">
               <span>ℹ️</span>
-              <span>Tu API Key permite que MATRIX use inteligencia artificial de Anthropic para análisis, validación y generación de contenido. Se almacena cifrada localmente y nunca se transmite.</span>
+              <span>Aquí conectas tu propia API Key de Anthropic. Se guarda solo en el navegador de este dispositivo (codificada, no cifrada: protege tu equipo) y únicamente se envía a Anthropic cuando verificas o usas la conexión. BlogFort Agency LLC nunca la recibe. El uso de IA te lo factura Anthropic a ti.</span>
             </div>
             <div class="grid-2">
               <div class="form-group">
@@ -1335,105 +1669,48 @@ if ('serviceWorker' in navigator) {
         <div class="card">
           <div class="card-header"><div class="card-title">📋 PLANES DE USO — MATRIX</div></div>
           <div class="card-body">
-            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:1.8;margin-bottom:14px;">Precios en dólares estadounidenses, sin impuestos aplicables. Suscripción mensual o anual (−15 %). El pago se hace en la página segura de Stripe, que se abre en una pestaña nueva; BlogFort no ve los datos de tu tarjeta. Cancela cuando quieras.</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;">
 
-              <!-- MATRIX SOLO -->
-              <div style="border-radius:var(--radius-lg);border:1px solid var(--border-light);overflow:hidden;" id="plan-starter">
+              <div style="border-radius:var(--radius-lg);border:1px solid var(--border-light);overflow:hidden;">
                 <div style="background:linear-gradient(135deg,#1B4F8A,#0EA5E9);padding:20px;text-align:center;">
                   <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);margin-bottom:6px;">LICENCIA</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:#fff;">MATRIX SOLO</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:#fff;line-height:1;margin-top:8px;">$497<span style="font-size:14px;font-weight:normal;opacity:0.7;">/mes</span></div>
-                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $422/mes facturado anualmente (−15 %)</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:#fff;">MATRIX SOLO</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:#fff;line-height:1;margin-top:8px;">$49<span style="font-size:14px;font-weight:normal;opacity:0.7;">/mes</span></div>
+                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $499/año facturado anualmente (−15 %)</div>
                 </div>
                 <div style="padding:16px;background:var(--bg-card);">
-                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
-                    <div>✓ CRM completo con bóveda</div>
-                    <div>✓ Seguridad nivel ROOT</div>
-                    <div>✓ Leads y clientes ilimitados</div>
-                    <div>✓ Calculadora financiera</div>
-                    <div>✓ Log de auditoría</div>
-                    <div style="color:var(--text-light);">✗ Conexión BlogFort App</div>
-                    <div style="color:var(--text-light);">✗ Motor de Validación</div>
-                  </div>
-                  <button class="btn btn-ghost" style="width:100%;margin-top:12px;" onclick="openMatrixPlansModal()">Seleccionar</button>
+                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;"><div>✓ CRM de leads y clientes</div><div>✓ Calculadora financiera</div><div>✓ Cámaras Alfa y Beta (legal y contratos)</div><div>✓ Muro de contención y semáforo de alertas</div><div>✓ Log de auditoría</div><div>✓ Copia de seguridad (JSON) con un clic</div><div><span style="color:var(--text-light);">✗ BlogFort App y MWBFA no incluidas</span></div></div>
+                  <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="openMatrixPlansModal('solo')">Suscribirme</button>
                 </div>
               </div>
-
-              <!-- MATRIX + BLOGFORT APP -->
-              <div style="border-radius:var(--radius-lg);border:2px solid var(--seal-public);overflow:hidden;position:relative;box-shadow:var(--shadow-md);" id="plan-business">
-                <div style="position:absolute;top:12px;right:12px;background:var(--seal-public);color:#fff;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:10px;">RECOMENDADO</div>
-                <div style="background:linear-gradient(135deg,#00B894,#0EA5E9);padding:20px;text-align:center;">
-                  <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);margin-bottom:6px;">LICENCIA</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#fff;">MATRIX + BLOGFORT</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:#fff;line-height:1;margin-top:8px;">$797<span style="font-size:14px;font-weight:normal;opacity:0.7;">/mes</span></div>
-                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $677/mes facturado anualmente (−15 %)</div>
-                </div>
-                <div style="padding:16px;background:var(--bg-card);">
-                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
-                    <div>✓ Todo de MATRIX Solo</div>
-                    <div>✓ BlogFort App conectada</div>
-                    <div>✓ Motor de Validación activo</div>
-                    <div>✓ Ecosistema sincronizado</div>
-                    <div>✓ Pipeline de leads completo</div>
-                    <div>✓ Alertas semáforo</div>
-                    <div style="color:var(--text-light);">✗ MWBFA incluida</div>
-                  </div>
-                  <button class="btn btn-success" style="width:100%;margin-top:12px;" onclick="openMatrixPlansModal()">Seleccionar</button>
-                </div>
-              </div>
-
-              <!-- ECOSISTEMA COMPLETO -->
-              <div style="border-radius:var(--radius-lg);border:2px solid #f0a500;overflow:hidden;position:relative;" id="plan-ecosystem">
-                <div style="position:absolute;top:12px;right:12px;background:#f0a500;color:#000;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:10px;">COMPLETO</div>
+              <div style="border-radius:var(--radius-lg);border:2px solid #f0a500;overflow:hidden;">
                 <div style="background:linear-gradient(135deg,#7C3AED,#0EA5E9);padding:20px;text-align:center;">
                   <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);margin-bottom:6px;">ECOSISTEMA</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#fff;">MATRIX + BF + MWBFA</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:#fff;line-height:1;margin-top:8px;">$1,497<span style="font-size:14px;font-weight:normal;opacity:0.7;">/mes</span></div>
-                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $1,272/mes facturado anualmente (−15 %)</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:#fff;">MATRIX + APP + MWBFA</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:#fff;line-height:1;margin-top:8px;">$121<span style="font-size:14px;font-weight:normal;opacity:0.7;">/mes</span></div>
+                  <div style="font-size:12px;color:#9fe0b0;margin-top:4px;">o $1,234/año facturado anualmente (−15 %)</div>
                 </div>
                 <div style="padding:16px;background:var(--bg-card);">
-                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
-                    <div>✓ Todo el ecosistema completo</div>
-                    <div>✓ MATRIX + BlogFort + MWBFA</div>
-                    <div>✓ Licencia white-label</div>
-                    <div>✓ Soporte CEO directo</div>
-                    <div>✓ Backup automático</div>
-                    <div>✓ Multi-usuario con roles</div>
-                    <div>✓ Onboarding incluido</div>
-                  </div>
-                  <button class="btn btn-primary" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#7C3AED,#0EA5E9);" onclick="openMatrixPlansModal()">Seleccionar</button>
+                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;"><div>✓ Todo lo de MATRIX Solo</div><div>✓ BlogFort App (plan Starter)</div><div>✓ MWBFA (plan Starter)</div><div>✓ Soporte directo del fundador</div><div>✓ Onboarding incluido</div></div>
+                  <button class="btn btn-primary" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#7C3AED,#0EA5E9);" onclick="openMatrixPlansModal('ecosystem')">Suscribirme</button>
                 </div>
               </div>
-
-              <!-- ENTERPRISE -->
-              <div style="border-radius:var(--radius-lg);border:1px solid rgba(240,165,0,0.3);overflow:hidden;" id="plan-enterprise">
+              <div style="border-radius:var(--radius-lg);border:1px solid rgba(240,165,0,0.3);overflow:hidden;">
                 <div style="background:linear-gradient(135deg,#0A1628,#1B4F8A);padding:20px;text-align:center;">
                   <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.6);margin-bottom:6px;">CORPORATIVO</div>
-                  <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:#f0a500;">ENTERPRISE</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:#f0a500;">ENTERPRISE</div>
                   <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#f0a500;line-height:1;margin-top:8px;">A MEDIDA</div>
+                  
                 </div>
                 <div style="padding:16px;background:var(--bg-card);">
-                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;">
-                    <div>✓ Todo el ecosistema</div>
-                    <div>✓ Clientes ilimitados</div>
-                    <div>✓ Personalización total</div>
-                    <div>✓ Onboarding CEO directo</div>
-                    <div>✓ SLA garantizado 99.9%</div>
-                    <div>✓ Soporte 24/7</div>
-                    <div>✓ Integración a medida</div>
-                  </div>
-                  <button class="btn btn-primary" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#0A1628,#1B4F8A);" onclick="window.location.href='mailto:info@blogfort.agency?subject=MATRIX Enterprise'">Contactar CEO</button>
+                  <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-mid);line-height:2;"><div>✓ Todo el ecosistema</div><div>✓ Personalización e integración a medida</div><div>✓ Condiciones y soporte acordados por contrato</div></div>
+                  <button class="btn btn-primary" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#0A1628,#1B4F8A);" onclick="window.location.href='mailto:hello@blogfort.agency?subject=MATRIX%20Enterprise'">Pedir presupuesto</button>
                 </div>
               </div>
 
             </div>
-
-            <!-- Plan activo indicator -->
-            <div style="margin-top:16px;padding:12px 16px;background:var(--bg-primary);border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-light);">PLAN ACTIVO:</span>
-              <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--accent-blue);" id="planActivoLabel">— Sin seleccionar —</span>
-              <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-light);" id="planActivoFecha"></span>
-            </div>
+            <div style="margin-top:16px;padding:12px 16px;background:var(--bg-primary);border-radius:var(--radius);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;line-height:1.8;color:var(--text-mid);">Tu suscripción y tu factura se gestionan en Stripe. ¿Dudas? Escribe a hello@blogfort.agency</div>
           </div>
         </div>
 
@@ -1457,7 +1734,7 @@ if ('serviceWorker' in navigator) {
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text-primary);margin-bottom:12px;">🔒 POLÍTICA DE PRIVACIDAD</div>
                 <div style="font-size:12px;color:var(--text-mid);line-height:1.8;">
                   <p style="margin-bottom:8px;"><strong>Almacenamiento local:</strong> Todos los datos de MATRIX se almacenan exclusivamente en el dispositivo del usuario mediante IndexedDB y localStorage. BlogFort Agency LLC no tiene acceso a estos datos.</p>
-                  <p style="margin-bottom:8px;"><strong>API Keys:</strong> Las claves API se cifran localmente y nunca son transmitidas a servidores de BlogFort Agency LLC.</p>
+                  <p style="margin-bottom:8px;"><strong>API Keys:</strong> Las claves API se guardan solo en el navegador de este dispositivo (codificadas, no cifradas) y se envían únicamente a Anthropic cuando verificas o usas la conexión. BlogFort Agency LLC nunca las recibe.</p>
                   <p style="margin-bottom:8px;"><strong>Datos de clientes:</strong> La información de leads y clientes almacenada en MATRIX es responsabilidad exclusiva del licenciatario conforme al RGPD y normativa aplicable.</p>
                   <p><strong>Auditoría:</strong> El log de actividad es local y solo accesible por el CEO Nivel 100.</p>
                 </div>
@@ -1470,7 +1747,7 @@ if ('serviceWorker' in navigator) {
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent-blue);">BLOGFORT AGENCY LLC</div>
                 <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-light);">30 N GOULD ST · SHERIDAN · WYOMING 82801 · USA · blogfort.agency</div>
               </div>
-              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-light);">MATRIX v3.1 © 2025 BlogFort Agency LLC<br>Todos los derechos reservados</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-light);">MATRIX v3.2 © 2026 BlogFort Agency LLC<br>Todos los derechos reservados</div>
             </div>
 
           </div>
@@ -1492,11 +1769,9 @@ const STATE = {
   leads: [], clients: [], vaultAlfa: [], vaultBeta: [],
   blacklist: [], contratos: [], securityLog: [],
   alerts: [], semRed: 0, semOrange: 0, semBlue: 0,
-  password: null, pin: null, falconConnected: false,
+  password: null, pin: null, validatorConnected: false,
   currentAlfa: null, currentBeta: null
 };
-const DEFAULT_PASS = 'matrix100';
-const DEFAULT_PIN = '1234';
 let quickOp = '*';
 
 // ═══════════════════════════════════════
@@ -1542,6 +1817,7 @@ function dbLoad(store) {
 }
 
 async function saveState() {
+  contaSave();
   await Promise.all([
     dbSave('leads', STATE.leads), dbSave('clients', STATE.clients),
     dbSave('vaultAlfa', STATE.vaultAlfa), dbSave('vaultBeta', STATE.vaultBeta),
@@ -1558,6 +1834,7 @@ async function saveState() {
 }
 
 async function loadState() {
+  contaLoad();
   try {
     const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
     STATE.password = m.password || null;
@@ -1579,29 +1856,96 @@ function updateStorageInfo() {
   const kb = Math.round(JSON.stringify(STATE).length / 1024);
   const info = `💾 ${total} registros · ~${kb}KB · Leads:${STATE.leads.length} Clientes:${STATE.clients.length} Alfa:${STATE.vaultAlfa.length} Beta:${STATE.vaultBeta.length}`;
   ['storageInfo','sysStorageDetail'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = info; });
+  let hasKey=false; try{ hasKey=!!localStorage.getItem('matrix_anthropic'); }catch(e){}
+  const ai=document.getElementById('aiIndicator'), at=document.getElementById('aiIndicatorText');
+  if(ai&&at){ at.textContent = hasKey ? 'IA · CLAVE CONFIGURADA' : 'IA · SIN CLAVE'; ai.className = 'storage-item ' + (hasKey?'storage-ok':'storage-na'); const d=ai.querySelector('.storage-dot'); if(d) d.className='storage-dot '+(hasKey?'dot-green':'dot-grey'); }
 }
 
 // ═══════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════
-function attemptLogin() {
-  const pass = document.getElementById('loginPass').value;
-  const stored = STATE.password || DEFAULT_PASS;
-  if (pass === stored) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    addLog('CONFIRM', 'Acceso CEO autorizado. Nivel 100 activo. Cámaras Alfa & Beta desbloqueadas.');
-    addLog('INFO', 'BlogFort App — conexión permanente establecida.');
-    updateUI(); updateClock(); setInterval(updateClock, 1000);
-    updateStorageInfo(); restoreFalconState();
-    runAlertScan();
-    setInterval(runAlertScan, 300000); // scan every 5 min
+// ── Seguridad local: contraseña y PIN propios, bloqueo tras 5 fallos ──
+const MAX_FAILS = 5, LOCK_MS = 15*60*1000;
+const CRED_NAME = { login:'Contraseña principal (acceso CEO)', pin:'PIN Bóveda Alfa' };
+function secLoad(){ try{ return JSON.parse(localStorage.getItem('matrix_sec_v1'))||{}; }catch(e){ return {}; } }
+function secStore(o){ try{ localStorage.setItem('matrix_sec_v1', JSON.stringify(o)); }catch(e){} }
+function secGet(k){ const o=secLoad(); o[k]=o[k]||{fails:0,lockedUntil:0,last:0}; o.events=o.events||[]; return o; }
+function lockRemaining(k){ const o=secLoad(); return Math.max(0, ((o[k]&&o[k].lockedUntil)||0) - Date.now()); }
+function recentEvents(k){ const o=secLoad(); return (o.events||[]).filter(e=>Date.now()-e.t<864e5 && (!k||e.k===k)); }
+function registerFail(k){
+  const o=secGet(k), c=o[k]; c.fails++; c.last=Date.now();
+  o.events.push({k,t:Date.now()}); o.events=o.events.filter(e=>Date.now()-e.t<864e5).slice(-200);
+  let locked=false, n=c.fails;
+  if(c.fails>=MAX_FAILS){ c.lockedUntil=Date.now()+LOCK_MS; c.fails=0; locked=true; }
+  secStore(o);
+  addLog('SECURITY', locked ? `BLOQUEO 15 min — ${CRED_NAME[k]}: ${MAX_FAILS} intentos fallidos.` : `INTENTO FALLIDO ${n}/${MAX_FAILS} — ${CRED_NAME[k]}.`);
+  runAlertScan(); updateSecurityIndicator(); renderMuro();
+  return {locked, n};
+}
+function registerOk(k){ const o=secGet(k); o[k].fails=0; o[k].lockedUntil=0; secStore(o); }
+function clearSecEvents(){ const o=secLoad(); o.events=[]; secStore(o); addLog('INFO','Avisos de intentos fallidos marcados como revisados.'); runAlertScan(); renderMuro(); }
+
+async function hashSecret(v){
+  try{
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('matrix|'+v));
+    return 'h1:'+Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }catch(e){ return 'p0:'+v; }
+}
+async function verifySecret(input, stored){
+  if(!stored) return false;
+  if(stored.startsWith('h1:')) return (await hashSecret(input))===stored;
+  if(stored.startsWith('p0:')) return stored==='p0:'+input;
+  return stored===input; // formato antiguo: se migra al validar
+}
+
+function mirrorEcho(el, text){
+  // Muro de Contención: bloqueado, la pantalla no informa de nada; solo devuelve lo escrito
+  el.textContent = '» ' + text;
+  el.style.opacity = '1';
+}
+
+function enterApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  addLog('CONFIRM', 'Acceso CEO autorizado. Cámaras Alfa & Beta disponibles.');
+  updateUI(); updateClock(); setInterval(updateClock, 1000);
+  updateStorageInfo(); refreshValidator(); updateSecurityIndicator(); renderMuro();
+  runAlertScan();
+  setInterval(()=>{ runAlertScan(); refreshValidator(); }, 300000);
+}
+
+function prepareLogin(){
+  const first = !STATE.password;
+  document.getElementById('setupIntro').style.display = first ? 'block' : 'none';
+  document.getElementById('setupBlock').style.display = first ? 'block' : 'none';
+  document.getElementById('loginLabel').textContent = first ? 'Crea tu contraseña (mín. 8 caracteres)' : 'Contraseña de acceso';
+  document.getElementById('loginBtn').textContent = first ? 'CREAR ACCESO' : 'ACCEDER AL SISTEMA';
+}
+
+async function attemptLogin() {
+  const err = document.getElementById('loginError');
+  const passEl = document.getElementById('loginPass');
+  const pass = passEl.value;
+  if (!STATE.password) {
+    const p2 = document.getElementById('setupPass2').value, pin = document.getElementById('setupPin').value;
+    const bad = pass.length<8 ? 'La contraseña necesita al menos 8 caracteres' : pass!==p2 ? 'Las contraseñas no coinciden' : !/^\d{4,8}$/.test(pin) ? 'El PIN debe tener de 4 a 8 dígitos' : '';
+    if (bad) { err.textContent='// '+bad; err.style.opacity='1'; setTimeout(()=>err.style.opacity='0',4000); return; }
+    STATE.password = await hashSecret(pass); STATE.pin = await hashSecret(pin);
+    await saveState();
+    addLog('SECURITY','Contraseña y PIN Bóveda Alfa creados (primer uso).');
+    passEl.value=''; document.getElementById('setupPass2').value=''; document.getElementById('setupPin').value='';
+    enterApp(); return;
+  }
+  if (lockRemaining('login') > 0) { mirrorEcho(err, pass); passEl.value=''; return; }
+  if (await verifySecret(pass, STATE.password)) {
+    registerOk('login');
+    if (!STATE.password.startsWith('h1:')) { STATE.password = await hashSecret(pass); await saveState(); }
+    passEl.value=''; enterApp();
   } else {
-    const err = document.getElementById('loginError');
-    err.style.opacity = '1';
-    addLog('SECURITY', 'BLOQUEO — Contraseña incorrecta en acceso CEO.');
-    setTimeout(() => err.style.opacity = '0', 3000);
-    document.getElementById('loginPass').value = '';
+    const r = registerFail('login');
+    if (r.locked) mirrorEcho(err, pass);
+    else { err.textContent = `// CONTRASEÑA INCORRECTA — INTENTO ${r.n}/${MAX_FAILS}`; err.style.opacity='1'; setTimeout(()=>err.style.opacity='0',3000); }
+    passEl.value='';
   }
 }
 document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') attemptLogin(); });
@@ -1623,22 +1967,35 @@ function requirePin(callback) {
   pinCallback = callback;
   document.getElementById('pinInput').value = '';
   document.getElementById('pinError').style.opacity = '0';
+  document.getElementById('pinTitle').textContent = STATE.pin ? '🔐 CÁMARA ALFA' : '🔐 CREA TU PIN BÓVEDA ALFA';
   document.getElementById('pinModal').classList.add('open');
   setTimeout(() => document.getElementById('pinInput').focus(), 100);
 }
 
-function validatePin() {
-  const pin = document.getElementById('pinInput').value;
-  const stored = STATE.pin || DEFAULT_PIN;
-  if (pin === stored) {
+async function validatePin() {
+  const pinEl = document.getElementById('pinInput'), perr = document.getElementById('pinError');
+  const pin = pinEl.value;
+  if (!STATE.pin) { // PIN aún no creado
+    if (!/^\d{4,8}$/.test(pin)) { perr.textContent='// El PIN debe tener de 4 a 8 dígitos'; perr.style.opacity='1'; setTimeout(()=>perr.style.opacity='0',3000); return; }
+    STATE.pin = await hashSecret(pin); await saveState();
+    addLog('SECURITY','PIN Bóveda Alfa creado.');
     document.getElementById('pinModal').classList.remove('open');
-    addLog('CONFIRM', 'PIN Cámara Alfa validado. Acceso legal corporativo autorizado.');
+    if (pinCallback) { pinCallback(); pinCallback = null; }
+    return;
+  }
+  if (lockRemaining('pin') > 0) { mirrorEcho(perr, pin); pinEl.value=''; return; }
+  if (await verifySecret(pin, STATE.pin)) {
+    registerOk('pin');
+    if (!STATE.pin.startsWith('h1:')) { STATE.pin = await hashSecret(pin); await saveState(); }
+    document.getElementById('pinModal').classList.remove('open');
+    addLog('CONFIRM', 'PIN Bóveda Alfa validado.');
     if (pinCallback) { pinCallback(); pinCallback = null; }
   } else {
-    document.getElementById('pinError').style.opacity = '1';
-    addLog('SECURITY', `PIN INCORRECTO — Intento de acceso a Cámara Alfa registrado.`);
-    document.getElementById('pinInput').value = '';
-    setTimeout(() => document.getElementById('pinError').style.opacity = '0', 3000);
+    const r = registerFail('pin');
+    if (r.locked) mirrorEcho(perr, pin);
+    else { perr.textContent = `// PIN INCORRECTO — INTENTO ${r.n}/${MAX_FAILS}`; perr.style.opacity='1'; setTimeout(()=>perr.style.opacity='0',3000); }
+    pinEl.value='';
+    showToast('🔴 Intento fallido: PIN Bóveda Alfa');
   }
 }
 
@@ -1713,36 +2070,346 @@ function showToast(msg) {
 // ═══════════════════════════════════════
 // MOTOR DE VALIDACIÓN
 // ═══════════════════════════════════════
-function toggleFalcon() {
-  STATE.falconConnected = !STATE.falconConnected;
-  const btn = document.getElementById('btnFalcon');
-  const dot = document.getElementById('falconDot');
-  const card = document.getElementById('falconStatusCard');
-  const cardStatus = document.getElementById('falconCardStatus');
-  if (STATE.falconConnected) {
-    btn.classList.add('active'); dot.className='conn-dot conn-dot-orange';
-    if(card) card.style.borderColor='rgba(245,158,11,0.45)';
-    if(cardStatus) { cardStatus.textContent='● CONECTADO · VALIDACIÓN ACTIVA'; cardStatus.style.color='#F59E0B'; }
-    addLog('CONFIRM','MOTOR DE VALIDACIÓN conectado. Canal de validación activo.');
-    showToast('🦅 Motor de Validación conectado');
-    try { localStorage.setItem('matrix_falcon_conn','1'); } catch(e) {}
+const QUEUE_KEY = 'bf_matrix_queue';
+function readQueue(){ try{ const q=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function writeQueue(q){ try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }catch(e){} }
+function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function safeUrl(u){ return /^https?:\/\//i.test(u||'') ? u : '—'; }
+
+function refreshValidator(){
+  const q = readQueue();
+  const pend = q.filter(x => (x.estado||'pendiente')==='pendiente');
+  const dot=document.getElementById('validatorDot'), lbl=document.getElementById('validatorLabel'), btn=document.getElementById('btnValidator');
+  const card=document.getElementById('validatorCardStatus'), cnt=document.getElementById('stat-pending');
+  if(dot) dot.className = 'conn-dot ' + (pend.length ? 'conn-dot-orange' : 'conn-dot-off');
+  if(btn) btn.classList.toggle('active', pend.length>0);
+  if(lbl) lbl.textContent = pend.length ? `VALIDADOR · ${pend.length}` : 'VALIDADOR';
+  if(card){ card.textContent = pend.length ? `● ${pend.length} PENDIENTE(S) DE CONFIRMAR` : '○ SIN DATOS PENDIENTES'; card.style.color = pend.length ? '#F59E0B' : 'rgba(245,158,11,0.6)'; }
+  if(cnt) cnt.textContent = pend.length;
+  renderValidatorTray(pend);
+}
+
+function renderValidatorTray(pend){
+  const box=document.getElementById('validatorTray'); if(!box) return;
+  if(!pend.length){ box.innerHTML='<div class="empty-state" style="padding:18px;"><div class="empty-icon">🦅</div><div class="empty-text">Bandeja vacía — no hay datos pendientes de confirmar</div></div>'; return; }
+  box.innerHTML = '<table class="data-table"><thead><tr><th>Dato recibido</th><th>País</th><th>Sector</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>' +
+    pend.map(x=>`<tr><td><strong>${esc(x.titulo||x.empresa||'Sin título')}</strong><br><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-light);">${esc(safeUrl(x.url))}</span></td><td>${esc(x.pais||'—')}</td><td>${esc(x.sector||'—')}</td><td style="font-size:11px;max-width:260px;">${esc((x.oportunidad_blogfort||x.notas||'').toString().slice(0,160))}</td><td style="white-space:nowrap;"><button class="btn btn-primary btn-sm" onclick="acceptQueueItem('${esc(x.id)}')">✓ Aceptar</button> <button class="btn btn-ghost btn-sm" onclick="discardQueueItem('${esc(x.id)}')">✕ Descartar</button></td></tr>`).join('') + '</tbody></table>';
+}
+
+function openValidator(){
+  const nav = [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick')||'').includes("'sector1'"));
+  showPanel('sector1', nav);
+  refreshValidator();
+  const t=document.getElementById('validatorBox'); if(t) t.scrollIntoView({behavior:'smooth'});
+}
+
+async function acceptQueueItem(id){
+  const q=readQueue(); const it=q.find(x=>String(x.id)===String(id)); if(!it) return;
+  const empresa=(it.titulo||it.empresa||'Sin título').toString().trim();
+  const notas=[it.oportunidad_blogfort||it.notas||'', it.carta_sower?'[Carta Sower recibida]':'', it.carta_espejo?'[Carta Espejo recibida]':''].filter(Boolean).join(' ');
+  STATE.leads.push({ id:Date.now(), empresa, pais:(it.pais||'—'), sector:(it.sector||'—'), url:safeUrl(it.url), canal:'Motor de Validación', notas, fase:'Detección', sello:'public', status:'pending', fecha:new Date().toLocaleDateString('es-ES'), origen: it.puntuacion_oportunidad!=null?('Puntuación '+it.puntuacion_oportunidad):'' });
+  it.estado='aceptado'; writeQueue(q);
+  await saveState(); filterLeadsSearch(); updateStats(); refreshValidator(); runAlertScan();
+  addLog('CONFIRM',`Motor de Validación: lead aceptado — ${empresa}`);
+  showToast('✓ Lead aceptado: '+empresa);
+}
+function discardQueueItem(id){
+  const q=readQueue(); const it=q.find(x=>String(x.id)===String(id)); if(!it) return;
+  it.estado='descartado'; writeQueue(q); refreshValidator();
+  addLog('INFO',`Motor de Validación: dato descartado — ${it.titulo||it.empresa||id}`);
+}
+
+// Importar JSON (para sistemas de búsqueda que no comparten navegador/dispositivo)
+function importValidatorJSON(){
+  const ta=document.getElementById('validatorJson'); const txt=(ta.value||'').trim();
+  if(!txt){ showToast('⚠️ Pega primero el JSON'); return; }
+  let data; try{ data=JSON.parse(txt); }catch(e){ showToast('⚠️ JSON no válido'); return; }
+  if(!Array.isArray(data)) data=[data];
+  const q=readQueue(); let n=0;
+  data.forEach((x,i)=>{ if(!x || typeof x!=='object' || !(x.titulo||x.empresa)) return;
+    q.push({ id: x.id || ('imp-'+Date.now()+'-'+i), titulo:x.titulo||x.empresa, url:x.url||'', sector:x.sector||'', pais:x.pais||'', puntuacion_oportunidad:x.puntuacion_oportunidad, oportunidad_blogfort:x.oportunidad_blogfort||x.notas||'', carta_sower:x.carta_sower||'', carta_espejo:x.carta_espejo||'', fecha_envio:x.fecha_envio||new Date().toISOString(), estado:'pendiente' }); n++; });
+  if(!n){ showToast('⚠️ Ningún registro válido (cada uno necesita "titulo" o "empresa")'); return; }
+  writeQueue(q); ta.value=''; refreshValidator();
+  addLog('INFO',`Motor de Validación: ${n} dato(s) importado(s) por JSON.`);
+  showToast(`🦅 ${n} dato(s) recibido(s)`);
+}
+function importValidatorFile(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ document.getElementById('validatorJson').value=r.result; importValidatorJSON(); inp.value=''; }; r.readAsText(f);
+}
+window.addEventListener('storage', e => { if(e.key===QUEUE_KEY) refreshValidator(); });
+
+
+// ═══════════════════════════════════════
+// INFORMES — PDF / Word con sello de autenticidad
+// ═══════════════════════════════════════
+function reportData(){ return { leads:STATE.leads, clients:STATE.clients, contratos:STATE.contratos, vaultAlfa:STATE.vaultAlfa, vaultBeta:STATE.vaultBeta, conta:STATE.conta }; }
+let lastReport=null;
+function informeUI(){
+  const t=document.getElementById('inf-tipo').value;
+  document.getElementById('inf-g-year').style.display = t==='conta'?'block':'none';
+  document.getElementById('inf-g-month').style.display = t==='conta'?'block':'none';
+  document.getElementById('inf-g-cam').style.display = t==='camaras'?'block':'none';
+  const y=document.getElementById('inf-year'); if(y && !y.value) y.value=new Date().getFullYear();
+}
+function informeFijo(){
+  const t=document.getElementById('inf-tipo').value;
+  informeGenerar({ report:t, year:document.getElementById('inf-year').value, month:document.getElementById('inf-month').value, camara:document.getElementById('inf-cam').value });
+}
+function informeGenerar(spec){
+  const v=BFR.validateSpec(spec); if(!v.ok){ showToast('⚠️ '+v.error); return; }
+  if(BFR.needsAlfa(v.spec) && !alfaPinUnlocked){ requirePin(()=>informeConstruir(v.spec)); }
+  else informeConstruir(v.spec);
+}
+async function informeConstruir(sp){
+  if(!window.BF){ showToast('⛔ Sin licencia válida: no se emite el documento'); addLog('SECURITY','Informe rechazado: licencia no válida.'); return; }
+  let doc; try{ doc=BFR.build(sp, reportData()); }catch(e){ showToast('⚠️ '+e.message); return; }
+  const h=await BF.sha256(BFR.canonical(doc)), ts=new Date().toISOString(), id='R'+Date.now().toString(36);
+  let sealObj;
+  try{ sealObj=await BF.seal({ id, title:doc.title, kind:doc.kind, tool:'MATRIX', ts, h }); }
+  catch(e){ showToast('⛔ La firma de la licencia no coincide: documento no emitido'); addLog('SECURITY','Informe rechazado: la firma de activación no coincide.'); return; }
+  const meta={ tool:'MATRIX', ts, h, who:(document.getElementById('ceoNameDisplay')||{}).textContent||'' };
+  lastReport={ doc, seal:sealObj, meta };
+  if(!document.getElementById('bfrCss')){ const st=document.createElement('style'); st.id='bfrCss'; st.textContent=BFR.css; document.head.appendChild(st); }
+  let box=document.getElementById('reportPrint'); if(!box){ box=document.createElement('div'); box.id='reportPrint'; document.body.appendChild(box); }
+  box.innerHTML='<div class="rp-bar"><button onclick="informePDF()">🖨 PDF (Guardar como PDF)</button><button onclick="informeWord()">📄 Word (.docx)</button><button class="g" onclick="informeCerrar()">✕ Cerrar</button></div>'+BFR.html(doc,sealObj,meta);
+  box.style.display='block';
+  addLog('CONFIRM',`Informe sellado: ${doc.title} · ${sealObj.short}`);
+}
+function informeCerrar(){ const b=document.getElementById('reportPrint'); if(b) b.style.display='none'; }
+function informePDF(){
+  if(!lastReport) return; const old=document.title; document.title=(lastReport.doc.title+' '+lastReport.seal.short).replace(/[\\/:*?"<>|]/g,'-');
+  window.print(); setTimeout(()=>{ document.title=old; },1500);
+}
+function informeWord(){
+  if(!lastReport) return; const blob=BFR.docx(lastReport.doc,lastReport.seal,lastReport.meta);
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=('informe-'+lastReport.doc.kind+'-'+lastReport.seal.short+'.docx'); a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000); addLog('INFO','Informe descargado en Word: '+lastReport.seal.short);
+}
+let pendingSpec=null;
+async function informeInterpretar(){
+  const order=(document.getElementById('inf-orden').value||'').trim(); const out=document.getElementById('inf-interp');
+  if(!order){ showToast('⚠️ Escribe la orden'); return; }
+  let key=null; try{ key=localStorage.getItem('matrix_anthropic'); }catch(e){}
+  if(!key){ showToast('⚠️ Configura primero tu clave de Anthropic (Acceso & Licencia)'); return; }
+  out.style.display='block'; out.textContent='Interpretando la orden…'; pendingSpec=null;
+  const hoy=new Date().toISOString().slice(0,10);
+  const system='Eres un intérprete de órdenes de informes. Hoy es '+hoy+'. Devuelve SOLO un objeto JSON, sin texto adicional, con estas claves: report ("conta"=contabilidad, "leads"=pipeline de leads, "clientes"=clientes y contratos, "camaras"=documentos de las cámaras), year (entero, si aplica), month (1-12 o null), fase (una de Detección, Carta Sower, Carta Espejo, Reporte Final, o null), estado ("pendiente" o "confirmado" o null), pais (texto o null), sector (texto o null), camara ("alfa","beta" o "ambas"), titulo (texto o null). Si la orden pide algo que no sea uno de esos cuatro informes, devuelve {"report":null}. No inventes ni calcules cifras.';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{ method:'POST', headers:{'Content-Type':'application/json','x-api-key':atob(key),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body:JSON.stringify({ model:'claude-sonnet-5', max_tokens:300, system, messages:[{role:'user',content:order}] }) });
+    if(!r.ok) throw new Error('La API respondió '+r.status);
+    const data=await r.json(); const txt=(data.content&&data.content[0]&&data.content[0].text)||'';
+    const m=txt.match(/\{[\s\S]*\}/); if(!m) throw new Error('Respuesta no válida');
+    const v=BFR.validateSpec(JSON.parse(m[0]));
+    if(!v.ok){ out.innerHTML='⚠️ '+esc(v.error); return; }
+    pendingSpec=v.spec;
+    out.innerHTML='<b>Entendido como:</b> '+esc(BFR.describe(v.spec))+'<br><span style="font-size:11px;color:var(--text-light)">Si no es lo que querías, reescribe la orden.</span><div style="margin-top:8px;"><button class="btn btn-primary btn-sm" onclick="informeGenerar(pendingSpec)">✓ Generar este informe</button></div>';
+  }catch(e){ out.innerHTML='⚠️ No se pudo interpretar la orden: '+esc(e.message); }
+}
+document.addEventListener('DOMContentLoaded', informeUI);
+// ═══ PAQUETE PARA EL AGENTE (sellado) ═══
+function paqueteExportar(){
+  const conAlfa=document.getElementById('pkg-alfa').checked;
+  if(conAlfa && !alfaPinUnlocked){ requirePin(()=>paqueteConstruir(true)); } else paqueteConstruir(conAlfa);
+}
+async function paqueteConstruir(conAlfa){
+  if(!window.BF){ showToast('⛔ Sin licencia válida: no se emite el paquete'); addLog('SECURITY','Paquete rechazado: licencia no válida.'); return; }
+  const d=reportData();
+  const data={ leads:d.leads, clients:d.clients, contratos:d.contratos, vaultBeta:d.vaultBeta,
+    vaultAlfa: conAlfa ? d.vaultAlfa : [], conta: conAlfa ? d.conta : { params:d.conta.params, movs:[] } };
+  const dataStr=JSON.stringify(data), h=await BF.sha256(dataStr), ts=new Date().toISOString(), id='P'+Date.now().toString(36);
+  let sealObj;
+  try{ sealObj=await BF.seal({ id, title:'Paquete de datos MATRIX', kind:'paquete', tool:'MATRIX', ts, h }); }
+  catch(e){ showToast('⛔ La firma de la licencia no coincide: paquete no emitido'); addLog('SECURITY','Paquete rechazado: la firma de activación no coincide.'); return; }
+  const pkg={ format:'bf-matrix-package', v:1, tool:'MATRIX', ts, includesAlfa:!!conAlfa, dataStr, seal:sealObj.seal, short:sealObj.short };
+  const blob=new Blob([JSON.stringify(pkg)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='paquete-matrix-'+ts.slice(0,10)+'-'+sealObj.short+'.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  addLog('CONFIRM','Paquete para el agente exportado: '+sealObj.short+(conAlfa?' (con Cámara Alfa)':' (sin Cámara Alfa)'));
+  showToast('📦 Paquete sellado exportado · '+sealObj.short);
+}
+
+
+// ═══════════════════════════════════════
+// MURO DE CONTENCIÓN — estado real
+// ═══════════════════════════════════════
+function renderMuro(){
+  const box=document.getElementById('muroBody'); if(!box) return;
+  const row=(k)=>{ const rem=lockRemaining(k), o=secLoad(), c=o[k]||{fails:0,last:0}, n=recentEvents(k).length;
+    const st = rem>0 ? `<span class="badge badge-blocked"><span class="badge-dot"></span>BLOQUEADA ${Math.ceil(rem/60000)} min</span>` : `<span class="badge badge-active"><span class="badge-dot"></span>Operativa · ${c.fails||0}/${MAX_FAILS}</span>`;
+    const last = c.last ? new Date(c.last).toLocaleString('es-ES') : 'sin intentos fallidos';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;background:var(--bg-primary);border-radius:var(--radius);"><div><div style="font-size:12px;font-weight:600;">${CRED_NAME[k]}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-light);">Fallos en 24 h: ${n} · Último: ${last}</div></div>${st}</div>`; };
+  box.innerHTML = `<div class="alert-box alert-info"><span>🛡️</span><div><strong>Bloqueo por intentos</strong><br><small>${MAX_FAILS} fallos seguidos bloquean esa credencial 15 min. Bloqueada, la pantalla no informa de nada: solo devuelve lo que el intruso escribió (modo espejo).</small></div></div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">${row('login')}${row('pin')}</div>
+    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-ghost btn-sm" onclick="clearSecEvents()">Marcar avisos como revisados</button></div>
+    <div style="font-size:10px;color:var(--text-light);margin-top:10px;line-height:1.5;">Protección local: actúa en este navegador y dispositivo. No sustituye al cifrado ni a la seguridad del propio equipo.</div>`;
+}
+function updateSecurityIndicator(){
+  const t=document.getElementById('securityText'), d=document.getElementById('securityDot'), w=document.getElementById('securityIndicator');
+  if(!t) return;
+  const locked = lockRemaining('login')>0 || lockRemaining('pin')>0;
+  const warn = recentEvents().length>0;
+  t.textContent = locked ? 'Bloqueo activo' : warn ? 'Intentos fallidos' : 'Protegido';
+  const col = locked||warn ? 'var(--alert-red)' : 'var(--seal-public)';
+  t.style.color=col; if(d) d.style.background=col;
+  if(w){ w.style.borderColor = locked||warn ? 'rgba(192,57,43,0.4)' : 'rgba(0,184,148,0.15)'; w.style.background = locked||warn ? 'rgba(192,57,43,0.08)' : 'rgba(0,184,148,0.06)'; }
+}
+setInterval(()=>{ updateSecurityIndicator(); renderMuro(); }, 30000);
+
+
+// ═══════════════════════════════════════
+// CONTABILIDAD INTERNA — Cámara Alfa
+// ═══════════════════════════════════════
+const CONTA_KEY = 'matrix_conta_v1';
+const CONTA_DEFAULT = { params:{ moneda:'USD', ivaVentas:0, ivaCompras:0, tasaBeneficio:0, reserva:0 }, movs:[] };
+STATE.conta = JSON.parse(JSON.stringify(CONTA_DEFAULT));
+let contaYear = new Date().getFullYear();
+function contaLoad(){ try{ const c=JSON.parse(localStorage.getItem(CONTA_KEY)||'null'); if(c&&c.params) STATE.conta={params:{...CONTA_DEFAULT.params,...c.params},movs:Array.isArray(c.movs)?c.movs:[]}; }catch(e){} }
+function contaSave(){ try{ localStorage.setItem(CONTA_KEY, JSON.stringify(STATE.conta)); }catch(e){} }
+function cMoney(n){ const a=Math.abs(n).toFixed(2).split('.'); const e=a[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'); const t=e+','+a[1]; return STATE.conta.params.moneda==='EUR' ? ((n<0?'-':'')+t+' €') : ((n<0?'-':'')+'$'+t); }
+function cNum(id){ const v=parseFloat(document.getElementById(id)?.value); return isNaN(v)?0:v; }
+
+function contaSummary(year, month){
+  const p=STATE.conta.params;
+  const rows=STATE.conta.movs.filter(m=>{ const d=new Date(m.fecha); return d.getFullYear()===year && (month==null || d.getMonth()===month); });
+  let ing=0,gDed=0,gNo=0,rep=0,sop=0;
+  rows.forEach(m=>{ const base=+m.base||0, imp=base*(+m.tasa||0)/100;
+    if(m.tipo==='ingreso'){ ing+=base; rep+=imp; }
+    else if(m.deducible){ gDed+=base; sop+=imp; } else { gNo+=base+imp; } });
+  const beneficio=ing-gDed, impBenef=Math.max(0,beneficio)*p.tasaBeneficio/100;
+  const ivaNeto=rep-sop, extra=Math.max(0,beneficio)*p.reserva/100;
+  return { n:rows.length, ing, gDed, gNo, rep, sop, ivaNeto, beneficio, impBenef, extra,
+    margen: ing>0 ? beneficio/ing*100 : 0,
+    neto: ing-gDed-gNo-impBenef,
+    apartar: Math.max(0,ivaNeto)+impBenef+extra };
+}
+
+function contaRender(){
+  const cnt=document.getElementById('cnt-alfa-conta'); if(cnt) cnt.textContent=STATE.conta.movs.length;
+  const box=document.getElementById('alfaConta'); if(!box || box.style.display==='none') return;
+  const p=STATE.conta.params, y=contaYear, S=contaSummary(y);
+  const years=[...new Set([new Date().getFullYear(), ...STATE.conta.movs.map(m=>new Date(m.fecha).getFullYear())])].filter(v=>!isNaN(v)).sort();
+  const avisos=[];
+  if(!p.tasaBeneficio && !p.ivaVentas) avisos.push('Aún no has configurado tus porcentajes: los impuestos salen a 0. Usa un preset o escribe los tuyos.');
+  if(S.n && S.beneficio<0) avisos.push('Este año los gastos deducibles superan a los ingresos: resultado negativo.');
+  if(S.ing>0 && S.margen<20 && S.beneficio>=0) avisos.push(`Margen bajo (${S.margen.toFixed(1)} %).`);
+  if(S.ivaNeto<0) avisos.push('El impuesto soportado supera al repercutido: saldo a tu favor según lo anotado.');
+  const month=new Date().getMonth(), mS=contaSummary(y,month);
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const monthRows=meses.map((nm,i)=>{ const r=contaSummary(y,i); if(!r.n) return ''; return `<tr><td>${nm}</td><td>${cMoney(r.ing)}</td><td>${cMoney(r.gDed+r.gNo)}</td><td>${cMoney(r.beneficio)}</td><td>${cMoney(r.impBenef)}</td></tr>`; }).join('');
+  const movs=STATE.conta.movs.filter(m=>new Date(m.fecha).getFullYear()===y).sort((a,b)=>a.fecha<b.fecha?1:-1).map(m=>{ const imp=(+m.base||0)*(+m.tasa||0)/100; return `<tr><td>${esc(m.fecha)}</td><td>${m.tipo==='ingreso'?'🟢 Ingreso':'🔴 Gasto'}${m.tipo==='gasto'&&!m.deducible?' <small>(no deducible)</small>':''}</td><td>${esc(m.concepto)}<br><small style="color:var(--text-light)">${esc(m.categoria||'')}</small></td><td>${cMoney(+m.base||0)}</td><td>${m.tasa||0}% · ${cMoney(imp)}</td><td><strong>${cMoney((+m.base||0)+imp)}</strong></td><td><button class="btn btn-ghost btn-sm" onclick="contaDelete('${m.id}')">✕</button></td></tr>`; }).join('');
+  const stat=(l,v,c)=>`<div class="stat-card ${c||'blue'}"><div class="stat-label">${l}</div><div class="stat-value" style="font-size:22px;">${v}</div></div>`;
+  box.innerHTML=`
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-header"><div class="card-title">🧮 CONTABILIDAD INTERNA</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><select class="search-select" onchange="contaYear=+this.value;contaRender()">${years.map(v=>`<option ${v===y?'selected':''}>${v}</option>`).join('')}</select>
+      <button class="btn btn-ghost btn-sm" onclick="contaExport('csv')">⬇ CSV</button><button class="btn btn-ghost btn-sm" onclick="contaExport('json')">⬇ JSON</button></div></div>
+    <div class="card-body">
+      ${avisos.map(a=>`<div class="alert-box alert-warn" style="font-size:12px;"><span>⚠️</span><span>${a}</span></div>`).join('')}
+      <div class="stats-grid" style="margin-bottom:14px;">
+        ${stat('Ingresos '+y, cMoney(S.ing),'green')}${stat('Gastos deducibles', cMoney(S.gDed),'red')}${stat('Beneficio antes de impuestos', cMoney(S.beneficio),'blue')}${stat('Impuesto sobre beneficio (est.)', cMoney(S.impBenef),'orange')}
+        ${stat('Impuesto indirecto neto (est.)', cMoney(S.ivaNeto),'orange')}${stat('Neto tras impuestos', cMoney(S.neto),'green')}${stat('Margen', S.margen.toFixed(1)+' %','blue')}${stat('A apartar para impuestos', cMoney(S.apartar),'red')}
+      </div>
+      <div style="font-size:11px;color:var(--text-light);margin-bottom:6px;">Este mes (${meses[month]}): ingresos ${cMoney(mS.ing)} · gastos ${cMoney(mS.gDed+mS.gNo)} · beneficio ${cMoney(mS.beneficio)}.</div>
+      <div style="font-size:10px;color:var(--text-light);line-height:1.5;">Cálculo orientativo con los porcentajes que tú configuras. No es asesoramiento fiscal: confírmalo con tu gestor.</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px;">
+    <div class="card" style="margin-bottom:0;"><div class="card-header"><div class="card-title">PORCENTAJES</div></div><div class="card-body">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"><button class="btn btn-ghost btn-sm" onclick="contaPreset('US')">Preset EE. UU. (21 % federal)</button><button class="btn btn-ghost btn-sm" onclick="contaPreset('ES')">Preset España (IVA 21 % · IS 25 %)</button></div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Moneda</label><select class="form-input" id="cp-moneda" onchange="contaParams()"><option value="USD" ${p.moneda==='USD'?'selected':''}>USD $</option><option value="EUR" ${p.moneda==='EUR'?'selected':''}>EUR €</option></select></div>
+        <div class="form-group"><label class="form-label">% impuesto en ventas (Sales tax / IVA)</label><input class="form-input" type="number" step="0.01" id="cp-iva-v" value="${p.ivaVentas}" onchange="contaParams()"></div>
+        <div class="form-group"><label class="form-label">% impuesto en compras (soportado)</label><input class="form-input" type="number" step="0.01" id="cp-iva-c" value="${p.ivaCompras}" onchange="contaParams()"></div>
+        <div class="form-group"><label class="form-label">% impuesto sobre beneficio</label><input class="form-input" type="number" step="0.01" id="cp-tasa" value="${p.tasaBeneficio}" onchange="contaParams()"></div>
+        <div class="form-group"><label class="form-label">% extra a reservar del beneficio</label><input class="form-input" type="number" step="0.01" id="cp-res" value="${p.reserva}" onchange="contaParams()"></div>
+      </div></div></div>
+    <div class="card" style="margin-bottom:0;"><div class="card-header"><div class="card-title">CALCULADORA DE IMPUESTOS Y %</div></div><div class="card-body">
+      <div class="form-group"><label class="form-label">Operación</label><select class="form-input" id="cq-modo" onchange="contaQuick()">
+        <option value="add">Añadir % a una base (precio + impuesto)</option><option value="sub">Quitar % de un total (sacar la base)</option><option value="pct">Calcular el % de una cantidad</option><option value="var">Variación % entre dos cantidades</option><option value="mar">Margen sobre precio (precio y coste)</option></select></div>
+      <div class="grid-2"><div class="form-group"><label class="form-label" id="cq-la">Cantidad</label><input class="form-input" type="number" step="0.01" id="cq-a" oninput="contaQuick()"></div>
+      <div class="form-group"><label class="form-label" id="cq-lb">Porcentaje</label><input class="form-input" type="number" step="0.01" id="cq-b" oninput="contaQuick()"></div></div>
+      <div id="cq-res" style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 12px;background:var(--bg-primary);border-radius:var(--radius);min-height:20px;">—</div>
+    </div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px;"><div class="card-header"><div class="card-title">NUEVO MOVIMIENTO</div></div><div class="card-body">
+    <div class="grid-3">
+      <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="cm-fecha" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="form-group"><label class="form-label">Tipo</label><select class="form-input" id="cm-tipo" onchange="contaTipoChange()"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select></div>
+      <div class="form-group"><label class="form-label">Categoría</label><input class="form-input" id="cm-cat" placeholder="Suscripciones, hosting, gestoría..."></div>
+    </div>
+    <div class="grid-3">
+      <div class="form-group"><label class="form-label">Concepto</label><input class="form-input" id="cm-concepto" placeholder="Descripción"></div>
+      <div class="form-group"><label class="form-label">Importe SIN impuesto</label><input class="form-input" type="number" step="0.01" id="cm-base" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">% impuesto</label><input class="form-input" type="number" step="0.01" id="cm-tasa" value="${p.ivaVentas}"></div>
+    </div>
+    <label style="font-size:12px;display:none;" id="cm-ded-wrap"><input type="checkbox" id="cm-ded" checked> Gasto deducible</label>
+    <div style="margin-top:8px;"><button class="btn btn-primary" onclick="contaAdd()">✓ Registrar movimiento</button></div>
+  </div></div>
+
+  <div class="card" style="margin-bottom:12px;"><div class="card-header"><div class="card-title">RESUMEN POR MES — ${y}</div></div><div style="padding:0;overflow-x:auto;">
+    <table class="data-table"><thead><tr><th>Mes</th><th>Ingresos</th><th>Gastos</th><th>Beneficio</th><th>Impuesto est.</th></tr></thead><tbody>${monthRows||'<tr><td colspan="5"><div class="empty-state"><div class="empty-text">Sin movimientos este año</div></div></td></tr>'}</tbody></table></div></div>
+
+  <div class="card" style="margin-bottom:0;"><div class="card-header"><div class="card-title">LIBRO DE MOVIMIENTOS — ${y}</div></div><div style="padding:0;overflow-x:auto;">
+    <table class="data-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Base</th><th>Impuesto</th><th>Total</th><th></th></tr></thead><tbody>${movs||'<tr><td colspan="7"><div class="empty-state"><div class="empty-text">Sin movimientos</div></div></td></tr>'}</tbody></table></div></div>`;
+  contaQuick();
+}
+
+function contaParams(){
+  const p=STATE.conta.params;
+  p.moneda=document.getElementById('cp-moneda').value; p.ivaVentas=cNum('cp-iva-v'); p.ivaCompras=cNum('cp-iva-c'); p.tasaBeneficio=cNum('cp-tasa'); p.reserva=cNum('cp-res');
+  contaSave(); addLog('INFO','Contabilidad: porcentajes actualizados.'); contaRender();
+}
+function contaPreset(k){
+  const p=STATE.conta.params;
+  if(k==='US'){ p.moneda='USD'; p.ivaVentas=0; p.ivaCompras=0; p.tasaBeneficio=21; }
+  else { p.moneda='EUR'; p.ivaVentas=21; p.ivaCompras=21; p.tasaBeneficio=25; }
+  contaSave(); contaRender(); showToast('Preset aplicado (orientativo): confirma con tu gestor');
+}
+function contaTipoChange(){
+  const t=document.getElementById('cm-tipo').value, p=STATE.conta.params;
+  document.getElementById('cm-tasa').value = t==='ingreso'?p.ivaVentas:p.ivaCompras;
+  document.getElementById('cm-ded-wrap').style.display = t==='gasto'?'inline-block':'none';
+}
+function contaAdd(){
+  const concepto=document.getElementById('cm-concepto').value.trim(), base=cNum('cm-base'), fecha=document.getElementById('cm-fecha').value;
+  if(!concepto||!base||!fecha){ showToast('⚠️ Fecha, concepto e importe son obligatorios'); return; }
+  const tipo=document.getElementById('cm-tipo').value;
+  STATE.conta.movs.push({ id:'m'+Date.now(), fecha, tipo, concepto, categoria:document.getElementById('cm-cat').value.trim(), base, tasa:cNum('cm-tasa'), deducible: tipo==='gasto' ? document.getElementById('cm-ded').checked : false });
+  contaSave(); addLog('CONFIRM',`Contabilidad: ${tipo} registrado — ${concepto}`); contaRender(); showToast('✓ Movimiento registrado');
+}
+function contaDelete(id){
+  if(!confirm('¿Eliminar este movimiento?')) return;
+  STATE.conta.movs=STATE.conta.movs.filter(m=>m.id!==id); contaSave(); contaRender();
+}
+function contaQuick(){
+  const modo=document.getElementById('cq-modo'); if(!modo) return;
+  const m=modo.value, a=cNum('cq-a'), b=cNum('cq-b'), out=document.getElementById('cq-res');
+  const L={add:['Base','% a añadir'],sub:['Total con impuesto','% incluido'],pct:['Cantidad','Porcentaje'],var:['Valor inicial','Valor final'],mar:['Precio de venta','Coste']}[m];
+  document.getElementById('cq-la').textContent=L[0]; document.getElementById('cq-lb').textContent=L[1];
+  let t='—';
+  if(m==='add'){ const i=a*b/100; t=`Impuesto ${cMoney(i)} · Total ${cMoney(a+i)}`; }
+  else if(m==='sub'){ const base=a/(1+b/100); t=`Base ${cMoney(base)} · Impuesto ${cMoney(a-base)}`; }
+  else if(m==='pct'){ t=`${b} % de ${cMoney(a)} = ${cMoney(a*b/100)}`; }
+  else if(m==='var'){ t = a ? `Variación ${((b-a)/a*100).toFixed(2)} %  (${cMoney(b-a)})` : 'Introduce un valor inicial distinto de 0'; }
+  else if(m==='mar'){ t = a ? `Beneficio ${cMoney(a-b)} · Margen ${((a-b)/a*100).toFixed(2)} % · Recargo sobre coste ${b?((a-b)/b*100).toFixed(2)+' %':'—'}` : 'Introduce el precio de venta'; }
+  out.textContent=t;
+}
+function contaExport(fmt){
+  const y=contaYear, S=contaSummary(y), rows=STATE.conta.movs.filter(m=>new Date(m.fecha).getFullYear()===y);
+  let blob,name;
+  if(fmt==='csv'){
+    const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+    const lines=[['fecha','tipo','concepto','categoria','base','tasa_%','impuesto','total','deducible'].join(',')];
+    rows.forEach(m=>{ const i=(+m.base||0)*(+m.tasa||0)/100; lines.push([m.fecha,m.tipo,q(m.concepto),q(m.categoria),m.base,m.tasa,i.toFixed(2),((+m.base||0)+i).toFixed(2),m.tipo==='gasto'?(m.deducible?'si':'no'):''].join(',')); });
+    blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'}); name=`contabilidad-${y}.csv`;
   } else {
-    btn.classList.remove('active'); dot.className='conn-dot conn-dot-off';
-    if(card) card.style.borderColor='rgba(245,158,11,0.2)';
-    if(cardStatus) { cardStatus.textContent='○ DESCONECTADO · EN ESPERA'; cardStatus.style.color='rgba(245,158,11,0.5)'; }
-    addLog('WARN','MOTOR DE VALIDACIÓN desconectado.');
-    showToast('🦅 Motor de Validación desconectado');
-    try { localStorage.removeItem('matrix_falcon_conn'); } catch(e) {}
+    blob=new Blob([JSON.stringify({herramienta:'MATRIX',tipo:'contabilidad',anio:y,generado:new Date().toISOString(),moneda:STATE.conta.params.moneda,parametros:STATE.conta.params,resumen:S,movimientos:rows},null,2)],{type:'application/json'}); name=`contabilidad-${y}.json`;
   }
-}
-
-function showBlogfortStatus() {
-  showToast('⚡ BlogFort App — Siempre conectado a Matrix');
-  addLog('INFO','BlogFort App verificado — Conexión permanente activa.');
-}
-
-function restoreFalconState() {
-  try { if(localStorage.getItem('matrix_falcon_conn')==='1') { STATE.falconConnected=false; toggleFalcon(); } } catch(e) {}
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  addLog('INFO',`Contabilidad ${y} exportada (${fmt.toUpperCase()}).`); showToast('⬇ Contabilidad exportada');
 }
 
 // ═══════════════════════════════════════
@@ -1753,33 +2420,35 @@ function runAlertScan() {
   STATE.semRed = 0; STATE.semOrange = 0; STATE.semBlue = 0;
   const hoy = new Date();
 
-  // Scan vault beta for expiring docs
-  STATE.vaultBeta.forEach(v => {
-    if (!v.vencimiento) return;
-    const venc = new Date(v.vencimiento);
-    const diff = Math.ceil((venc - hoy) / (1000*60*60*24));
-    if (diff <= 15 && diff >= 0) {
-      STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 CRÍTICO: "${v.entidad}" vence en ${diff} días.`, time:getTime() });
+  // Intentos fallidos de acceso (indica QUÉ credencial)
+  ['login','pin'].forEach(k => {
+    const n = recentEvents(k).length, rem = lockRemaining(k);
+    if (n > 0 || rem > 0) {
+      STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 INTENTOS FALLIDOS — ${CRED_NAME[k]}: ${n} en 24 h${rem>0?` · BLOQUEADA ${Math.ceil(rem/60000)} min`:''}.`, time:getTime() });
       STATE.semRed++;
-    } else if (diff <= 30 && diff > 15) {
-      STATE.alerts.push({ type:'orange', dot:'alert-dot-orange', msg:`🟠 ADVERTENCIA: Renegociar con "${v.entidad}" (${diff} días).`, time:getTime() });
-      STATE.semOrange++;
     }
   });
 
-  // Scan contratos for expiring
-  STATE.contratos.forEach(ct => {
-    if (!ct.fecha || ct.periodo !== 'anual') return;
-    const inicio = new Date(ct.fecha);
-    const venc = new Date(inicio);
-    venc.setFullYear(venc.getFullYear() + 1);
-    const diff = Math.ceil((venc - hoy) / (1000*60*60*24));
-    if (diff <= 15 && diff >= 0) {
-      STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 CRÍTICO: Contrato "${ct.cliente}" vence en ${diff} días.`, time:getTime() });
-      STATE.semRed++;
-    } else if (diff <= 30 && diff > 15) {
-      STATE.alerts.push({ type:'orange', dot:'alert-dot-orange', msg:`🟠 Iniciar renegociación con "${ct.cliente}" (${diff} días).`, time:getTime() });
-      STATE.semOrange++;
+  // Vencimientos: ROJO ≤7 días (o vencido), AMARILLO ≤30 días
+  const classify=(diff,label,rojo,amar)=>{
+    if (diff <= 7) { STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 ${diff<0?'VENCIDO':'CRÍTICO'}: ${label} ${diff<0?`(hace ${-diff} días)`:`vence en ${diff} días`}.`, time:getTime() }); STATE.semRed++; }
+    else if (diff <= 30) { STATE.alerts.push({ type:'orange', dot:'alert-dot-orange', msg:`🟡 AVISO: ${label} vence en ${diff} días.`, time:getTime() }); STATE.semOrange++; }
+  };
+  const ms=1000*60*60*24;
+  [['Bóveda Alfa',STATE.vaultAlfa],['Bóveda Beta',STATE.vaultBeta]].forEach(([nom,arr])=>{
+    arr.forEach(v=>{ if(!v.vencimiento) return; classify(Math.ceil((new Date(v.vencimiento)-hoy)/ms), `${nom}: "${v.entidad}"`); });
+  });
+  STATE.contratos.forEach(ct=>{
+    if(!ct.fecha) return;
+    const ini=new Date(ct.fecha); if(isNaN(ini)) return;
+    if(ct.periodo==='anual'){
+      const venc=new Date(ini); venc.setFullYear(venc.getFullYear()+1);
+      classify(Math.ceil((venc-hoy)/ms), `Contrato anual "${ct.cliente}"`);
+    } else if(ct.periodo==='mensual'){
+      // próxima renovación mensual: solo avisa en rojo (≤7 días); amarillo no aplica porque siempre quedaría a <30 días
+      const next=new Date(ini); while(next<=hoy) next.setMonth(next.getMonth()+1);
+      const diff=Math.ceil((next-hoy)/ms);
+      if(diff<=7){ STATE.alerts.push({ type:'red', dot:'alert-dot-red', msg:`🔴 RENOVACIÓN: suscripción mensual "${ct.cliente}" se renueva en ${diff} días.`, time:getTime() }); STATE.semRed++; }
     }
   });
 
@@ -1791,7 +2460,7 @@ function runAlertScan() {
     STATE.semBlue++;
   }
 
-  updateAlertUI();
+  updateAlertUI(); updateSecurityIndicator();
 }
 
 function updateAlertUI() {
@@ -1821,7 +2490,7 @@ function updateAlertUI() {
       dash.innerHTML = STATE.alerts.filter(a=>a.type==='red').map(a => `<div class="alert-box alert-danger"><span>🔴</span><span>${a.msg}</span></div>`).join('');
     } else if (STATE.semOrange > 0) {
       dash.style.display='block';
-      dash.innerHTML = STATE.alerts.filter(a=>a.type==='orange').map(a => `<div class="alert-box alert-warn"><span>🟠</span><span>${a.msg}</span></div>`).join('');
+      dash.innerHTML = STATE.alerts.filter(a=>a.type==='orange').map(a => `<div class="alert-box alert-warn"><span>🟡</span><span>${a.msg}</span></div>`).join('');
     } else { dash.style.display='none'; }
   }
 }
@@ -2037,6 +2706,10 @@ function selectSubcarpeta(camara, nombre, el) {
   btns.forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   if (camara==='alfa') {
+    const isConta = nombre==='Contabilidad';
+    document.getElementById('alfaConta').style.display = isConta ? 'block' : 'none';
+    document.getElementById('alfaDocsCard').style.display = isConta ? 'none' : 'block';
+    if (isConta) { contaRender(); return; }
     document.getElementById('alfa-subcarpeta-title').textContent = nombre.toUpperCase() + ' — CÁMARA ALFA';
     const filtered = nombre ? STATE.vaultAlfa.filter(v => v.subcarpeta===nombre) : STATE.vaultAlfa;
     renderVaultAlfa(filtered);
@@ -2125,7 +2798,7 @@ function renderVaultBeta(list) {
     let vencBadge = '—';
     if (v.vencimiento) {
       const diff = Math.ceil((new Date(v.vencimiento) - new Date()) / (1000*60*60*24));
-      const color = diff<=15?'var(--alert-red)':diff<=30?'var(--alert-orange)':'var(--text-light)';
+      const color = diff<=7?'var(--alert-red)':diff<=30?'var(--alert-orange)':'var(--text-light)';
       vencBadge = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:${color};">${v.vencimiento} (${diff}d)</span>`;
     }
     return `<tr>
@@ -2190,27 +2863,30 @@ function saveProfile() {
   showToast('✓ Perfil guardado');
 }
 
-function changePasswordProfile() {
+async function changePasswordProfile() {
   const old = document.getElementById('prf-old').value;
   const nw = document.getElementById('prf-new').value;
   const conf = document.getElementById('prf-confirm').value;
-  const current = STATE.password || DEFAULT_PASS;
-  if(old!==current){ showToast('⚠️ Contraseña actual incorrecta'); return; }
+  if(lockRemaining('login')>0){ showToast('⛔ Bloqueado temporalmente'); return; }
+  if(!(await verifySecret(old, STATE.password))){ registerFail('login'); showToast('⚠️ Contraseña actual incorrecta'); return; }
   if(nw!==conf){ showToast('⚠️ Las contraseñas no coinciden'); return; }
-  if(nw.length<6){ showToast('⚠️ Mínimo 6 caracteres'); return; }
-  STATE.password=nw; saveState();
-  addLog('SECURITY','Contraseña Nivel 100 actualizada por CEO.');
+  if(nw.length<8){ showToast('⚠️ Mínimo 8 caracteres'); return; }
+  registerOk('login');
+  STATE.password=await hashSecret(nw); await saveState();
+  addLog('SECURITY','Contraseña principal actualizada.');
   showToast('✓ Contraseña actualizada');
   ['prf-old','prf-new','prf-confirm'].forEach(id=>document.getElementById(id).value='');
 }
 
 function changePinProfile() {
   const pin = document.getElementById('prf-pin').value;
-  if(pin.length<4){ showToast('⚠️ PIN mínimo 4 dígitos'); return; }
-  STATE.pin=pin; saveState();
-  addLog('SECURITY','PIN Cámara Alfa actualizado por CEO.');
-  showToast('✓ PIN Alfa actualizado');
-  document.getElementById('prf-pin').value='';
+  if(!/^\d{4,8}$/.test(pin)){ showToast('⚠️ PIN de 4 a 8 dígitos'); return; }
+  requirePin(async () => {
+    STATE.pin=await hashSecret(pin); await saveState();
+    addLog('SECURITY','PIN Bóveda Alfa actualizado.');
+    showToast('✓ PIN Alfa actualizado');
+    document.getElementById('prf-pin').value='';
+  });
 }
 
 function saveApiKeysSys() {
@@ -2378,7 +3054,7 @@ function updateStats() {
 // BACKUP
 // ═══════════════════════════════════════
 function exportData() {
-  const data=JSON.stringify({ version:'matrix_v3', exportDate:new Date().toISOString(), leads:STATE.leads, clients:STATE.clients, vaultAlfa:STATE.vaultAlfa, vaultBeta:STATE.vaultBeta, blacklist:STATE.blacklist, contratos:STATE.contratos },null,2);
+  const data=JSON.stringify({ version:'matrix_v3', exportDate:new Date().toISOString(), leads:STATE.leads, clients:STATE.clients, vaultAlfa:STATE.vaultAlfa, vaultBeta:STATE.vaultBeta, blacklist:STATE.blacklist, contratos:STATE.contratos, conta:STATE.conta },null,2);
   const blob=new Blob([data],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -2399,6 +3075,7 @@ async function importData(event) {
     if(data.vaultBeta) STATE.vaultBeta=data.vaultBeta;
     if(data.blacklist) STATE.blacklist=data.blacklist;
     if(data.contratos) STATE.contratos=data.contratos;
+    if(data.conta && data.conta.params) { STATE.conta={params:{...CONTA_DEFAULT.params,...data.conta.params},movs:Array.isArray(data.conta.movs)?data.conta.movs:[]}; }
     await saveState(); updateUI();
     addLog('CONFIRM',`Backup importado: ${file.name}`);
     showToast('📥 Backup importado');
@@ -2407,7 +3084,7 @@ async function importData(event) {
 }
 
 async function clearAllData() {
-  STATE.leads=[]; STATE.clients=[]; STATE.vaultAlfa=[]; STATE.vaultBeta=[]; STATE.blacklist=[]; STATE.contratos=[];
+  STATE.leads=[]; STATE.clients=[]; STATE.vaultAlfa=[]; STATE.vaultBeta=[]; STATE.blacklist=[]; STATE.contratos=[]; STATE.conta=JSON.parse(JSON.stringify(CONTA_DEFAULT));
   await saveState(); updateUI();
   addLog('SECURITY','BORRADO TOTAL ejecutado por CEO Nivel 100.');
   showToast('🗑️ Todos los datos eliminados');
@@ -2419,7 +3096,7 @@ async function clearAllData() {
 function updateUI() {
   renderLeads(STATE.leads); renderClients(STATE.clients);
   renderBlacklist(); updateStats(); updateVaultCounts();
-  renderContratos(); calcEstrategica();
+  renderContratos(); calcEstrategica(); contaRender();
   updateStorageInfo();
   if (STATE.securityLog.length) {
     const tagMap = { 'CONFIRM':['log-tag-confirm','[✓ CONFIRM]'], 'INFO':['log-tag-info','[INFO]'], 'WARN':['log-tag-warn','[WARN]'], 'SECURITY':['log-tag-security','[🛡️ SEGURIDAD]'] };
@@ -2443,7 +3120,7 @@ function saveApiKeyLic() {
   if (!key.startsWith('sk-ant-')) { showToast('⚠️ Formato inválido — debe comenzar con sk-ant-'); return; }
   localStorage.setItem('matrix_anthropic', btoa(key));
   updateApiStatus(true);
-  addLog('CONFIRM', 'API Key Anthropic guardada y cifrada correctamente.');
+  addLog('CONFIRM', 'API Key Anthropic guardada localmente en este dispositivo.');
   showToast('🔐 API Key guardada correctamente');
 }
 
@@ -2503,52 +3180,6 @@ function loadApiKeyLic() {
   }
 }
 
-function selectPlan(plan) {
-  const labels = { starter: 'STARTER — $497/mes', business: 'BUSINESS — $797/mes', enterprise: 'ENTERPRISE — A MEDIDA' };
-  STATE.planActivo = plan;
-  try {
-    const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
-    m.planActivo = plan;
-    m.planFecha = new Date().toLocaleDateString('es-ES');
-    localStorage.setItem('matrix_meta_v3', JSON.stringify(m));
-  } catch(e) {}
-  const lbl = document.getElementById('planActivoLabel');
-  const fecha = document.getElementById('planActivoFecha');
-  if (lbl) lbl.textContent = labels[plan];
-  if (fecha) fecha.textContent = `Desde: ${new Date().toLocaleDateString('es-ES')}`;
-
-  // Highlight selected plan
-  ['starter','business','enterprise'].forEach(p => {
-    const el = document.getElementById('plan-'+p);
-    if (el) el.style.boxShadow = p === plan ? '0 0 0 2px var(--accent-cyan)' : '';
-  });
-
-  if (plan === 'enterprise') {
-    addLog('INFO', 'Solicitud plan Enterprise iniciada — Contactar CEO BlogFort Agency.');
-    showToast('📧 Contacta con BlogFort Agency para Enterprise');
-  } else {
-    addLog('CONFIRM', `Plan seleccionado: ${labels[plan]}`);
-    showToast(`✓ Plan ${plan.toUpperCase()} seleccionado`);
-  }
-}
-
-function loadPlanActivo() {
-  try {
-    const m = JSON.parse(localStorage.getItem('matrix_meta_v3') || '{}');
-    if (m.planActivo) {
-      const labels = { starter: 'STARTER — $497/mes', business: 'BUSINESS — $797/mes', enterprise: 'ENTERPRISE — A MEDIDA' };
-      const lbl = document.getElementById('planActivoLabel');
-      const fecha = document.getElementById('planActivoFecha');
-      if (lbl) lbl.textContent = labels[m.planActivo];
-      if (fecha && m.planFecha) fecha.textContent = `Desde: ${m.planFecha}`;
-      ['starter','business','enterprise'].forEach(p => {
-        const el = document.getElementById('plan-'+p);
-        if (el) el.style.boxShadow = p === m.planActivo ? '0 0 0 2px var(--accent-cyan)' : '';
-      });
-    }
-  } catch(e) {}
-}
-
 // ═══════════════════════════════════════
 // ═══════════════════════════════════════
 // SHOW PANEL — títulos + carga licencia
@@ -2562,10 +3193,10 @@ function showPanel(id, el) {
     dashboard:'DASHBOARD CEO', sector1:'SECTOR 1 — FLUJO DE CONTACTO',
     sector2:'SECTOR 2 — EJECUCIÓN PROGRAMADA', finanzas:'CALCULADORA FINANCIERA',
     boveda:'BÓVEDA — CÁMARAS ALFA & BETA', seguridad:'MURO DE CONTENCIÓN',
-    log:'LOG & AUDITORÍA', licencia:'ACCESO & LICENCIA'
+    log:'LOG & AUDITORÍA', licencia:'ACCESO & LICENCIA', informes:'INFORMES'
   };
   document.getElementById('topbarTitle').textContent = titles[id] || id.toUpperCase();
-  if (id === 'licencia') { loadApiKeyLic(); loadPlanActivo(); }
+  if (id === 'licencia') { loadApiKeyLic(); }
 }
 
 
@@ -2606,75 +3237,65 @@ function checkTermsAccepted() {
 (async () => {
   try { await initDB(); } catch(e) {}
   await loadState();
+  prepareLogin();
+  runAlertScan();
   checkTermsAccepted();
   document.getElementById('loginPass').focus();
   document.getElementById('ct-fecha') && (document.getElementById('ct-fecha').value = new Date().toISOString().slice(0,10));
-  initMatrixStripe();
-  updateMatrixPlanBadge();
 })();
 
 // ═══════════════════════════════════════════════════
-// STRIPE — MATRIX · BlogFort Agency LLC
+// PLANES — MATRIX · BlogFort Agency LLC
+// El pago se hace en la página segura de Stripe (enlaces de pago).
+// La herramienta NO procesa tarjetas ni activa licencias por sí misma.
 // ═══════════════════════════════════════════════════
-const MATRIX_STRIPE = {
-  publishableKey: 'pk_test_51ReplaceWithYourStripeKeyHere',
-  plans: {
-    solo:      { name: 'MATRIX SOLO',            price: 497,  desc: 'CRM + Bóveda completa' },
-    blogfort:  { name: 'MATRIX + BLOGFORT APP',  price: 797,  desc: 'Ecosistema dual · Recomendado', popular: true },
-    ecosystem: { name: 'ECOSISTEMA COMPLETO',    price: 1497, desc: 'MATRIX + BlogFort + MWBFA · White-label' },
-    enterprise:{ name: 'ENTERPRISE',             price: null, desc: 'Corporaciones · Precio a medida' }
-  }
+const MATRIX_PLANS = {
+  solo:      { name: 'MATRIX SOLO', desc: 'CRM + Bóveda completa', monthly: 49, annual: 499,
+               urlMonthly: 'https://buy.stripe.com/3cI6oH3WpfjY1DR7aDgMw04',
+               urlAnnual:  'https://buy.stripe.com/9B614n64xgo24Q3amPgMw05' },
+  ecosystem: { name: 'MATRIX + APP + MWBFA', desc: 'Ecosistema completo (App y MWBFA plan Starter)', monthly: 121, annual: 1234,
+               urlMonthly: 'https://buy.stripe.com/6oU3cv78B9ZE0zN7aDgMw0a',
+               urlAnnual:  'https://buy.stripe.com/4gM28r78B0p46Yb66zgMw0b' }
 };
 
-let matrixStripe = null;
-let matrixCardEl = null;
-let matrixStripeElements = null;
-let matrixSelectedPlan = null;
-
-function initMatrixStripe() {
-  try { matrixStripe = Stripe(MATRIX_STRIPE.publishableKey); } catch(e) {}
-}
-
-function openMatrixPlansModal() {
-  matrixSelectedPlan = null;
+function openMatrixPlansModal(key) {
   document.getElementById('matrixStripeOverlay').classList.add('visible');
-  renderMatrixPlans();
+  if (key && MATRIX_PLANS[key]) renderMatrixChoice(key); else renderMatrixPlans();
 }
 
 function closeMatrixModal() {
   document.getElementById('matrixStripeOverlay').classList.remove('visible');
-  if (matrixCardEl) { try { matrixCardEl.destroy(); } catch(e){} matrixCardEl = null; }
 }
 
 function renderMatrixPlans() {
   document.getElementById('matrixModalBody').innerHTML = `
     <div class="matrix-plans-body" style="border-radius:0 0 12px 12px;">
       <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:#94A3B8;text-transform:uppercase;margin-bottom:14px;">// SELECCIONA TU LICENCIA</div>
-      ${Object.entries(MATRIX_STRIPE.plans).map(([key, plan]) => {
-        const isEnterprise = plan.price === null;
-        const priceDisplay = isEnterprise ? 'A MEDIDA' : `$${plan.price.toLocaleString()}`;
-        return `<div class="matrix-plan-row ${plan.popular ? 'featured' : ''}" onclick="${isEnterprise ? "window.location.href='mailto:info@blogfort.agency?subject=MATRIX Enterprise'" : `selectMatrixPlan('${key}')`}">
+      ${Object.entries(MATRIX_PLANS).map(([key, plan]) => `
+        <div class="matrix-plan-row" onclick="renderMatrixChoice('${key}')">
           <div class="matrix-plan-left">
             <div class="matrix-plan-name">${plan.name}</div>
             <div class="matrix-plan-desc">${plan.desc}</div>
-            ${plan.popular ? '<span class="matrix-popular-tag">⭐ RECOMENDADO</span>' : ''}
           </div>
           <div>
-            <div class="matrix-plan-price">${priceDisplay}</div>
-            <div class="matrix-plan-period">${isEnterprise ? 'contactar' : '/mes'}</div>
+            <div class="matrix-plan-price">$${plan.monthly}</div>
+            <div class="matrix-plan-period">/mes</div>
           </div>
-        </div>`;
-      }).join('')}
+        </div>`).join('')}
+      <div class="matrix-plan-row" onclick="window.location.href='mailto:hello@blogfort.agency?subject=MATRIX%20Enterprise'">
+        <div class="matrix-plan-left"><div class="matrix-plan-name">ENTERPRISE</div><div class="matrix-plan-desc">Corporaciones · Precio a medida</div></div>
+        <div><div class="matrix-plan-price">A MEDIDA</div><div class="matrix-plan-period">contactar</div></div>
+      </div>
       <div style="font-family:'DM Mono',monospace;font-size:8px;color:#94A3B8;text-align:center;margin-top:12px;letter-spacing:1px;line-height:1.8;">
-        🔒 Pago seguro via Stripe · BlogFort Agency LLC · Wyoming, USA<br>
-        💳 Visa · Mastercard · Apple Pay · Google Pay · Cancela cuando quieras
+        Pago en la página segura de Stripe · BlogFort Agency LLC · Wyoming, USA<br>
+        Precios sin impuestos aplicables · Cancela cuando quieras
       </div>
     </div>`;
 }
 
-function selectMatrixPlan(planKey) {
-  matrixSelectedPlan = planKey;
-  const plan = MATRIX_STRIPE.plans[planKey];
+function renderMatrixChoice(key) {
+  const plan = MATRIX_PLANS[key];
+  const btn = 'display:block;text-align:center;text-decoration:none;margin-bottom:10px;';
   document.getElementById('matrixModalBody').innerHTML = `
     <div class="matrix-checkout-body">
       <div class="matrix-checkout-header">
@@ -2683,134 +3304,15 @@ function selectMatrixPlan(planKey) {
           <div style="font-family:'DM Mono',monospace;font-size:8px;color:#94A3B8;letter-spacing:2px;">LICENCIA MATRIX</div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:#00a8ff;">${plan.name}</div>
         </div>
-        <div style="margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#f0a500;">$${plan.price.toLocaleString()}/mes</div>
       </div>
-      <div class="matrix-field">
-        <label class="matrix-label">Nombre completo</label>
-        <input type="text" id="matrixName" class="matrix-input" placeholder="Tu nombre completo" autocomplete="name"/>
-      </div>
-      <div class="matrix-field">
-        <label class="matrix-label">Email corporativo</label>
-        <input type="email" id="matrixEmail" class="matrix-input" placeholder="tu@empresa.com" autocomplete="email"/>
-      </div>
-      <div class="matrix-field">
-        <label class="matrix-label">Empresa / Agencia</label>
-        <input type="text" id="matrixCompany" class="matrix-input" placeholder="Nombre de tu agencia"/>
-      </div>
-      <div class="matrix-field">
-        <label class="matrix-label">Datos de tarjeta</label>
-        <div id="matrix-card-element"></div>
-        <div class="matrix-card-error" id="matrix-card-error"></div>
-      </div>
-      <button class="matrix-pay-btn" id="matrixPayBtn" onclick="processMatrixPayment()">
-        ⚡ ACTIVAR LICENCIA — $${plan.price.toLocaleString()}/MES
-      </button>
+      <a class="matrix-pay-btn" style="${btn}" href="${plan.urlMonthly}" target="_blank" rel="noopener">MENSUAL — $${plan.monthly}/MES</a>
+      <a class="matrix-pay-btn" style="${btn}" href="${plan.urlAnnual}" target="_blank" rel="noopener">ANUAL — $${plan.annual.toLocaleString('en-US')}/AÑO (−15 %)</a>
       <div class="matrix-pay-footer">
-        🔒 Encriptado SSL · Stripe · BlogFort Agency LLC · Wyoming, USA<br>
-        Cancela en cualquier momento · Factura automática mensual
+        Se abrirá la página de pago segura de Stripe en una pestaña nueva.<br>
+        BlogFort no ve los datos de tu tarjeta. Recibirás la factura por correo.<br>
+        Precios en USD sin impuestos aplicables · Cancela cuando quieras
       </div>
     </div>`;
-  initMatrixCardEl();
-}
-
-function initMatrixCardEl() {
-  if (!matrixStripe) {
-    document.getElementById('matrix-card-element').innerHTML = `
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#94A3B8;text-align:center;padding:10px;background:#F8FAFC;border-radius:6px;letter-spacing:1px;">
-        🔧 MODO TEST — Configura tu Stripe Key para pagos reales
-      </div>`;
-    return;
-  }
-  matrixStripeElements = matrixStripe.elements();
-  matrixCardEl = matrixStripeElements.create('card', {
-    style: {
-      base: { fontFamily: "'DM Mono', monospace", fontSize: '13px', color: '#0A1628', '::placeholder': { color: '#CBD5E1' }, iconColor: '#00a8ff' },
-      invalid: { color: '#ff4060', iconColor: '#ff4060' }
-    }
-  });
-  matrixCardEl.mount('#matrix-card-element');
-  matrixCardEl.on('change', e => {
-    document.getElementById('matrix-card-error').textContent = e.error ? e.error.message : '';
-  });
-}
-
-async function processMatrixPayment() {
-  const btn = document.getElementById('matrixPayBtn');
-  const name = document.getElementById('matrixName')?.value.trim();
-  const email = document.getElementById('matrixEmail')?.value.trim();
-  const company = document.getElementById('matrixCompany')?.value.trim();
-  if (!name || !email) {
-    document.getElementById('matrix-card-error').textContent = 'Por favor completa todos los campos.';
-    return;
-  }
-  btn.disabled = true;
-  btn.textContent = 'PROCESANDO...';
-  if (!matrixStripe) { simulateMatrixSuccess(name, email, company); return; }
-  try {
-    const { paymentMethod, error } = await matrixStripe.createPaymentMethod({
-      type: 'card', card: matrixCardEl, billing_details: { name, email }
-    });
-    if (error) {
-      document.getElementById('matrix-card-error').textContent = error.message;
-      btn.disabled = false;
-      btn.textContent = `⚡ ACTIVAR LICENCIA`;
-      return;
-    }
-    simulateMatrixSuccess(name, email, company);
-  } catch(err) {
-    document.getElementById('matrix-card-error').textContent = err.message;
-    btn.disabled = false;
-  }
-}
-
-function simulateMatrixSuccess(name, email, company) {
-  const plan = MATRIX_STRIPE.plans[matrixSelectedPlan];
-  const payData = {
-    plan: matrixSelectedPlan, planName: plan.name,
-    price: plan.price, name, email, company,
-    date: new Date().toISOString()
-  };
-  localStorage.setItem('matrix_active_plan', JSON.stringify(payData));
-
-  // Notificar a MATRIX bóveda
-  try {
-    const queue = JSON.parse(localStorage.getItem('bf_matrix_queue') || '[]');
-    queue.push({
-      id: Date.now(), tipo: 'MATRIX_LICENCIA',
-      plan: plan.name, importe: `$${plan.price.toLocaleString()}`,
-      ciclo: '/mes', cliente: email, nombre: name,
-      empresa: company, producto: 'MATRIX — Licencia Ecosistema',
-      fecha: new Date().toISOString(), estado: 'confirmado'
-    });
-    localStorage.setItem('bf_matrix_queue', JSON.stringify(queue));
-  } catch(e) {}
-
-  document.getElementById('matrixModalBody').innerHTML = `
-    <div class="matrix-success-box">
-      <div class="matrix-success-icon">🔐</div>
-      <div class="matrix-success-title">LICENCIA ACTIVADA</div>
-      <div class="matrix-success-badge">${plan.name} — $${plan.price.toLocaleString()}/mes</div>
-      <div class="matrix-success-desc">
-        <strong style="color:#0A1628;">${name}</strong> · ${company || 'BlogFort Agency'}<br>
-        Tu licencia MATRIX está activa.<br>
-        Confirmación enviada a <span style="color:#00a8ff;">${email}</span><br><br>
-        <span style="color:#f0a500;">⚡ Acceso completo activado · BlogFort Agency LLC</span>
-      </div>
-      <button class="matrix-success-btn" onclick="closeMatrixModal()">⚡ ACCEDER A MATRIX</button>
-    </div>`;
-
-  updateMatrixPlanBadge();
-  addLog('LICENCIA', `Plan activado: ${plan.name} — ${email}`);
-}
-
-function updateMatrixPlanBadge() {
-  const saved = JSON.parse(localStorage.getItem('matrix_active_plan') || 'null');
-  const label = document.getElementById('planActivoLabel');
-  const fecha = document.getElementById('planActivoFecha');
-  if (label && saved) {
-    label.textContent = saved.planName;
-    if (fecha) fecha.textContent = new Date(saved.date).toLocaleDateString('es-ES');
-  }
 }
 </script>
 
@@ -2820,7 +3322,7 @@ function updateMatrixPlanBadge() {
     <div class="matrix-modal-top" style="position:relative;">
       <button class="matrix-close-btn" onclick="closeMatrixModal()">✕</button>
       <div class="matrix-modal-title">⬡ MATRIX — LICENCIA</div>
-      <div class="matrix-modal-sub">BLOGFORT AGENCY LLC · WYOMING, USA · ECOSISTEMA PROPIETARIO</div>
+      <div class="matrix-modal-sub">BLOGFORT AGENCY LLC · WYOMING, USA</div>
     </div>
     <div id="matrixModalBody"></div>
   </div>
