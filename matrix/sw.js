@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matrix-v5';
+const CACHE_NAME = 'matrix-v6';
 const urlsToCache = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', event => {
