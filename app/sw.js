@@ -1,4 +1,4 @@
-const CACHE_NAME = 'blogfort-app-v9';
+const CACHE_NAME = 'blogfort-app-v12';
 const urlsToCache = [
   './',
   './index.html',
@@ -36,6 +36,6 @@ self.addEventListener('fetch', event => {
         caches.open(CACHE_NAME).then(c => c.put(req, copy));
       }
       return res;
-    }).catch(() => caches.match(req))
+    }).catch(() => caches.match(req, { ignoreSearch: true }))
   );
 });
