@@ -1,31 +1,17 @@
 {
-  "name": "MWBFA — Módulo Web BlogFort",
+  "name": "MWBFA · BlogFort Agency",
   "short_name": "MWBFA",
-  "description": "Constructor de webs, PWAs y agentes de voz",
+  "description": "Constructor web de BlogFort Agency: crea, edita y exporta webs, apps instalables y guiones de voz.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#7C3AED",
+  "background_color": "#030810",
+  "theme_color": "#030810",
   "lang": "es",
+  "categories": ["productivity", "business"],
   "icons": [
-    {
-      "src": "icon-192-2.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-512-2.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192-2.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-2.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
