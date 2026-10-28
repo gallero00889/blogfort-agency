@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1a56db">
+<meta name="theme-color" content="#030810">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BlogFort">
@@ -101,15 +101,15 @@
 :root {
   --ink:#0d0d0d; --paper:#ffffff; --cream:#f5f7fa; --gold:#f59e0b;
   --gold-l:#fef3c7; --blue:#1a56db; --blue-l:#eff6ff; --blue-m:#3b82f6;
-  --teal:#0d9488; --teal-l:#f0fdfa; --rust:#dc2626;
-  --mist:#e5e7eb; --mid:#6b7280; --border:#e2e8f0; --white:#fff;
-  --success:#059669; --warning:#d97706;
+  --teal:#0f766e; --teal-l:#f0fdfa; --rust:#dc2626;
+  --mist:#e5e7eb; --mid:#4b5563; --border:#e2e8f0; --white:#fff;
+  --success:#047857; --warning:#d97706;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
   --f-bg:#030810; --f-surface:#070f1a; --f-surface2:#0b1825;
   --f-border:#132a42; --f-border2:#1a3a5c;
   --f-accent:#00a8ff; --f-accent2:#00ffcc; --f-gold:#f0a500;
-  --f-text:#c8dff0; --f-text-dim:#3d6a8a;
+  --f-text:#c8dff0; --f-text-dim:#7ea6c8; --f-text-nav:#9fc3e0; --f-text-dim-light:#3d6a8a;
   --f-glow:0 0 18px rgba(0,168,255,0.35); --f-glow2:0 0 18px rgba(0,255,204,0.3);
 }
 /* ── PLANES (estilos base del modal de planes) ── */
@@ -199,7 +199,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .act-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
 .act-btn.primary:hover{background:#1d4ed8;}
 .act-btn.success{background:var(--success);color:#fff;border-color:var(--success);}
-.act-btn.success:hover{background:#047857;}
+.act-btn.success:hover{background:#065f46;}
 
 .seo-pill{
   display:flex;align-items:center;gap:5px;background:var(--teal-l);
@@ -236,7 +236,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .title-input::placeholder{color:#cbd5e1;}
 .meta-row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;}
 .meta-f{flex:1;min-width:120px;}
-.meta-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:3px;}
+.meta-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:600;margin-bottom:3px;}
 .meta-inp{
   width:100%;background:#fff;border:1px solid var(--border);border-radius:6px;
   padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);outline:none;
@@ -257,20 +257,33 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 /* AI DRAWER */
 .ai-drawer{
   width:275px;min-width:275px;background:#f8fafc;border-left:1px solid var(--border);
-  overflow-y:auto;display:flex;flex-direction:column;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.drawer-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+/* Cabecera del panel (ordenador y móvil): título corto y botón «Cerrar ✕» */
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--f-surface);border-bottom:1px solid var(--f-border);flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--f-accent);text-transform:uppercase;}
+.sheet-head .sh-long{display:none;}
+.sheet-head button{background:transparent;border:1px solid var(--f-border2);color:var(--f-text);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.sheet-head button:hover{border-color:var(--f-accent2);color:var(--f-accent2);}
+#aiFab,#aiSheetBg{display:none;}
+#aiFab{position:fixed;right:18px;bottom:46px;z-index:80;align-items:center;gap:6px;background:var(--f-bg);border:1px solid var(--f-accent2);color:var(--f-accent2);border-radius:999px;padding:11px 18px;font:700 13px 'DM Sans',sans-serif;letter-spacing:.5px;box-shadow:0 6px 22px rgba(0,0,0,.4);cursor:pointer;}
+/* Ordenador: el panel se puede cerrar para escribir con más espacio; el botón «✦ IA · SEO» lo vuelve a abrir */
+@media(min-width:701px){
+  body.drawer-off .ai-drawer{display:none;}
+  body.drawer-off[data-screen="editor"] #aiFab{display:flex;}
 }
 /* En móvil el panel IA/SEO/Estructura se abre como hoja inferior (botón flotante «✦ IA · SEO») */
-.sheet-head{display:none;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--f-surface);border-bottom:1px solid var(--f-border);border-radius:16px 16px 0 0;flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--f-accent);text-transform:uppercase;}
-.sheet-head button{background:transparent;border:1px solid var(--f-border2);color:var(--f-text);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-#aiFab,#aiSheetBg{display:none;}
 @media(max-width:700px){
   .ai-drawer{display:none;}
   body[data-screen="editor"] #aiFab{display:flex;}
   body.sheet-on #aiSheetBg{display:block;}
-  #aiFab{position:fixed;right:14px;bottom:calc(52px + var(--safe-bot));z-index:80;align-items:center;gap:6px;background:var(--f-bg);border:1px solid var(--f-accent2);color:var(--f-accent2);border-radius:999px;padding:11px 18px;font:700 13px 'DM Sans',sans-serif;letter-spacing:.5px;box-shadow:0 6px 22px rgba(0,0,0,.4);cursor:pointer;}
+  #aiFab{right:14px;bottom:calc(52px + var(--safe-bot));}
   #aiSheetBg{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.5);}
   .ai-drawer.sheet-open{display:flex;position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;min-width:0;max-height:82vh;max-height:82dvh;z-index:90;overflow:hidden;border-left:0!important;border-top:1px solid var(--f-border2)!important;border-radius:16px 16px 0 0;box-shadow:0 -14px 40px rgba(0,0,0,.55);padding-bottom:var(--safe-bot);}
-  .ai-drawer.sheet-open .sheet-head{display:flex;}
+  .ai-drawer.sheet-open .sheet-head{padding:10px 14px;border-radius:16px 16px 0 0;font-size:10px;letter-spacing:2px;}
+  .ai-drawer.sheet-open .sheet-head .sh-long{display:inline;}
+  .ai-drawer.sheet-open .sheet-head .sh-short{display:none;}
+  .ai-drawer.sheet-open .sheet-head button{padding:6px 14px;font-size:12px;}
   .ai-drawer.sheet-open .drawer-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 }
 .drawer-tabs{display:flex;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:5;}
@@ -279,12 +292,12 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .dtab.active{color:var(--blue);border-bottom-color:var(--blue);}
 .dpanel{padding:14px;display:none;}
 .dpanel.active{display:block;}
-.ds-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);
+.ds-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);
   font-weight:700;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
 
 /* AI prompt box */
 .ai-box{background:white;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-.ai-box-head{background:linear-gradient(135deg,var(--ink),#1a1a2e);color:var(--gold);font-size:9px;font-weight:700;
+.ai-box-head{background:linear-gradient(135deg,var(--ink),#1a1a2e);color:var(--gold);font-size:10px;font-weight:700;
   letter-spacing:1.5px;text-transform:uppercase;padding:7px 10px;}
 .ai-ta{width:100%;border:none;outline:none;padding:9px 10px;font-family:'DM Sans',sans-serif;
   font-size:12px;color:var(--ink);resize:none;min-height:70px;background:white;line-height:1.5;}
@@ -314,7 +327,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .human-score{display:flex;align-items:center;gap:6px;padding:6px 10px;background:linear-gradient(135deg,var(--teal-l),#f0fdf4);
   border:1px solid rgba(13,148,136,.2);border-radius:8px;margin-bottom:8px;}
 .human-score-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--teal);}
-.human-score-lbl{font-size:9px;color:var(--teal);font-weight:600;letter-spacing:.5px;}
+.human-score-lbl{font-size:10px;color:var(--teal);font-weight:600;letter-spacing:.5px;}
 
 /* SEO checks */
 .seo-check{display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;line-height:1.4;}
@@ -347,7 +360,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .btn-secondary{background:var(--mist);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:9px 16px;
   font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .btn-secondary:hover{background:#e2e8f0;}
-.btn-danger{background:#fee2e2;color:var(--rust);border:1px solid #fecaca;border-radius:8px;padding:9px 16px;
+.btn-danger{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;border-radius:8px;padding:9px 16px;
   font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
 .btn-danger:hover{background:#fecaca;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
@@ -360,7 +373,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .drop-zone:hover,.drop-zone.drag{border-color:var(--blue);background:var(--blue-l);}
 .drop-icon{font-size:36px;margin-bottom:8px;}
 .drop-text{font-size:13px;color:var(--mid);}
-.drop-hint{font-size:11px;color:#cbd5e1;margin-top:4px;}
+.drop-hint{font-size:11px;color:#64748b;margin-top:4px;}
 #imgInput{display:none;}
 .img-preview{max-width:100%;border-radius:10px;border:1px solid var(--border);margin:10px 0;max-height:220px;object-fit:contain;}
 .slider-row{display:flex;align-items:center;gap:10px;margin:6px 0;}
@@ -404,14 +417,14 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .trans-panel:last-child{border:none;}
 .trans-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:600;padding:8px 14px;background:#f8fafc;border-bottom:1px solid var(--border);}
 .trans-ta{flex:1;width:100%;border:none;outline:none;padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.7;resize:none;background:#fff;color:var(--ink);}
-.trans-ta::placeholder{color:#cbd5e1;}
+.trans-ta::placeholder{color:#64748b;}
 .trans-actions{padding:8px 12px;background:#f8fafc;border-top:1px solid var(--border);display:flex;gap:6px;align-items:center;}
 
 /* Articles grid */
 .articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;padding:18px;}
 .art-card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;position:relative;}
 .art-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.1);}
-.art-card-cat{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px;}
+.art-card-cat{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px;}
 .art-card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1.3;margin-bottom:8px;color:#0d0d0d;}
 .art-card-meta{font-size:11px;color:var(--mid);display:flex;align-items:center;gap:8px;}
 .art-card-actions{display:flex;gap:5px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
@@ -424,7 +437,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .status-dot.pub{background:var(--success);} .status-dot.draft{background:var(--warning);}
 .new-art-card{background:transparent;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:140px;border-radius:14px;}
 .new-art-card:hover{border-color:var(--blue);background:var(--blue-l);}
-.new-art-icon{font-size:28px;color:#cbd5e1;}
+.new-art-icon{font-size:28px;color:#7d8ea5;}
 .new-art-lbl{font-size:12px;color:var(--mid);font-weight:600;}
 
 /* Settings */
@@ -445,7 +458,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .plan-card{border:2px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;background:white;transition:.2s;}
 .plan-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(26,86,219,.1);}
 .plan-card.featured{border-color:var(--blue);background:var(--blue-l);}
-.plan-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:4px;}
+.plan-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:4px;color:var(--blue);}
 .plan-price{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;color:var(--blue);}
 .plan-period{font-size:12px;color:var(--mid);}
 .plan-features{list-style:none;margin:12px 0;font-size:12px;display:flex;flex-direction:column;gap:5px;}
@@ -554,8 +567,8 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
     gap:6px;
   }
   .footer-security{display:none;}
-  .footer-legal-btn{font-size:9px;}
-  .footer-brand{font-size:9px;}
+  .footer-legal-btn{font-size:10px;}
+  .footer-brand{font-size:10px;}
 }
 
 /* Teclado virtual Android — evitar que tape el editor */
@@ -586,10 +599,10 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 }
 
 /* ── PIE DE PÁGINA y AVISO DE API ── */
-.app-footer{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 14px calc(6px + var(--safe-bot));background:var(--f-bg);border-top:1px solid var(--f-border);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--f-text-dim);}
+.app-footer{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 14px calc(6px + var(--safe-bot));background:var(--f-bg);border-top:1px solid var(--f-border);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--f-text-dim);}
 .app-footer strong{color:var(--f-accent);}
 .footer-links{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
-.footer-legal-btn,.footer-health-btn{background:transparent;border:1px solid var(--f-border);color:var(--f-text-dim);font:inherit;letter-spacing:inherit;cursor:pointer;border-radius:3px;padding:3px 9px;}
+.footer-legal-btn,.footer-health-btn{background:transparent;border:1px solid var(--f-border2);color:var(--f-text-nav);font:inherit;letter-spacing:inherit;cursor:pointer;border-radius:3px;padding:3px 9px;}
 .footer-legal-btn:hover,.footer-health-btn:hover{color:var(--f-accent);border-color:var(--f-accent);}
 .api-pause-banner{align-items:center;gap:10px;padding:8px 14px;background:#451a03;border-bottom:1px solid #92400e;color:#fde68a;font-size:12px;line-height:1.4;flex-shrink:0;}
 .api-pause-txt{flex:1;}
@@ -605,7 +618,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 .pdf-preview small{font:11px 'DM Sans',sans-serif;}
 
 /* ── Funciones de plan Business (candado) ── */
-.lock-badge{display:inline-flex;align-items:center;gap:3px;font:700 9px 'DM Sans',sans-serif;letter-spacing:.5px;background:#fef3c7;color:#92400e;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;text-transform:none;}
+.lock-badge{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font:700 10px 'DM Sans',sans-serif;letter-spacing:.5px;background:#fef3c7;color:#92400e;border:1px solid rgba(245,158,11,.4);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;text-transform:none;}
 .lock-note{background:linear-gradient(135deg,#fffbeb,#eff6ff);border:1px solid #fde68a;border-radius:12px;padding:20px;text-align:center;font-size:13px;color:#78350f;line-height:1.6;}
 .lock-note b{display:block;font-size:15px;margin-bottom:6px;}
 .lic-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px;}
@@ -772,7 +785,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
     <div class="nav-spacer"></div>
     <div class="nav-actions" style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;">
       <button class="plan-badge" onclick="openPlansModal()" style="background:transparent;border:1px solid var(--f-gold);color:var(--f-gold);border-radius:3px;padding:4px 11px;font-size:9px;font-weight:700;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:2px;transition:all .2s;">⚡ PLANES</button>
-      <button class="api-key-btn" id="apiKeyBtn" onclick="openApiModal()" style="background:rgba(0,168,255,0.07);border:1px solid var(--f-border2);color:var(--f-text-dim);border-radius:3px;padding:5px 11px;font-size:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:1px;transition:all .2s;">🔑 API KEY</button>
+      <button class="api-key-btn" id="apiKeyBtn" onclick="openApiModal()" style="background:rgba(0,168,255,0.07);border:1px solid var(--f-border2);color:var(--f-accent2);border-radius:3px;padding:5px 11px;font-size:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:1px;transition:all .2s;">🔑 API KEY</button>
     </div>
   </nav>
   <style>
@@ -784,43 +797,54 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
   <style>
   .tabbar{display:flex;background:var(--f-surface);border-bottom:1px solid var(--f-border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
   .tabbar::-webkit-scrollbar{display:none;}
-  .tab{flex-shrink:0;padding:9px 11px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;font-weight:600;color:var(--f-text-dim);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;text-transform:uppercase;position:relative;}
-  .tab.active{color:var(--f-accent);border-bottom-color:var(--f-accent);background:rgba(0,168,255,0.06);text-shadow:0 0 8px rgba(0,168,255,0.4);}
-  .tab:hover:not(.active){color:var(--f-text);background:rgba(255,255,255,0.03);}
+  .tab{flex-shrink:0;padding:9px 11px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;font-weight:700;color:var(--f-accent2);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;text-transform:uppercase;position:relative;}
+  .tab.active{color:#fff;border-bottom-color:var(--f-accent);background:rgba(0,168,255,0.10);text-shadow:0 0 8px rgba(0,168,255,0.7);}
+  .tab:hover:not(.active){color:#fff;background:rgba(255,255,255,0.05);}
   .tab svg{width:13px;height:13px;flex-shrink:0;transition:filter .2s;}
   .tab.active svg{filter:drop-shadow(0 0 4px rgba(0,168,255,0.7));}
-  .tab-label{font-size:8px;letter-spacing:1.5px;}
+  .tab-label{font-size:10px;letter-spacing:1.5px;}
   /* Tool card heads */
   .tool-card-head{background:var(--f-surface)!important;color:var(--f-accent)!important;font-family:'Share Tech Mono',monospace!important;font-size:10px!important;letter-spacing:2px!important;border-bottom:1px solid var(--f-border)!important;position:relative;overflow:hidden;}
   .tool-card-head::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--f-accent),transparent);}
   /* AI drawer */
   .ai-drawer{background:var(--f-surface2)!important;border-left:1px solid var(--f-border)!important;}
   .drawer-tabs{background:var(--f-surface)!important;border-bottom:1px solid var(--f-border)!important;}
-  .dtab{font-family:'Share Tech Mono',monospace!important;font-size:9px!important;letter-spacing:2px!important;color:var(--f-text-dim)!important;text-transform:uppercase;}
-  .dtab.active{color:var(--f-accent)!important;border-bottom-color:var(--f-accent)!important;}
+  .dtab{font-family:'Share Tech Mono',monospace!important;font-size:10px!important;letter-spacing:2px!important;color:var(--f-accent2)!important;text-transform:uppercase;}
+  .dtab.active{color:#fff!important;border-bottom-color:var(--f-accent)!important;}
   .ai-box{background:var(--f-surface)!important;border:1px solid var(--f-border)!important;}
-  .ai-box-head{background:var(--f-bg)!important;color:var(--f-accent)!important;font-family:'Share Tech Mono',monospace!important;font-size:8px!important;letter-spacing:2px!important;}
+  .ai-box-head{background:var(--f-bg)!important;color:var(--f-accent)!important;font-family:'Share Tech Mono',monospace!important;font-size:10px!important;letter-spacing:.3px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .ai-ta{background:var(--f-surface)!important;color:var(--f-text)!important;}
   .ai-ta::placeholder{color:var(--f-text-dim)!important;}
   .ai-foot{background:var(--f-bg)!important;border-top:1px solid var(--f-border)!important;}
-  .ai-sel{background:var(--f-surface)!important;color:var(--f-text-dim)!important;border:1px solid var(--f-border)!important;font-family:'Share Tech Mono',monospace!important;font-size:9px!important;}
-  .ai-go{background:transparent!important;border:1px solid var(--f-accent2)!important;color:var(--f-accent2)!important;font-family:'Share Tech Mono',monospace!important;letter-spacing:2px!important;border-radius:3px!important;}
+  .ai-sel{background:var(--f-surface)!important;color:var(--f-text-nav)!important;border:1px solid var(--f-border)!important;font-family:'Share Tech Mono',monospace!important;font-size:10px!important;min-width:0;max-width:58%;flex:0 1 auto;}
+  .ai-foot{gap:8px;}
+  .ai-go{flex:0 0 auto;background:transparent!important;border:1px solid var(--f-accent2)!important;color:var(--f-accent2)!important;font-family:'Share Tech Mono',monospace!important;letter-spacing:2px!important;border-radius:3px!important;}
   .ai-go:hover{background:var(--f-accent2)!important;color:var(--f-bg)!important;}
   .ai-result{background:var(--f-surface)!important;border:1px solid var(--f-border)!important;color:var(--f-text)!important;}
-  .qa-btn{background:var(--f-surface)!important;border:1px solid var(--f-border)!important;color:var(--f-text-dim)!important;font-family:'Share Tech Mono',monospace!important;font-size:9px!important;letter-spacing:1px!important;border-radius:4px!important;text-transform:uppercase;}
+  .qa-btn{background:var(--f-surface)!important;border:1px solid var(--f-border2)!important;color:var(--f-text-nav)!important;font-family:'Share Tech Mono',monospace!important;font-size:10px!important;letter-spacing:1px!important;border-radius:4px!important;text-transform:uppercase;}
   .qa-btn:hover{background:rgba(0,168,255,0.08)!important;border-color:var(--f-accent)!important;color:var(--f-accent)!important;}
-  .ds-title{font-family:'Share Tech Mono',monospace!important;font-size:8px!important;letter-spacing:2.5px!important;color:var(--f-text-dim)!important;border-bottom:1px solid var(--f-border)!important;}
+  .ds-title{font-family:'Share Tech Mono',monospace!important;font-size:10px!important;letter-spacing:2px!important;color:var(--mid)!important;border-bottom:1px solid var(--border)!important;}
+  .ai-drawer .ds-title{color:var(--f-text-dim)!important;border-bottom:1px solid var(--f-border)!important;letter-spacing:2.5px!important;}
   .dpanel{padding:12px!important;}
+  /* Pestañas SEO y Estructura: su texto va sobre el fondo oscuro del panel, así que usa colores claros (no los de la página blanca) */
+  #dpanel-seo,#dpanel-struct{--ink:var(--f-text);--mid:var(--f-text-dim);--border:var(--f-border2);--teal:#2dd4bf;--warning:#fbbf24;--rust:#f87171;color:var(--f-text);}
+  #dpanel-seo .d-bar{background:var(--f-border2);}
+  /* Botón «← Volver al asistente IA» (SEO y Estructura) y «✕ Descartar» (resultado de la IA) */
+  .dp-back{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:transparent;border:1px solid var(--f-accent2);color:var(--f-accent2);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 10px;border-radius:4px;cursor:pointer;margin-bottom:12px;}
+  .dp-back:hover{background:var(--f-accent2);color:var(--f-bg);}
+  .ar-btn.x{background:transparent;border:1px solid var(--f-border2);color:var(--f-text-nav);}
+  .ar-btn.x:hover{border-color:var(--f-accent2);color:var(--f-accent2);}
   /* Plantillas CSS */
   #screen-templates{background:#f5f7fa;overflow-y:auto;}
+  #screen-templates>*{flex-shrink:0;}
   .tpl-header{background:var(--f-surface);border-bottom:1px solid var(--f-border);padding:13px 14px 11px;position:relative;overflow:hidden;}
   .tpl-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--f-accent),var(--f-accent2),transparent);}
   .tpl-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
   .tpl-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--f-accent);letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 10px rgba(0,168,255,0.4);display:flex;align-items:center;gap:7px;}
-  .tpl-subtitle{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--f-text-dim);letter-spacing:2px;}
+  .tpl-subtitle{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--f-text-dim);letter-spacing:2px;}
   .tpl-cats{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
   .tpl-cats::-webkit-scrollbar{display:none;}
-  .tpl-cat{flex-shrink:0;padding:4px 10px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;background:transparent;border:1px solid var(--f-border);color:var(--f-text-dim);border-radius:2px;cursor:pointer;transition:all .15s;}
+  .tpl-cat{flex-shrink:0;padding:5px 10px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;background:transparent;border:1px solid var(--f-border2);color:var(--f-text-nav);border-radius:2px;cursor:pointer;transition:all .15s;}
   .tpl-cat:hover{border-color:var(--f-accent);color:var(--f-accent);}
   .tpl-cat.active{border-color:var(--f-accent2);color:var(--f-accent2);background:rgba(0,255,204,0.07);}
   .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px;}
@@ -830,17 +854,17 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
   .tpl-card-head::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--f-accent),transparent);}
   .tpl-card-icon{width:28px;height:28px;margin-bottom:5px;background:rgba(0,168,255,0.08);border:1px solid var(--f-border2);border-radius:5px;display:flex;align-items:center;justify-content:center;}
   .tpl-card-icon svg{width:14px;height:14px;color:var(--f-accent);}
-  .tpl-card-name{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--f-accent);font-weight:700;}
-  .tpl-card-cat{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--f-text-dim);margin-top:2px;}
+  .tpl-card-name{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--f-accent);font-weight:700;}
+  .tpl-card-cat{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--f-text-dim);margin-top:2px;}
   .tpl-card-body{padding:8px 11px;}
   .tpl-card-desc{font-size:11px;color:#4b5563;line-height:1.4;margin-bottom:6px;}
   .tpl-card-tags{display:flex;flex-wrap:wrap;gap:3px;}
-  .tpl-tag{font-size:9px;background:#eff6ff;color:#1a56db;padding:2px 6px;border-radius:3px;font-weight:600;}
+  .tpl-tag{font-size:10px;background:#eff6ff;color:#1a56db;padding:2px 6px;border-radius:3px;font-weight:600;}
   .tpl-card-footer{padding:7px 11px;border-top:1px solid #f1f5f9;display:flex;gap:5px;}
-  .tpl-use-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;background:transparent;border:1px solid var(--f-accent);color:var(--f-accent);border-radius:3px;padding:5px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
-  .tpl-use-btn:hover{background:var(--f-accent);color:var(--f-bg);}
-  .tpl-ai-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;background:transparent;border:1px solid var(--f-accent2);color:var(--f-accent2);border-radius:3px;padding:5px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
-  .tpl-ai-btn:hover{background:var(--f-accent2);color:var(--f-bg);}
+  .tpl-use-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.5px;background:var(--f-accent);border:1px solid var(--f-accent);color:var(--f-bg);border-radius:3px;padding:6px 3px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+  .tpl-use-btn:hover{filter:brightness(1.15);box-shadow:var(--f-glow);}
+  .tpl-ai-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.5px;background:var(--f-accent2);border:1px solid var(--f-accent2);color:var(--f-bg);border-radius:3px;padding:6px 3px;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+  .tpl-ai-btn:hover{filter:brightness(1.12);box-shadow:var(--f-glow2);}
   .tpl-builder{background:#fff;border:1px solid var(--f-border);border-radius:10px;margin:0 12px 12px;overflow:hidden;display:none;}
   .tpl-builder.on{display:block;}
   .tpl-builder-head{background:var(--f-surface);padding:10px 14px;border-bottom:1px solid var(--f-border);display:flex;align-items:center;justify-content:space-between;position:relative;}
@@ -851,38 +875,38 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
   .tpl-form{padding:13px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .tpl-field{display:flex;flex-direction:column;gap:3px;}
   .tpl-field.full{grid-column:1/-1;}
-  .tpl-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--f-text-dim);text-transform:uppercase;}
+  .tpl-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--f-text-dim-light);text-transform:uppercase;}
   .tpl-input{border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:#0d0d0d;outline:none;transition:border-color .15s;background:#fff;}
   .tpl-input:focus{border-color:var(--f-accent);}
   .tpl-select{border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:#0d0d0d;outline:none;background:#fff;cursor:pointer;}
   .tpl-textarea{border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-family:'DM Mono',monospace;font-size:11px;color:#0d0d0d;outline:none;resize:vertical;min-height:75px;background:#fff;line-height:1.5;}
   .tpl-textarea:focus{border-color:var(--f-accent);}
   .tpl-actions{padding:0 13px 13px;display:flex;gap:7px;}
-  .tpl-btn-gen{flex:1;background:transparent;border:1px solid var(--f-accent2);color:var(--f-accent2);border-radius:4px;padding:9px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
-  .tpl-btn-gen:hover{background:var(--f-accent2);color:var(--f-bg);}
+  .tpl-btn-gen{flex:1;background:var(--f-accent2);border:1px solid var(--f-accent2);color:var(--f-bg);border-radius:4px;padding:10px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .tpl-btn-gen:hover{filter:brightness(1.12);box-shadow:var(--f-glow2);}
   .tpl-btn-gen:disabled{opacity:.35;cursor:not-allowed;}
-  .tpl-btn-load{flex:1;background:transparent;border:1px solid var(--f-accent);color:var(--f-accent);border-radius:4px;padding:9px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .15s;}
-  .tpl-btn-load:hover{background:var(--f-accent);color:var(--f-bg);}
-  .tpl-loading{display:none;align-items:center;justify-content:center;gap:9px;padding:13px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--f-accent2);letter-spacing:2px;}
+  .tpl-btn-load{flex:1;background:var(--f-accent);border:1px solid var(--f-accent);color:var(--f-bg);border-radius:4px;padding:10px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all .15s;}
+  .tpl-btn-load:hover{filter:brightness(1.15);box-shadow:var(--f-glow);}
+  .tpl-loading{display:none;align-items:center;justify-content:center;gap:9px;padding:13px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blue);letter-spacing:2px;}
   .tpl-loading.on{display:flex;}
   .tpl-radar{width:19px;height:19px;border:2px solid var(--f-border);border-radius:50%;position:relative;animation:radarSpin 1.5s linear infinite;}
   .tpl-radar::after{content:'';position:absolute;top:50%;left:50%;width:50%;height:2px;background:linear-gradient(90deg,var(--f-accent2),transparent);transform-origin:left center;transform:translateY(-50%);}
   @keyframes radarSpin{to{transform:rotate(360deg);}}
   .tpl-json-wrap{padding:0 13px 13px;}
-  .tpl-json-head{background:var(--f-bg);border:1px solid var(--f-border);border-bottom:none;border-radius:5px 5px 0 0;padding:6px 11px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--f-accent);letter-spacing:2px;display:flex;align-items:center;justify-content:space-between;}
+  .tpl-json-head{background:var(--f-bg);border:1px solid var(--f-border);border-bottom:none;border-radius:5px 5px 0 0;padding:6px 11px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--f-accent);letter-spacing:2px;display:flex;align-items:center;justify-content:space-between;}
   .tpl-json-body{background:var(--f-surface2);border:1px solid var(--f-border);border-radius:0 0 5px 5px;padding:10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--f-text);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:190px;overflow-y:auto;}
-  .tpl-json-copy{background:transparent;border:1px solid var(--f-border2);color:var(--f-text-dim);padding:3px 8px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;cursor:pointer;transition:all .15s;}
+  .tpl-json-copy{background:transparent;border:1px solid var(--f-border2);color:var(--f-text-dim);padding:3px 8px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .15s;}
   .tpl-json-copy:hover{border-color:var(--f-accent2);color:var(--f-accent2);}
-  .tpl-saved-head{background:var(--f-surface);border-top:1px solid var(--f-border);border-bottom:1px solid var(--f-border);padding:8px 13px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--f-text-dim);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+  .tpl-saved-head{background:var(--f-surface);border-top:1px solid var(--f-border);border-bottom:1px solid var(--f-border);padding:8px 13px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--f-text-dim);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
   .tpl-saved-list{padding:9px 12px;}
   .tpl-saved-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:9px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:9px;transition:border-color .15s;}
   .tpl-saved-item:hover{border-color:var(--f-accent);}
   .tpl-saved-name{font-size:13px;font-weight:600;color:#0d0d0d;}
-  .tpl-saved-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6b7280;letter-spacing:1px;margin-top:2px;}
+  .tpl-saved-meta{font-family:'Share Tech Mono',monospace;font-size:10px;color:#5b6472;letter-spacing:1px;margin-top:2px;}
   .tpl-saved-acts{display:flex;gap:5px;flex-shrink:0;}
-  .tpl-saved-btn{font-family:'Share Tech Mono',monospace;font-size:8px;padding:4px 8px;border-radius:2px;cursor:pointer;transition:all .15s;letter-spacing:1px;text-transform:uppercase;}
-  .tpl-saved-use{background:transparent;border:1px solid var(--f-accent);color:var(--f-accent);}
-  .tpl-saved-use:hover{background:var(--f-accent);color:var(--f-bg);}
+  .tpl-saved-btn{font-family:'Share Tech Mono',monospace;font-size:10px;padding:5px 9px;border-radius:2px;cursor:pointer;transition:all .15s;letter-spacing:1px;text-transform:uppercase;}
+  .tpl-saved-use{background:var(--f-accent);border:1px solid var(--f-accent);color:var(--f-bg);}
+  .tpl-saved-use:hover{filter:brightness(1.15);box-shadow:var(--f-glow);}
   .tpl-saved-del{background:transparent;border:1px solid #dc2626;color:#dc2626;}
   .tpl-saved-del:hover{background:#dc2626;color:#fff;}
   </style>
@@ -1002,15 +1026,15 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
               <button onclick="copyMetaSeo()" style="font-size:10px;background:var(--blue-l);border:1px solid var(--blue);color:var(--blue);border-radius:5px;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;">⎘ Copiar todo</button>
             </div>
             <div style="margin-bottom:8px;">
-              <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Meta descripción <span id="metaCount" style="font-family:'DM Mono',monospace;font-weight:600;">0/155</span></div>
+              <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Meta descripción <span id="metaCount" style="font-family:'DM Mono',monospace;font-weight:600;">0/155</span></div>
               <div id="metaDescAuto" style="font-size:12px;color:var(--ink);background:white;border:1px solid var(--border);border-radius:6px;padding:6px 9px;line-height:1.5;">—</div>
             </div>
             <div style="margin-bottom:8px;">
-              <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Alt Text sugerido para imágenes</div>
+              <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Alt Text sugerido para imágenes</div>
               <div id="altTextAuto" style="font-size:12px;color:var(--ink);background:white;border:1px solid var(--border);border-radius:6px;padding:6px 9px;line-height:1.5;">—</div>
             </div>
             <div>
-              <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Slug URL sugerido</div>
+              <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);font-weight:700;margin-bottom:3px;">Slug URL sugerido</div>
               <div id="slugAuto" style="font-size:12px;color:var(--blue);background:white;border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:'DM Mono',monospace;">—</div>
             </div>
           </div>
@@ -1021,7 +1045,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 
         <!-- AI Drawer -->
         <aside class="ai-drawer" id="aiDrawer">
-          <div class="sheet-head"><span>✦ Asistente · SEO · Estructura</span><button onclick="closeAiSheet()">Cerrar ✕</button></div>
+          <div class="sheet-head"><span><span class="sh-short">✦ Asistente</span><span class="sh-long">✦ Asistente · SEO · Estructura</span></span><button onclick="closeAiPanel()" title="Cerrar este panel (se abre de nuevo con el botón «✦ IA · SEO»)">Cerrar ✕</button></div>
           <div class="drawer-tabs">
             <button class="dtab active" id="dtab-ai" onclick="showDrawerTab('ai')">✦ IA</button>
             <button class="dtab" id="dtab-seo" onclick="showDrawerTab('seo')">SEO</button>
@@ -1044,7 +1068,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
             <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:white;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
               <div>
                 <div style="font-size:11px;font-weight:700;color:var(--ink);">🔬 Modo Médico/Científico<span class="lock-badge" data-lock="medico" style="display:none;">🔒 Business</span></div>
-                <div style="font-size:9px;color:var(--mid);margin-top:1px;">Cita fuentes: OMS · NIH · PubMed · ADA</div>
+                <div style="font-size:10px;color:var(--mid);margin-top:1px;">Cita fuentes: OMS · NIH · PubMed · ADA</div>
               </div>
               <button class="toggle on" id="tog-medico" onclick="toggleMedico(this)" aria-label="Activar o desactivar el modo médico/científico"></button>
             </div>
@@ -1079,6 +1103,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
               <div class="ar-acts">
                 <button class="ar-btn ins" onclick="insertAI()">↩ Insertar</button>
                 <button class="ar-btn cp" onclick="copyAI()">⎘ Copiar</button>
+                <button class="ar-btn x" onclick="discardAI()" title="Quitar este resultado">✕ Descartar</button>
               </div>
             </div>
 
@@ -1102,6 +1127,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 
           <!-- SEO panel -->
           <div class="dpanel" id="dpanel-seo">
+            <button class="dp-back" onclick="showDrawerTab('ai')">← Volver al asistente IA</button>
             <div class="ds-title">Puntuación SEO</div>
             <div style="text-align:center;padding:8px 0 14px;">
               <div id="bigSeo" style="font-family:'DM Mono',monospace;font-size:52px;font-weight:700;line-height:1;color:var(--teal);">--</div>
@@ -1115,6 +1141,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 
           <!-- Estructura panel -->
           <div class="dpanel" id="dpanel-struct">
+            <button class="dp-back" onclick="showDrawerTab('ai')">← Volver al asistente IA</button>
             <div class="ds-title">Legibilidad</div>
             <div id="readStats"></div>
             <div class="ds-title" style="margin-top:10px;">Esquema</div>
@@ -1543,7 +1570,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
         <div class="setting-group">
           <div class="setting-group-title">Sobre BlogFort</div>
           <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:16px;font-size:12px;color:var(--mid);line-height:1.8;">
-            <strong style="color:var(--ink);font-size:14px;">BlogFort Agency v3.1</strong><br>
+            <strong style="color:var(--ink);font-size:14px;">BlogFort Agency v3.1.1</strong><br>
             Plataforma profesional de contenido SEO con IA · PWA instalable<br><br>
             Herramientas: Editor SEO · Asistente IA · PDF y Word · Editor de imágenes · Corrector · Traductor multiidioma<br><br>
             Desarrollado por <strong style="color:var(--blue);">BlogFort Agency LLC</strong> · Pensada para salud, empresas y marketing<br><br>
@@ -1637,7 +1664,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
       </div>
       <div class="tpl-saved-head"><span>// MIS PLANTILLAS GUARDADAS</span><span id="tplSavedCount" style="color:var(--f-accent2)">0 PLANTILLAS</span></div>
       <div class="tpl-saved-list" id="tplSavedList">
-        <div style="text-align:center;padding:18px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--f-text-dim);letter-spacing:2px;">SIN PLANTILLAS GUARDADAS AÚN</div>
+        <div style="text-align:center;padding:18px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--f-text-dim-light);letter-spacing:2px;">SIN PLANTILLAS GUARDADAS AÚN</div>
       </div>
     </div>
 
@@ -1645,7 +1672,7 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 
   <!-- FOOTER -->
   <footer class="app-footer">
-    <div class="footer-brand"><strong>BlogFort</strong> Agency v3.1</div>
+    <div class="footer-brand"><strong>BlogFort</strong> Agency v3.1.1</div>
     <div class="footer-links">
       <button class="footer-legal-btn" onclick="showModal('legalModal')">📋 Aviso legal y privacidad</button>
       <button class="footer-health-btn" onclick="openHealth()">⛨ Salud de datos</button>
@@ -1826,36 +1853,36 @@ html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;backgroun
 <div class="modal-overlay" id="legalModal">
   <div class="modal" style="max-width:540px;max-height:85vh;overflow-y:auto;">
     <h3>📋 Aviso Legal y Privacidad</h3>
-    <p>BlogFort Agency LLC · v3.1 · Todos los derechos reservados</p>
+    <p>BlogFort Agency LLC · v3.1.1 · Todos los derechos reservados</p>
     <div style="margin:14px 0;display:flex;flex-direction:column;gap:12px;">
       <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">01 · NATURALEZA DEL SERVICIO</div>
+        <div style="font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">01 · NATURALEZA DEL SERVICIO</div>
         <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Aplicación Local Autónoma</div>
         <div style="font-size:12px;color:var(--mid);line-height:1.6;">BlogFort es una interfaz de software autónoma que se ejecuta localmente en el navegador del usuario. La aplicación facilita la edición de contenidos y la conexión técnica con servicios de terceros (Anthropic PBC).</div>
       </div>
       <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">02 · RESPONSABILIDAD DE LA API KEY</div>
+        <div style="font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">02 · RESPONSABILIDAD DE LA API KEY</div>
         <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Custodia y Uso de Claves</div>
         <div style="font-size:12px;color:var(--mid);line-height:1.6;">El usuario es el único responsable de la obtención, custodia y uso de su propia clave de API. BlogFort Agency no almacena, accede ni distribuye dichas claves. Cualquier cargo facturado por el proveedor de IA es responsabilidad exclusiva del usuario.</div>
       </div>
       <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">03 · VERACIDAD DEL CONTENIDO</div>
+        <div style="font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">03 · VERACIDAD DEL CONTENIDO</div>
         <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Revisión en Sectores YMYL</div>
         <div style="font-size:12px;color:var(--mid);line-height:1.6;">El usuario asume la responsabilidad total de revisar, verificar y editar los textos antes de su publicación, especialmente en sectores críticos como Salud y Bienestar (YMYL). Los modelos de IA pueden cometer errores o inventar datos y fuentes: verifica toda cita y todo dato. BlogFort no se hace responsable de imprecisiones técnicas o médicas generadas por los modelos de lenguaje, ni ofrece garantías sobre el resultado en buscadores o detectores de texto automático.</div>
       </div>
       <div style="border-bottom:1px solid var(--border);padding-bottom:12px;">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">04 · PROPIEDAD INTELECTUAL</div>
+        <div style="font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">04 · PROPIEDAD INTELECTUAL</div>
         <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Código y Contenido Generado</div>
         <div style="font-size:12px;color:var(--mid);line-height:1.6;">El código fuente de la interfaz BlogFort es propiedad exclusiva de <strong style="color:var(--ink);">BlogFort Agency</strong>. Todos los derechos reservados © 2026 BlogFort Agency LLC. El contenido generado mediante la herramienta pertenece íntegramente al usuario, sujeto a los términos de servicio del proveedor de la API utilizada.</div>
       </div>
       <div style="padding-bottom:4px;">
-        <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">05 · PRIVACIDAD Y DATOS</div>
+        <div style="font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">05 · PRIVACIDAD Y DATOS</div>
         <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Tus textos se guardan en tu dispositivo</div>
         <div style="font-size:12px;color:var(--mid);line-height:1.6;">BlogFort no dispone de servidores donde se guarden tus artículos: se almacenan en el almacenamiento local de este navegador, y por eso conviene que hagas copias de seguridad. Para usar la IA, el texto que envías viaja desde tu equipo a Anthropic, que lo trata según sus propias condiciones. La licencia se comprueba en tu navegador. La aplicación carga recursos externos (tipografías de Google y la librería PDF de cdnjs), cuyos proveedores pueden registrar tu dirección IP. Más información en la Política de Privacidad.</div>
       </div>
     </div>
     <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
-      <div style="font-size:9px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">06 · CONDICIONES Y LEY APLICABLE</div>
+      <div style="font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;margin-bottom:3px;">06 · CONDICIONES Y LEY APLICABLE</div>
       <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Términos de Servicio, Privacidad y Reembolsos</div>
       <div style="font-size:12px;color:var(--mid);line-height:1.6;">El uso de esta aplicación se rige por los <a href="https://blogfort.agency/terms.html" target="_blank" rel="noopener" style="color:var(--blue);">Términos de Servicio</a>, la <a href="https://blogfort.agency/privacy.html" target="_blank" rel="noopener" style="color:var(--blue);">Política de Privacidad</a> y la <a href="https://blogfort.agency/refunds.html" target="_blank" rel="noopener" style="color:var(--blue);">Política de Reembolsos</a> publicados en blogfort.agency, incluidos la ley aplicable y los tribunales competentes que allí se indican.</div>
     </div>
@@ -1884,7 +1911,8 @@ const KEY_API = 'blogfort_apikey';    // clave API en una entrada aparte: así j
 const KEY_TPL = 'bf_saved_tpls';      // plantillas guardadas
 const KEY_WELCOME = 'blogfort_welcomed';
 const KEY_LICENSE = 'bf_license';     // la gestiona el control de licencia
-const APP_VERSION = '3.1';
+const KEY_DRAWER = 'bf_drawer_off';   // preferencia de pantalla: panel IA/SEO/Estructura cerrado en el ordenador
+const APP_VERSION = '3.1.1';
 let articles = [], activeId = null, apiKey = '', settings = {};
 let pendingDeleteId = null, editingCardId = null;
 let origImgNaturalW = 0, origImgNaturalH = 0, origImgData = null;
@@ -2099,9 +2127,14 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Panel de IA / SEO / Estructura: en el móvil se abre como hoja inferior
+// Panel de IA / SEO / Estructura: en el móvil se abre como hoja inferior; en el ordenador es una columna que se puede cerrar
 const isMobile = () => window.matchMedia('(max-width:700px)').matches;
+function setDrawerOff(off) {
+  document.body.classList.toggle('drawer-off', !!off);
+  if (off) lsSet(KEY_DRAWER, '1'); else lsDel(KEY_DRAWER);
+}
 function openAiSheet() {
+  if (!isMobile()) { setDrawerOff(false); return; }
   const d = $id('aiDrawer'); if (!d) return;
   d.classList.add('sheet-open'); document.body.classList.add('sheet-on');
 }
@@ -2109,12 +2142,15 @@ function closeAiSheet() {
   const d = $id('aiDrawer'); if (d) d.classList.remove('sheet-open');
   document.body.classList.remove('sheet-on');
 }
+// Botón «Cerrar ✕» del panel: en el móvil cierra la hoja; en el ordenador oculta la columna (se reabre con «✦ IA · SEO»)
+function closeAiPanel() { if (isMobile()) closeAiSheet(); else setDrawerOff(true); }
 function showDrawerTab(n) {
   ['ai', 'seo', 'struct'].forEach(t => {
     $id('dpanel-' + t).classList.toggle('active', t === n);
     $id('dtab-' + t).classList.toggle('active', t === n);
   });
-  if (isMobile()) openAiSheet();
+  if (isMobile()) openAiSheet(); else setDrawerOff(false);
+  const body = document.querySelector('#aiDrawer .drawer-body'); if (body) body.scrollTop = 0;
 }
 
 // ═══════════ EDITOR ═══════════
@@ -2139,13 +2175,23 @@ function loadArt(id, stay) {
   _upd();
 }
 
+// Identificador único para un artículo nuevo (dos artículos creados en el mismo milisegundo nunca comparten número)
+let _lastArtId = 0;
+function newArtId() {
+  let t = Date.now();
+  if (t <= _lastArtId) t = _lastArtId + 1;
+  while (articles.some(x => x.id === t)) t++;
+  _lastArtId = t;
+  return t;
+}
+
 // Copia lo que hay en pantalla al artículo abierto (en memoria, sin coste) y programa el guardado en disco.
 // Si se escribe sin tener ningún artículo abierto (p. ej. tras borrar el último), se crea uno nuevo: el texto nunca se pierde.
 function saveCurrent() {
   let a = curArt();
   if (!a) {
     if (!editorHasContent()) return;
-    a = { id: Date.now(), title: '', category: 'GENERAL', keyword: '', slug: '', body: '', lang: 'es', tags: [], status: 'draft', date: '' };
+    a = { id: newArtId(), title: '', category: 'GENERAL', keyword: '', slug: '', body: '', lang: 'es', tags: [], status: 'draft', date: '' };
     articles.unshift(a); activeId = a.id;
   }
   const cat = $id('catBadge');
@@ -2174,7 +2220,7 @@ function newArt() {
     save(); loadArt(empty.id);
     return;
   }
-  const id = Date.now();
+  const id = newArtId();
   articles.unshift({ id, title: '', category: sector, keyword: '', slug: '', body: '', lang, tags: [], status: 'draft', date: todayShort() });
   save(); loadArt(id);
 }
@@ -2499,7 +2545,7 @@ function _upd() {
   $id('outline').innerHTML = hdgs.length ? hdgs.map(h => {
     const lvl = h.startsWith('### ') ? 'h3' : h.startsWith('## ') ? 'h2' : 'h1';
     const txt = h.replace(/^#{1,3}\s+/, '');
-    return '<div style="padding:4px 8px;' + (lvl === 'h3' ? 'padding-left:24px' : lvl === 'h2' ? 'padding-left:16px' : '') + ';border-left:2px solid ' + (lvl === 'h1' ? 'var(--gold)' : 'var(--border)') + ';margin-bottom:3px;font-size:' + (lvl === 'h1' ? '12' : lvl === 'h2' ? '11' : '10.5') + 'px;"><span style="opacity:.4;font-size:9px;">' + lvl.toUpperCase() + ' </span>' + escHtml(txt) + '</div>';
+    return '<div style="padding:4px 8px;' + (lvl === 'h3' ? 'padding-left:24px' : lvl === 'h2' ? 'padding-left:16px' : '') + ';border-left:2px solid ' + (lvl === 'h1' ? 'var(--gold)' : 'var(--border)') + ';margin-bottom:3px;font-size:' + (lvl === 'h1' ? '12' : lvl === 'h2' ? '11' : '10.5') + 'px;"><span style="opacity:.7;font-size:10px;">' + lvl.toUpperCase() + ' </span>' + escHtml(txt) + '</div>';
   }).join('') : '<span style="font-size:11px;color:var(--mid);font-style:italic;">Añade ## H2 para ver esquema.</span>';
 }
 
@@ -3394,6 +3440,11 @@ function insertAI() {
   toast('✅ Insertado en el editor');
 }
 function copyAI() { copyText($id('aiResText').textContent, '⎘ Copiado al portapapeles'); }
+// «✕ Descartar»: quita el resultado de la IA sin tocar el artículo
+function discardAI() {
+  const r = $id('aiRes'); if (r) r.classList.remove('on');
+  const t = $id('aiResText'); if (t) t.textContent = '';
+}
 
 // ═══════════ LISTA DE ARTÍCULOS ═══════════
 function renderGrid() {
@@ -4205,7 +4256,7 @@ function renderSavedTpls(){
   const list=document.getElementById('tplSavedList');const count=document.getElementById('tplSavedCount');
   if(!list)return;
   count.textContent=savedTemplates.length+' PLANTILLAS';
-  if(!savedTemplates.length){list.innerHTML='<div style="text-align:center;padding:18px;font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--f-text-dim);letter-spacing:2px;">SIN PLANTILLAS GUARDADAS AÚN</div>';return;}
+  if(!savedTemplates.length){list.innerHTML='<div style="text-align:center;padding:18px;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--f-text-dim-light);letter-spacing:2px;">SIN PLANTILLAS GUARDADAS AÚN</div>';return;}
   list.innerHTML=savedTemplates.slice().reverse().map(t=>`<div class="tpl-saved-item"><div><div class="tpl-saved-name">${escHtml(t.name)}</div><div class="tpl-saved-meta">${escHtml(t.type)} · ${escHtml(t.sector)} · ${escHtml(t.date)}</div></div><div class="tpl-saved-acts"><button class="tpl-saved-btn tpl-saved-use" onclick="loadSavedTpl(${t.id})">↩ USAR</button><button class="tpl-saved-btn tpl-saved-del" onclick="deleteSavedTpl(${t.id})">✗</button></div></div>`).join('');
 }
 
@@ -4246,6 +4297,7 @@ function handleUrlParams() {
 // ═══════════ INICIO ═══════════
 function init() {
   load();
+  if (lsGet(KEY_DRAWER) === '1') document.body.classList.add('drawer-off');   // el panel de la derecha se quedó cerrado la última vez
   fillSectorSelect($id('catBadge'), settings.defaultSector);
   fillSectorSelect($id('defaultSector'), settings.defaultSector);
   fillSectorSelect($id('editCategory'), 'GENERAL');
