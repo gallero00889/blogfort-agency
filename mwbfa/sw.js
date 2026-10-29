@@ -1,5 +1,5 @@
 const PREFIX = 'mwbfa-';
-const CACHE_NAME = 'mwbfa-v7';
+const CACHE_NAME = 'mwbfa-v8';
 const urlsToCache = ['./', './index.html', './manifest.json', './icon-192-2.png', './icon-512-2.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', event => {

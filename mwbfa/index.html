@@ -327,7 +327,8 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
 .seg button:last-child{border-right:0}
 .seg button.on{background:var(--purple);color:#fff}
 .save-state{font-size:12px;color:var(--text-light);margin-left:auto;white-space:nowrap}
-.ed-stage{flex:1;min-height:0;overflow:auto;background:#d5dde9;display:flex;justify-content:center;padding:14px}
+.ed-stage{flex:1;min-height:0;overflow:auto;background:#d5dde9;display:flex;justify-content:center;padding:14px;scrollbar-width:none;overscroll-behavior:contain}
+.ed-stage::-webkit-scrollbar{display:none;width:0;height:0}
 .ed-wrap{position:relative;flex:0 0 auto;width:100%;height:100%}
 .ed-frame{position:absolute;left:0;top:0;background:#fff;border:0;box-shadow:var(--sh-lg);width:100%;height:100%;border-radius:6px;transform-origin:top left}
 .ed-side{width:380px;flex-shrink:0;background:#fff;border-left:1px solid var(--border-light);display:flex;flex-direction:column;min-height:0}
@@ -390,8 +391,10 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
 .sel-card.on{border-color:var(--purple);background:#F5EFFF}
 .sel-card .ic{font-size:24px}.sel-card b{display:block;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:16px;margin-top:2px}.sel-card span{display:block;font-size:12.5px;color:var(--text-mid);line-height:1.4}
 .pwa-wrap{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
-.phone{width:290px;height:560px;border:10px solid #0b1424;border-radius:34px;overflow:hidden;background:#fff;flex-shrink:0;box-shadow:var(--sh-lg)}
-.phone iframe{width:100%;height:100%;border:0;background:#fff}
+/* Vista previa de la app: se maqueta con el ancho de un móvil real (marco ÷ --k ≈ 350-410 px) y se reduce para que quepa en el marco.
+   Antes la app se pintaba en unos 280 px y salía más apretada de lo que quedará instalada (textos cortados, platos en tres líneas). */
+.phone{--k:.78;width:340px;max-width:100%;height:560px;border:10px solid #0b1424;border-radius:34px;overflow:hidden;background:#fff;flex-shrink:0;box-shadow:var(--sh-lg)}
+.phone iframe{width:calc(100% / var(--k));height:calc(100% / var(--k));border:0;background:#fff;transform:scale(var(--k));transform-origin:0 0}
 .step-list{counter-reset:s;list-style:none;display:flex;flex-direction:column;gap:8px}
 .step-list li{counter-increment:s;display:flex;gap:10px;font-size:13.5px;line-height:1.5}
 .step-list li::before{content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--purple);color:#fff;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
@@ -466,13 +469,28 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
   .seg button{min-height:40px;padding:6px 11px}
   .mini{width:38px;height:38px}
   .pill{min-height:34px;padding:5px 11px}
-  .phone{width:100%;max-width:300px;margin:0 auto}
+  .phone{width:100%;max-width:340px;margin:0 auto}
 }
 @media (max-width:520px){
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .addgrid{grid-template-columns:1fr}
   .pill .pt{display:none}
   .topbar .btn .lbl{display:none}
+}
+@media (max-width:480px){
+  /* barra del editor en una sola fila en el móvil (antes el botón de exportar caía a una segunda fila y se perdían unos 44 px de lienzo) */
+  .ed-bar{gap:4px;padding:6px 8px}
+  .ed-sep{margin:0 2px}
+  .ed-bar .btn-sm{padding:6px 10px;min-width:36px}
+  .ed-bar .btn-icon.btn-sm{width:36px;padding:0}
+  .seg button{padding:6px 10px}
+}
+@media (max-width:350px){
+  .ed-bar{gap:2px;padding:6px 4px}
+  .ed-sep{margin:0}
+  .ed-bar .btn-sm{padding:6px 7px;min-width:32px}
+  .ed-bar .btn-icon.btn-sm{width:32px}
+  .seg button{padding:6px 7px}
 }
 @media print{.sidebar,.topbar,#toast{display:none!important}.main{margin:0}}
 
@@ -962,7 +980,7 @@ textarea.form-input{resize:vertical;min-height:70px;line-height:1.5}
    MWBFA v3.0 · Constructor Web de BlogFort Agency
    Núcleo: utilidades, almacenamiento, licencia/planes, IA, ZIP, imágenes
    ═══════════════════════════════════════════════════════════════ */
-const VER = '3.0.0';
+const VER = '3.0.1';
 const $ = id => document.getElementById(id);
 const qs = (s, r) => (r || document).querySelector(s);
 const qsa = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
@@ -2413,15 +2431,18 @@ function showEditor() {
 }
 /* El lienzo simula el ancho real de cada dispositivo (ordenador 1000 px o más, tableta 768, móvil 390) y se reduce para caber en pantalla */
 const DEV_W = { desktop: 1000, tablet: 768, mobile: 390 };
+/* El lienzo no puede sobrar ni un píxel del hueco. Si sobraba un poco, aparecían unas barras de desplazamiento, el hueco se encogía, el lienzo se recalculaba,
+   las barras desaparecían… y la web «temblaba» sin parar (se vio en un móvil real). Por eso: 1 px de margen, todo se redondea hacia abajo
+   y las barras del escenario no ocupan sitio (ver .ed-stage en el CSS). */
 function fitFrame() {
   const st = $('edStage'), wr = $('edWrap'), f = frame();
   if (!st || !wr || !f || !st.clientWidth) return;
   const cs = getComputedStyle(st);
-  const aw = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah = st.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const aw = Math.floor(st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) - 1, ah = Math.floor(st.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) - 1;
   if (aw < 40 || ah < 40) return;
-  const W = DEV_W[S.dev] || 1200, vw = (S.dev === 'desktop' && aw >= W) ? aw : W, k = Math.min(1, aw / vw), wh = Math.max(ah, 360 * k);
-  wr.style.width = Math.round(vw * k) + 'px'; wr.style.height = Math.round(wh) + 'px';
-  f.style.width = vw + 'px'; f.style.height = Math.round(wh / k) + 'px'; f.style.transform = k < 1 ? 'scale(' + k + ')' : '';
+  const W = DEV_W[S.dev] || 1200, vw = (S.dev === 'desktop' && aw >= W) ? aw : W, k = Math.min(1, Math.floor(aw / vw * 1e6) / 1e6), wh = Math.max(ah, Math.ceil(360 * k)), fh = Math.floor(wh / k);
+  wr.style.width = Math.ceil(vw * k - 1e-6) + 'px'; wr.style.height = wh + 'px';
+  f.style.width = vw + 'px'; f.style.height = fh + 'px'; f.style.transform = k < 1 ? 'scale(' + k + ')' : '';
 }
 function setDev(dev, silent) {
   S.dev = dev;
@@ -3321,7 +3342,7 @@ async function vozGenerate() {
   const d = {
     nombre: cleanStr(out.nombre_asistente, 40) || ($('vozName').value.trim() || 'Asistente'), primer: cleanStr(out.primer_mensaje, 500), instr: cleanStr(out.instrucciones, 9000), desp: cleanStr(out.mensaje_despedida, 400),
     faq: (Array.isArray(out.preguntas_frecuentes) ? out.preguntas_frecuentes : []).slice(0, 10).map(x => ({ p: cleanStr(x && x.p, 180), r: cleanStr(x && x.r, 500) })).filter(x => x.p && x.r),
-    avisos: (Array.isArray(out.avisos) ? out.avisos : []).slice(0, 6).map(x => cleanStr(x, 240)).filter(Boolean),
+    avisos: (Array.isArray(out.avisos) ? out.avisos : []).slice(0, 6).map(x => cleanStr(x, 480)).filter(Boolean),
     biz, lang: lang.c, rec, plat: S.voz.plat, src: $('vozInfo').value + ' ' + $('vozName').value
   };
   if (!d.primer || !d.instr) throw new Error('La IA no devolvió el guion completo. Inténtalo de nuevo.');
