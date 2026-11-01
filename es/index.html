@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlogFort Agency: herramientas para redactar contenido SEO, gestionar tu agencia y crear webs</title>
+<meta name="description" content="BlogFort App redacta y optimiza artículos SEO, MATRIX gestiona clientes, finanzas y documentos, y MWBFA crea páginas web. Suscripciones en dólares; tus datos se quedan en tu dispositivo.">
+<link rel="canonical" href="https://blogfort.agency/es/">
+<link rel="alternate" hreflang="en" href="https://blogfort.agency/">
+<link rel="alternate" hreflang="es" href="https://blogfort.agency/es/">
+<link rel="alternate" hreflang="x-default" href="https://blogfort.agency/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BlogFort Agency">
+<meta property="og:title" content="BlogFort Agency: herramientas para redactar contenido SEO, gestionar tu agencia y crear webs">
+<meta property="og:description" content="BlogFort App redacta y optimiza artículos SEO, MATRIX gestiona clientes, finanzas y documentos, y MWBFA crea páginas web. Suscripciones en dólares; tus datos se quedan en tu dispositivo.">
+<meta property="og:url" content="https://blogfort.agency/es/">
+<meta property="og:image" content="https://blogfort.agency/img/og.png">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0c1222">
+<link rel="icon" type="image/png" href="/icon-192-2.png">
+<link rel="apple-touch-icon" href="/icon-192-2.png">
+<link rel="preload" href="/fonts/zilla-slab-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.className="js"</script>
+<style>@font-face{font-family:"Zilla Slab";font-weight:500;font-style:normal;font-display:swap;src:url(/fonts/zilla-slab-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Zilla Slab";font-weight:600;font-style:normal;font-display:swap;src:url(/fonts/zilla-slab-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Zilla Slab";font-weight:700;font-style:normal;font-display:swap;src:url(/fonts/zilla-slab-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-weight:200 900;font-style:normal;font-display:swap;src:url(/fonts/source-sans-3-latin-wght-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-weight:200 900;font-style:italic;font-display:swap;src:url(/fonts/source-sans-3-latin-wght-italic.woff2) format("woff2")}
+
+:root{
+  --night:#0c1222;--night-2:#141c33;--stone:#eceef2;--stone-2:#e0e4ec;--paper:#fff;
+  --ink:#0f1626;--ink-2:#47526a;--rule:#cdd3e0;
+  --gold:#c9a24a;--gold-hi:#ecc872;--gold-deep:#7a5c14;
+  --serif:"Zilla Slab",Georgia,"Times New Roman",serif;
+  --sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --wrap:1180px;--gut:clamp(16px,4vw,32px);
+  --app-bg:#090b0f;--app:#2dd4b6;--app-btn:#2dd4b6;--app-frame:#1f8f7c;--app-ink:#e8f1ef;--app-mute:#9db3ae;
+  --mx-bg:#030a18;--mx:#43b9f6;--mx-btn:#1b4f8a;--mx-frame:#1b4f8a;--mx-ink:#e5edfb;--mx-mute:#9bb0cf;
+  --mw-bg:#160b35;--mw:#bba2ff;--mw-btn:#7c3aed;--mw-frame:#7c3aed;--mw-ink:#f0ebff;--mw-mute:#b6a9d9;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;font:400 1.0625rem/1.6 var(--sans);color:var(--ink);background:var(--stone);-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold-hi);outline-offset:3px;border-radius:3px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--gold-hi);color:var(--ink);padding:.6rem 1rem;z-index:100;font-weight:700;text-decoration:none}
+.skip:focus{top:12px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gut)}
+.sec{padding:clamp(56px,9vw,112px) 0}
+h1,h2,h3{font-family:var(--serif);margin:0;letter-spacing:-.012em}
+h2{font-size:clamp(1.95rem,4.2vw,3.05rem);line-height:1.08;font-weight:700}
+.sec h2{margin-bottom:.9rem}
+h3{font-size:1.35rem;line-height:1.2;font-weight:600}
+p{margin:0 0 1rem}
+.lead{font-size:clamp(1.12rem,2vw,1.3rem);line-height:1.5;max-width:40rem}
+.measure{max-width:40rem}
+
+/* —— botones —— */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:46px;padding:.65rem 1.35rem;border-radius:4px;border:2px solid transparent;font:700 1rem/1.2 var(--sans);text-decoration:none;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.btn-gold{background:var(--gold-hi);color:#241a02}
+.btn-gold:hover{background:#f5d68c}
+.btn-line{border-color:#5b6788;color:#fff;background:transparent}
+.btn-line:hover{border-color:#fff}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-dark:hover{background:#26324d}
+.btn-outline{border-color:var(--ink);color:var(--ink);background:transparent}
+.btn-outline:hover{background:var(--ink);color:#fff}
+
+/* —— cabecera —— */
+.top{position:sticky;top:0;z-index:50;background:rgba(12,18,34,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(201,162,74,.28)}
+.top-in{display:flex;align-items:center;gap:20px;min-height:66px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;margin-right:auto}
+.brand img{width:44px;height:auto;display:block}
+.brand-name{font:700 1.3rem/1 var(--serif);letter-spacing:.005em}
+.brand-name span{color:var(--gold-hi);font-weight:500}
+.nav{display:flex;align-items:center;gap:clamp(12px,1.8vw,26px)}
+.nav a{color:#c8d0e3;text-decoration:none;font-size:.97rem;font-weight:600;padding:.4rem 0;border-bottom:2px solid transparent}
+.nav a:hover{color:#fff;border-bottom-color:var(--gold)}
+.langsw{font-weight:700;border:1px solid #5b6788;border-radius:4px;padding:.3rem .65rem!important;color:#fff!important;border-bottom:1px solid #5b6788!important}
+.langsw:hover{border-color:var(--gold)!important}
+.burger{display:none;background:none;border:1px solid #5b6788;border-radius:4px;color:#fff;width:44px;height:44px;font-size:1.4rem;cursor:pointer}
+
+/* —— portada —— */
+.hero{position:relative;background:linear-gradient(180deg,var(--night) 0%,#101a36 100%);color:#fff;overflow:hidden}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--gold);z-index:3}
+.hero-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(20px,4vw,52px);align-items:end;padding-top:clamp(40px,7vw,88px)}
+.hero-copy{padding-bottom:clamp(40px,7vw,96px)}
+.hero h1{font-size:clamp(2.7rem,7.2vw,5.3rem);line-height:.98;font-weight:700;letter-spacing:-.02em;margin-bottom:1.5rem}
+.hero h1 span{display:block}
+.hero h1 span:nth-child(2){padding-left:.32em}
+.hero h1 span:nth-child(3){padding-left:.64em}
+.hero .lead{color:#c8d0e3;margin-bottom:1.6rem;max-width:30rem}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:2rem}
+.facts{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px 28px;font-size:.97rem;color:#aab6d2}
+.facts li{padding-left:12px;border-left:3px solid var(--gold)}
+
+.skyline{display:flex;align-items:flex-end;justify-content:flex-end;gap:clamp(8px,1.4vw,18px);position:relative;z-index:2;min-height:0}
+.tower{--c:var(--mx-btn);position:relative;display:block;width:clamp(92px,15vw,196px);text-decoration:none;color:#fff;flex:0 0 auto;animation:rise .95s cubic-bezier(.2,.75,.2,1) both}
+.tower::before{content:"";display:block;height:14px;background:repeating-linear-gradient(90deg,var(--c) 0 clamp(8px,1.4vw,16px),transparent clamp(8px,1.4vw,16px) calc(clamp(8px,1.4vw,16px)*2)) 50% 0/auto 100%}
+.tower-cap{display:block;background:var(--c);padding:10px 10px 9px;line-height:1.1}
+.tower-verb{display:block;font:700 clamp(1.05rem,2.2vw,1.55rem)/1 var(--serif)}
+.tower-name{display:block;font:600 .8rem/1.2 var(--sans);opacity:.85;margin-top:3px}
+.tower-img{display:block;background:var(--c);padding:0 3px 0}
+.tower-img img{display:block;width:100%;object-fit:cover;object-position:top center;background:#fff}
+.tower-app{--c:#1f8f7c;animation-delay:.12s}
+.tower-app .tower-img img{aspect-ratio:1/1.67}
+.tower-mx{--c:#1b4f8a;animation-delay:.28s}
+.tower-mx .tower-img img{aspect-ratio:1/2.08}
+.tower-mw{--c:#6d2fd6;animation-delay:.44s}
+.tower-mw .tower-img img{aspect-ratio:1/1.89}
+.tower:hover .tower-cap,.tower:focus-visible .tower-cap{filter:brightness(1.12)}
+@keyframes rise{from{transform:translateY(48px)}to{transform:none}}
+
+/* —— secciones claras —— */
+.stone{background:var(--stone)}
+.stone-2{background:var(--stone-2)}
+.about-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(28px,6vw,80px);align-items:start}
+.about-grid h2{margin-bottom:1.2rem}
+.pillars{margin:0;padding:0;list-style:none;display:grid;gap:22px}
+.pillars li{padding-left:18px;border-left:4px solid var(--gold)}
+.pillars strong{display:block;font:600 1.2rem/1.2 var(--serif);margin-bottom:.2rem}
+.pillars span{color:var(--ink-2)}
+
+/* —— herramientas (torres) —— */
+.tool{--bg:var(--app-bg);--acc:var(--app);--btn:var(--app-btn);--btn-ink:#04201b;--frame:var(--app-frame);--ink-t:var(--app-ink);--mute:var(--app-mute);position:relative;background:var(--bg);color:var(--ink-t);padding:clamp(64px,10vw,120px) 0 clamp(56px,9vw,104px)}
+.tool::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px;background:repeating-linear-gradient(90deg,var(--bg) 0 40px,transparent 40px 64px) 50% 0/auto 100%}
+.tool-mx{--bg:var(--mx-bg);--acc:var(--mx);--btn:var(--mx-btn);--btn-ink:#fff;--frame:var(--mx-frame);--ink-t:var(--mx-ink);--mute:var(--mx-mute)}
+.tool-mw{--bg:var(--mw-bg);--acc:var(--mw);--btn:var(--mw-btn);--btn-ink:#fff;--frame:var(--mw-frame);--ink-t:var(--mw-ink);--mute:var(--mw-mute)}
+.tool-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-template-areas:"head gallery" "body gallery";gap:0 clamp(28px,5vw,64px);align-items:start}
+.tool-head{grid-area:head}
+.tool-body{grid-area:body}
+.gallery{grid-area:gallery;min-width:0;position:sticky;top:88px;align-self:start}
+.tool h2{color:#fff;margin-bottom:.9rem}
+.tool .lead{color:var(--ink-t);margin-bottom:1.4rem}
+.tool-kick{font:600 1.15rem/1.3 var(--serif);color:var(--acc);margin:0 0 .5rem}
+.feat{list-style:none;margin:0 0 1.6rem;padding:0;display:grid;gap:.75rem}
+.feat li{position:relative;padding-left:1.45rem;font-size:1.02rem;line-height:1.5}
+.feat li::before{content:"";position:absolute;left:0;top:.56em;width:9px;height:9px;background:var(--acc);clip-path:polygon(0 100%,0 0,33% 0,33% 40%,66% 40%,66% 0,100% 0,100% 100%)}
+.feat strong{color:#fff;font-weight:700}
+.note{margin:0 0 1.6rem;padding:1rem 1.1rem 1rem 1.2rem;border-left:3px solid var(--acc);background:rgba(255,255,255,.055);font-size:.97rem;color:var(--mute)}
+.note b{display:block;color:#fff;font:600 1.05rem/1.2 var(--serif);margin-bottom:.4rem}
+.note ul{margin:0;padding-left:1.1rem}
+.note li{margin:.25rem 0}
+.tool-cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.from{font:600 1.15rem/1.2 var(--serif);color:#fff}
+.from small{font:400 .95rem var(--sans);color:var(--mute);display:block;margin-top:2px}
+.open-line{margin:1.1rem 0 0;font-size:.97rem;color:var(--mute)}
+.open-line a{color:var(--ink-t);font-weight:700;text-underline-offset:3px}
+.tool .btn{background:var(--btn);color:var(--btn-ink)}
+.tool .btn:hover{filter:brightness(1.12)}
+
+.shot{margin:0;position:relative}
+.shot-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-top:.85rem}
+.shot-bar figcaption{margin:0;flex:1}
+.zoom{flex:0 0 auto;display:none;align-items:center;gap:6px;padding:.45rem .8rem;border:1px solid var(--acc);border-radius:4px;background:transparent;color:var(--acc);font:700 .92rem/1 var(--sans);cursor:pointer;white-space:nowrap}
+.zoom:hover{background:var(--acc);color:#04120f}
+html.js .zoom{display:inline-flex}
+html.js .frame{cursor:zoom-in}
+.frame{border:2px solid var(--frame);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(0,0,0,.5);aspect-ratio:var(--ar,1280/860);position:relative}
+.frame img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+.shot figcaption{min-height:3.4em;font-size:1rem;color:var(--ink-t);max-width:46rem}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:.9rem}
+.thumb{flex:1 1 0;min-width:68px;max-width:112px;padding:0;border:2px solid rgba(255,255,255,.2);border-radius:7px;overflow:hidden;background:#000;cursor:pointer;opacity:.72;transition:opacity .15s,border-color .15s}
+.thumb img{display:block;width:100%;aspect-ratio:var(--ar,1280/860);object-fit:cover;object-position:top left}
+.thumb:hover{opacity:.9}
+.thumb[aria-pressed="true"]{opacity:1;border-color:var(--acc)}
+html:not(.js) .thumbs{display:none}
+
+/* —— ampliar captura —— */
+.lb{position:fixed;inset:0;z-index:300;background:rgba(5,8,18,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 16px 18px}
+.lb[hidden]{display:none}
+.lb-x{position:absolute;right:14px;top:10px;width:46px;height:46px;border:1px solid #5b6788;border-radius:4px;background:transparent;color:#fff;font-size:1.9rem;line-height:1;cursor:pointer}
+.lb-x:hover{border-color:#fff}
+.lb-scroll{overflow:auto;max-width:100%;max-height:calc(100vh - 150px);border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lb-scroll img{display:block;max-width:none;width:min(1280px,calc((100vh - 150px)*var(--lbr,1.49)),96vw);height:auto;background:#fff}
+.lb-cap{margin:.9rem 0 0;color:#e5eaf5;text-align:center;max-width:56rem;font-size:1rem}
+
+/* —— cómo funciona —— */
+.steps{list-style:none;margin:2.2rem 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;counter-reset:s}
+.steps li{counter-increment:s;padding-top:18px;border-top:4px solid var(--ink)}
+.steps li::before{content:counter(s);display:block;font:700 2.2rem/1 var(--serif);color:var(--gold-deep);margin-bottom:.4rem}
+.steps strong{display:block;font:600 1.2rem/1.2 var(--serif);margin-bottom:.35rem}
+.steps span{color:var(--ink-2);font-size:1rem}
+.privacy{margin-top:3rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.privacy div{padding:20px 22px;background:var(--paper);border:1px solid var(--rule)}
+.privacy b{display:block;font:600 1.15rem/1.25 var(--serif);margin-bottom:.4rem}
+.privacy p{margin:0;color:var(--ink-2);font-size:1rem}
+
+/* —— idiomas —— */
+.lang-table{width:100%;border-collapse:collapse;margin:2rem 0 1.4rem;font-size:1rem;background:var(--paper)}
+.lang-table th,.lang-table td{text-align:left;padding:.85rem 1rem;border:1px solid var(--rule);vertical-align:top}
+.lang-table thead th{background:var(--ink);color:#fff;font-weight:600}
+.lang-table tbody th{font:600 1.05rem var(--serif);white-space:nowrap}
+.wall{list-style:none;margin:2rem 0 0;padding:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+.wall li{padding:.55rem .5rem;text-align:center;background:var(--paper);border:1px solid var(--rule);border-bottom:3px solid var(--gold);font-weight:600;font-size:1rem}
+.wall li.var{background:transparent;border-bottom-color:var(--rule);color:var(--ink-2)}
+.small{font-size:.95rem;color:var(--ink-2)}
+.wall-note{margin:.9rem 0 0;font-size:.95rem;color:var(--ink-2)}
+
+/* —— planes —— */
+.plans-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:20px;margin-bottom:1.6rem}
+.bill{display:inline-flex;border:2px solid var(--ink);border-radius:4px;overflow:hidden}
+.bill button{border:0;background:transparent;font:700 .98rem var(--sans);padding:.6rem 1rem;cursor:pointer;color:var(--ink)}
+.bill button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.bill small{font-weight:600;opacity:.85}
+html:not(.js) .bill{display:none}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 -3px;position:relative;z-index:1}
+.tab{--t:var(--ink);border:2px solid var(--t);border-bottom:0;background:transparent;color:var(--t);font:700 1.1rem/1 var(--serif);padding:.85rem 1.4rem;cursor:pointer;border-radius:6px 6px 0 0}
+.tab[data-tool="app"]{--t:#187564}
+.tab[data-tool="matrix"]{--t:#1b4f8a}
+.tab[data-tool="mwbfa"]{--t:#6d2fd6}
+.tab[aria-selected="true"]{background:var(--t);color:#fff}
+html:not(.js) .tabs{display:none}
+.panel{--acc:var(--ink);border-top:3px solid var(--acc);padding-top:26px}
+.panel[data-tool="app"]{--acc:#187564}
+.panel[data-tool="matrix"]{--acc:#1b4f8a}
+.panel[data-tool="mwbfa"]{--acc:#6d2fd6}
+html:not(.js) .panel{margin-bottom:3rem}
+html.js .panel[hidden]{display:none}
+.panel-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;font:700 1.6rem var(--serif);color:var(--acc)}
+html:not(.js) .panel-title{position:static;width:auto;height:auto;margin:0 0 1rem;overflow:visible;clip:auto;white-space:normal}
+.plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.plan{background:var(--paper);border:1px solid var(--rule);border-top:6px solid var(--acc);padding:26px 24px 24px;display:flex;flex-direction:column}
+.plan h4{font:700 1.55rem/1.1 var(--serif);margin:0 0 .2rem}
+.who{color:var(--ink-2);font-size:.98rem;margin:0 0 1rem;min-height:2.9em}
+.price{font:700 2.9rem/1 var(--serif);letter-spacing:-.02em;margin:.2rem 0 .1rem}
+.price small{font:600 1rem var(--sans);color:var(--ink-2);letter-spacing:0;margin-left:.2rem}
+.alt{color:var(--ink-2);font-size:.95rem;margin:0 0 1.1rem;min-height:1.5em}
+.plan ul{list-style:none;margin:0 0 1.4rem;padding:0;display:grid;gap:.5rem;flex:1;align-content:start}
+.plan li{position:relative;padding-left:1.5rem;font-size:.99rem;line-height:1.45}
+.plan li::before{content:"";position:absolute;left:0;top:.28em;width:.85rem;height:.85rem;background:var(--acc);clip-path:polygon(14% 52%,0 66%,38% 100%,100% 22%,86% 8%,38% 72%)}
+.plan .btn{width:100%;background:var(--acc);color:#fff}
+.plan .btn:hover{filter:brightness(1.12)}
+.plan .btn-outline{background:transparent;color:var(--ink);border-color:var(--ink)}
+.plan .btn-outline:hover{background:var(--ink);color:#fff;filter:none}
+.p-a,.buy-a{display:none}
+.plans[data-bill="a"] .p-a{display:inline}
+.plans[data-bill="a"] .p-m{display:none}
+.plans[data-bill="a"] .buy-a{display:inline-flex}
+.plans[data-bill="a"] .buy-m{display:none}
+html:not(.js) .p-a{display:inline}
+html:not(.js) .buy-a{display:inline-flex;margin-top:8px}
+.fine{margin-top:1.8rem;display:grid;gap:.45rem;font-size:.98rem;color:var(--ink-2);max-width:60rem}
+.fine p{margin:0}
+.fine strong{color:var(--ink)}
+
+/* —— servicios —— */
+.night{background:var(--night);color:#fff}
+.night .lead{color:#c8d0e3}
+.svc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:2.4rem;border-top:1px solid #34406a}
+.svc>div{padding:26px 26px 26px 0;border-right:1px solid #34406a}
+.svc>div+div{padding-left:26px}
+.svc>div:last-child{border-right:0}
+.svc h3{color:var(--gold-hi);margin-bottom:.6rem}
+.svc p{color:#c8d0e3;font-size:1rem}
+.svc .how{color:#fff;font-weight:600;margin-top:.8rem;margin-bottom:0}
+.svc-note{margin-top:1.6rem;max-width:56rem;color:#aab6d2;font-size:.98rem}
+.night .btn{margin-top:1.8rem}
+.ahead{margin-top:3.5rem;padding-top:2rem;border-top:1px solid #34406a;max-width:56rem}
+.ahead h3{color:#fff;margin-bottom:.5rem}
+.ahead p{color:#c8d0e3}
+
+/* —— contacto —— */
+.contact-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(28px,6vw,80px);align-items:start}
+.contact-grid h2{margin-bottom:1rem}
+.cdl{margin:0;display:grid;gap:14px}
+.cdl div{padding:14px 0 14px 16px;border-left:4px solid var(--gold);background:linear-gradient(90deg,rgba(255,255,255,.55),transparent)}
+.cdl dt{font:600 .98rem var(--serif);color:var(--gold-deep)}
+.cdl dd{margin:.15rem 0 0;font-size:1.06rem;overflow-wrap:anywhere}
+.cdl a{font-weight:700}
+.contact-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.4rem}
+
+/* —— pie —— */
+.foot{background:var(--night);color:#aab6d2;padding:36px 0 44px;border-top:6px solid var(--gold);font-size:.97rem}
+.foot-in{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:center;justify-content:space-between}
+.foot nav{display:flex;flex-wrap:wrap;gap:8px 24px}
+.foot a{color:#d8dff0;text-decoration:none}
+.foot a:hover{color:#fff;text-decoration:underline}
+.foot p{margin:0}
+
+/* —— adaptación —— */
+@media (max-width:1060px){
+  .nav a.hide-md{display:none}
+  .wall{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .burger{display:block}
+  .nav a.hide-md{display:block}
+  .nav{display:none;position:absolute;left:0;right:0;top:100%;flex-direction:column;align-items:stretch;gap:0;background:var(--night);border-bottom:1px solid rgba(201,162,74,.28);padding:8px var(--gut) 16px}
+  .nav.open{display:flex}
+  .nav a{padding:.85rem 0;border-bottom:1px solid #26314f}
+  html:not(.js) .nav{display:flex;position:static;flex-direction:row;flex-wrap:wrap;padding:0}
+  html:not(.js) .burger{display:none}
+  .langsw{align-self:flex-start;margin-top:10px}
+  .hero-in{grid-template-columns:1fr}
+  .skyline{justify-content:center;width:100%}
+  .tower{width:min(196px,calc((100% - 28px)/3))}
+  .hero-copy{padding-bottom:28px}
+  .tool-grid{grid-template-columns:1fr;grid-template-areas:"head" "gallery" "body"}
+  .gallery{margin:0 0 2rem;position:static}
+  .about-grid,.contact-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .privacy{grid-template-columns:1fr}
+  .plan-grid{grid-template-columns:1fr}
+  .who,.alt{min-height:0}
+  .svc{grid-template-columns:1fr}
+  .svc>div,.svc>div+div{padding:22px 0;border-right:0;border-bottom:1px solid #34406a}
+  .svc>div:last-child{border-bottom:0}
+}
+@media (max-width:560px){
+  .steps{grid-template-columns:1fr}
+  .brand-name{font-size:1.15rem}
+  .brand img{width:38px}
+  .tower-name{display:none}
+  .tower{width:calc((100% - 16px)/3)}
+  .tower-cap{padding:8px 6px 7px;text-align:center}
+  .hero h1 span:nth-child(2){padding-left:.2em}
+  .hero h1 span:nth-child(3){padding-left:.4em}
+  .lang-table thead{display:none}
+  .lang-table,.lang-table tbody,.lang-table tr,.lang-table th,.lang-table td{display:block;width:100%}
+  .lang-table tr{margin-bottom:12px;border:1px solid var(--rule);background:var(--paper)}
+  .lang-table tbody th{border:0;border-bottom:1px solid var(--rule);background:var(--stone)}
+  .lang-table td{border:0;padding:.55rem 1rem}
+  .lang-table td::before{content:attr(data-h);display:block;font-weight:700;color:var(--ink-2);font-size:.85rem}
+  .tabs .tab{flex:1 1 auto;padding:.8rem .9rem;font-size:1rem}
+  .wall{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lb-scroll img{width:max(96vw,900px)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .tower{animation:none}
+  *{transition:none!important}
+}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "BlogFort Agency LLC", "url": "https://blogfort.agency/", "logo": "https://blogfort.agency/icon-512-2.png", "email": "hello@blogfort.agency", "address": {"@type": "PostalAddress", "streetAddress": "30 N Gould St, Ste N", "addressLocality": "Sheridan", "addressRegion": "WY", "postalCode": "82801", "addressCountry": "US"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top"><div class="wrap top-in"><a class="brand" href="/es/" aria-label="BlogFort Agency"><img src="/img/castle.webp" alt="" width="44" height="40"><span class="brand-name">BlogFort <span>Agency</span></span></a><button class="burger" type="button" aria-label="Menú" aria-expanded="false" aria-controls="nav">&#9776;</button><nav class="nav" id="nav" aria-label="Principal"><a href="#app">BlogFort App</a><a href="#matrix">MATRIX</a><a href="#mwbfa">MWBFA</a><a href="#languages" class="hide-md">Idiomas</a><a href="#plans">Planes</a><a href="#services" class="hide-md">Servicios</a><a href="#contact">Contacto</a><a class="langsw" href="/" hreflang="en" lang="en" aria-label="View this page in English">EN</a></nav></div></header>
+<main id="main">
+<section class="hero"><div class="wrap hero-in"><div class="hero-copy"><h1><span>Redáctalo.</span><span>Gestiónalo.</span><span>Constrúyelo.</span></h1><p class="lead">BlogFort Agency crea tres herramientas para quien vive del contenido SEO y de las webs: una para redactar los artículos, otra para gestionar el negocio y otra para construir las páginas. Usa una, o las tres.</p><div class="hero-cta"><a class="btn btn-gold" href="#app">Ver las herramientas</a><a class="btn btn-line" href="#plans">Planes y precios</a></div><ul class="facts"><li>Suscripciones en dólares</li><li>Tus datos se quedan en tu dispositivo</li><li>Reembolso en los primeros 14 días del primer pago</li></ul></div><div class="skyline"><a class="tower tower-app" href="#app"><span class="tower-cap"><span class="tower-verb">Redactar</span><span class="tower-name">BlogFort App</span></span><span class="tower-img"><img src="/img/hero-app-es.webp" alt="BlogFort App en un móvil: el editor SEO" width="560" height="907" decoding="async" fetchpriority="high"></span></a><a class="tower tower-mx" href="#matrix"><span class="tower-cap"><span class="tower-verb">Gestionar</span><span class="tower-name">MATRIX</span></span><span class="tower-img"><img src="/img/hero-matrix-es.webp" alt="MATRIX en un móvil: el panel" width="560" height="907" decoding="async" fetchpriority="high"></span></a><a class="tower tower-mw" href="#mwbfa"><span class="tower-cap"><span class="tower-verb">Construir</span><span class="tower-name">MWBFA</span></span><span class="tower-img"><img src="/img/hero-mwbfa-es.webp" alt="MWBFA en un móvil: el editor web" width="560" height="907" decoding="async" fetchpriority="high"></span></a></div></div></section>
+<section class="sec stone" id="about"><div class="wrap about-grid"><div><h2>Una empresa de Wyoming, dirigida desde Europa.</h2><p class="lead">BlogFort Agency LLC es una sociedad de responsabilidad limitada registrada en Wyoming (EE. UU.). Diseñamos y creamos nuestras herramientas en casa, así que nosotros decidimos cómo funcionan y cómo se tratan tus datos. Trabajamos con empresas y agencias de Estados Unidos, Europa, Latinoamérica y Asia.</p></div><ul class="pillars"><li><strong>Pensadas para la IA</strong><span>Cada herramienta usa la IA donde te ahorra tiempo, con tu propia clave de Anthropic.</span></li><li><strong>Hasta 22 idiomas</strong><span>Pantallas en 22 idiomas; redacción en 5 o en los 22, según la herramienta y el plan.</span></li><li><strong>Privadas por diseño</strong><span>Tu trabajo y tu clave de API se quedan en tu propio dispositivo.</span></li></ul></div></section>
+<section class="tool tool-app" id="app" aria-labelledby="h-app"><div class="wrap tool-grid"><div class="tool-head"><h2 id="h-app">BlogFort App</h2><p class="tool-kick">Redacta artículos SEO en un solo lugar.</p><p class="lead">Un estudio de redacción SEO que funciona en tu navegador. Escribe, corrige, traduce y exporta artículos con la puntuación SEO a la vista, y llama a la IA cuando quieras, con tu propia clave de Anthropic.</p></div><div class="gallery" style="--ar:1280/800"><figure class="shot"><div class="frame"><img src="/img/app-editor-es.webp" alt="El editor SEO: palabra clave, URL, meta descripción y puntuación a la vista mientras escribes." width="1280" height="800" loading="lazy" decoding="async"></div><div class="shot-bar"><figcaption>El editor SEO: palabra clave, URL, meta descripción y puntuación a la vista mientras escribes.</figcaption><button class="zoom" type="button" aria-label="Ampliar captura">&#10530; Ampliar</button></div></figure><div class="thumbs"><button class="thumb" type="button" aria-pressed="true" aria-label="El editor SEO: palabra clave, URL, meta descripción y puntuación a la vista mientras escribes." data-img="/img/app-editor-es.webp" data-alt="El editor SEO: palabra clave, URL, meta descripción y puntuación a la vista mientras escribes." data-cap="El editor SEO: palabra clave, URL, meta descripción y puntuación a la vista mientras escribes."><img src="/img/app-editor-es-t.webp" alt="" width="360" height="225" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="El corrector revisa ortografía, gramática y tono, y enumera cada corrección." data-img="/img/app-corrector-es.webp" data-alt="El corrector revisa ortografía, gramática y tono, y enumera cada corrección." data-cap="El corrector revisa ortografía, gramática y tono, y enumera cada corrección."><img src="/img/app-corrector-es-t.webp" alt="" width="360" height="225" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="El traductor: original y traducción lado a lado, con estilos y variantes regionales." data-img="/img/app-translator-es.webp" data-alt="El traductor: original y traducción lado a lado, con estilos y variantes regionales." data-cap="El traductor: original y traducción lado a lado, con estilos y variantes regionales."><img src="/img/app-translator-es-t.webp" alt="" width="360" height="225" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Catorce plantillas listas para usar, de páginas de captación a notas de prensa y presupuestos." data-img="/img/app-templates-es.webp" data-alt="Catorce plantillas listas para usar, de páginas de captación a notas de prensa y presupuestos." data-cap="Catorce plantillas listas para usar, de páginas de captación a notas de prensa y presupuestos."><img src="/img/app-templates-es-t.webp" alt="" width="360" height="225" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Exporta un PDF limpio con tu título, tu color y las páginas numeradas." data-img="/img/app-pdf-es.webp" data-alt="Exporta un PDF limpio con tu título, tu color y las páginas numeradas." data-cap="Exporta un PDF limpio con tu título, tu color y las páginas numeradas."><img src="/img/app-pdf-es-t.webp" alt="" width="360" height="225" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Salud de datos: mira cuánto espacio usas y haz una copia de seguridad en un archivo con un clic." data-img="/img/app-backup-es.webp" data-alt="Salud de datos: mira cuánto espacio usas y haz una copia de seguridad en un archivo con un clic." data-cap="Salud de datos: mira cuánto espacio usas y haz una copia de seguridad en un archivo con un clic."><img src="/img/app-backup-es-t.webp" alt="" width="360" height="225" loading="lazy" decoding="async"></button></div></div><div class="tool-body"><ul class="feat"><li><strong>Editor SEO con datos en vivo.</strong> Titulares, palabra clave, URL, meta descripción de hasta 155 caracteres y una puntuación de 0 a 100 mientras escribes.</li><li><strong>Asistente de IA.</strong> Escribe, mejora, optimiza para SEO, hace el tono más natural y propone títulos, metadescripciones y conclusiones.</li><li><strong>Indicador de tono natural para textos en español.</strong> Señala las frases típicas que repiten los textos de IA. Es una guía de estilo, no una garantía frente a ningún detector.</li><li><strong>Corrector y traductor.</strong> Revisa ortografía, gramática y tono, y traduce con 6 estilos, variantes regionales y dictado por voz.</li><li><strong>Exportaciones listas para usar.</strong> PDF con el color de tu marca y páginas numeradas, HTML para WordPress e impresión limpia.</li><li><strong>Tus artículos se quedan contigo.</strong> Autoguardado, biblioteca de artículos y copia de seguridad con un clic que nunca incluye tu clave de API.</li></ul><p class="small-t">Business añade los 22 idiomas de redacción, un modo Médico/Científico con fuentes citadas para que las verifiques, un editor de imágenes, plantillas creadas con IA y exportación a Word (.docx).</p><p class="small-t">Redacta en 5 idiomas con Starter (español, inglés, portugués, francés y alemán) y en los 22 con Business.</p><div class="note"><b>Conviene saber</b><ul><li>Para las funciones de IA usas tu propia clave de API de Anthropic. Anthropic te factura ese uso directamente; el editor, el PDF, las imágenes y las plantillas funcionan sin IA.</li><li>No garantiza posicionamiento ni evita los detectores de IA.</li><li>Los textos de IA pueden tener errores: comprueba datos y citas antes de publicar.</li></ul></div><div class="tool-cta"><div class="from">Desde $39 al mes</div><a class="btn" href="#plans" data-tab="app">Ver planes</a></div><p class="open-line">¿Ya eres cliente? <a href="/app/">Abrir BlogFort App</a></p></div></div></section>
+<section class="tool tool-mx" id="matrix" aria-labelledby="h-matrix"><div class="wrap tool-grid"><div class="tool-head"><h2 id="h-matrix">MATRIX</h2><p class="tool-kick">Gestiona tu agencia desde un panel privado.</p><p class="lead">Un panel de control para quien dirige el negocio: leads, clientes, contratos, dinero y documentos en un solo lugar, con tu propia contraseña y tu PIN. Todo se queda en tu dispositivo.</p></div><div class="gallery" style="--ar:1280/860"><figure class="shot"><div class="frame"><img src="/img/matrix-dashboard-es.webp" alt="El panel: leads, clientes, ingresos previstos y las alertas que te necesitan hoy." width="1280" height="860" loading="lazy" decoding="async"></div><div class="shot-bar"><figcaption>El panel: leads, clientes, ingresos previstos y las alertas que te necesitan hoy.</figcaption><button class="zoom" type="button" aria-label="Ampliar captura">&#10530; Ampliar</button></div></figure><div class="thumbs"><button class="thumb" type="button" aria-pressed="true" aria-label="El panel: leads, clientes, ingresos previstos y las alertas que te necesitan hoy." data-img="/img/matrix-dashboard-es.webp" data-alt="El panel: leads, clientes, ingresos previstos y las alertas que te necesitan hoy." data-cap="El panel: leads, clientes, ingresos previstos y las alertas que te necesitan hoy."><img src="/img/matrix-dashboard-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="El embudo de leads, con búsqueda y filtros por estado y fase." data-img="/img/matrix-leads-es.webp" data-alt="El embudo de leads, con búsqueda y filtros por estado y fase." data-cap="El embudo de leads, con búsqueda y filtros por estado y fase."><img src="/img/matrix-leads-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="La calculadora operativa convierte precio, descuento, impuesto y coste en tu margen neto." data-img="/img/matrix-finance-es.webp" data-alt="La calculadora operativa convierte precio, descuento, impuesto y coste en tu margen neto." data-cap="La calculadora operativa convierte precio, descuento, impuesto y coste en tu margen neto."><img src="/img/matrix-finance-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Cámara Beta: los contratos de clientes, cada uno con su fecha de vencimiento." data-img="/img/matrix-vault-es.webp" data-alt="Cámara Beta: los contratos de clientes, cada uno con su fecha de vencimiento." data-cap="Cámara Beta: los contratos de clientes, cada uno con su fecha de vencimiento."><img src="/img/matrix-vault-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Cámara Alfa, con tu PIN: documentos legales y contabilidad interna." data-img="/img/matrix-accounting-es.webp" data-alt="Cámara Alfa, con tu PIN: documentos legales y contabilidad interna." data-cap="Cámara Alfa, con tu PIN: documentos legales y contabilidad interna."><img src="/img/matrix-accounting-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="El muro de contención y el semáforo de alertas." data-img="/img/matrix-alerts-es.webp" data-alt="El muro de contención y el semáforo de alertas." data-cap="El muro de contención y el semáforo de alertas."><img src="/img/matrix-alerts-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Un informe sellado, listo para guardar en PDF o Word." data-img="/img/matrix-report-es.webp" data-alt="Un informe sellado, listo para guardar en PDF o Word." data-cap="Un informe sellado, listo para guardar en PDF o Word."><img src="/img/matrix-report-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button></div></div><div class="tool-body"><ul class="feat"><li><strong>Embudo de leads.</strong> Sigue a cada prospecto por cuatro fases, desde la detección hasta el informe final.</li><li><strong>Clientes y contratos.</strong> Controla el avance de cada cliente y el margen de cada contrato, y copia la ficha de un cliente a MWBFA con un clic.</li><li><strong>Calculadoras financieras.</strong> Precio, descuento, impuesto y coste te dan el margen neto; la vista estratégica proyecta tus ingresos del periodo.</li><li><strong>Dos cámaras de bóveda.</strong> Alfa, con PIN, guarda los documentos legales y corporativos y tu contabilidad interna. Beta guarda los contratos de clientes. Ambas te avisan antes de que venzan los documentos.</li><li><strong>Semáforo de alertas.</strong> Rojo para lo que vence en 7 días, amarillo en 30.</li><li><strong>Informes sellados.</strong> Informes en PDF o Word en 22 idiomas, con un sello de autenticidad que cualquiera puede comprobar en <a href="/verificar/">blogfort.agency/verificar</a>. Pídelos con tus palabras, por ejemplo «contabilidad de marzo»: la IA solo interpreta la orden y las cifras salen de tus datos guardados.</li><li><strong>Seguro por defecto.</strong> Cinco intentos fallidos bloquean una credencial 15 minutos. Copia de seguridad en un archivo con un clic y registro de auditoría de lo ocurrido.</li></ul><p class="small-t">Un solo plan de MATRIX incluye todo, en los 22 idiomas.</p><div class="note"><b>Conviene saber</b><ul><li>La protección es local: protege el acceso desde este navegador y dispositivo, y no sustituye la seguridad de tu propio equipo.</li><li>Las cifras de contabilidad son orientativas, con los porcentajes que tú configuras. No son asesoramiento fiscal: confírmalas con tu gestor.</li><li>MATRIX organiza tus leads; no los busca. Puedes importarlos desde tu propio sistema de búsqueda en un archivo JSON.</li></ul></div><div class="tool-cta"><div class="from">Desde $49 al mes<small>O $121 al mes con BlogFort App y MWBFA (planes Starter) incluidos.</small></div><a class="btn" href="#plans" data-tab="matrix">Ver planes</a></div><p class="open-line">¿Ya eres cliente? <a href="/matrix/">Abrir MATRIX</a></p></div></div></section>
+<section class="tool tool-mw" id="mwbfa" aria-labelledby="h-mwbfa"><div class="wrap tool-grid"><div class="tool-head"><h2 id="h-mwbfa">MWBFA</h2><p class="tool-kick">Crea webs para tus clientes.</p><p class="lead">Un constructor de webs para agencias y autónomos. Elige una plantilla para el sector del cliente, edita el texto sobre la propia página, comprueba el resultado y exporta una web lista para subir. La IA puede redactar la web entera a partir de la ficha del cliente.</p></div><div class="gallery" style="--ar:1280/860"><figure class="shot"><div class="frame"><img src="/img/mwbfa-templates-es.webp" alt="Doce plantillas por sector, cada una con muestras de color." width="1280" height="860" loading="lazy" decoding="async"></div><div class="shot-bar"><figcaption>Doce plantillas por sector, cada una con muestras de color.</figcaption><button class="zoom" type="button" aria-label="Ampliar captura">&#10530; Ampliar</button></div></figure><div class="thumbs"><button class="thumb" type="button" aria-pressed="true" aria-label="Doce plantillas por sector, cada una con muestras de color." data-img="/img/mwbfa-templates-es.webp" data-alt="Doce plantillas por sector, cada una con muestras de color." data-cap="Doce plantillas por sector, cada una con muestras de color."><img src="/img/mwbfa-templates-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Haz clic en el texto que quieras cambiar, sobre la propia página." data-img="/img/mwbfa-editor-es.webp" data-alt="Haz clic en el texto que quieras cambiar, sobre la propia página." data-cap="Haz clic en el texto que quieras cambiar, sobre la propia página."><img src="/img/mwbfa-editor-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Mira la versión móvil antes de entregar." data-img="/img/mwbfa-mobile-es.webp" data-alt="Mira la versión móvil antes de entregar." data-cap="Mira la versión móvil antes de entregar."><img src="/img/mwbfa-mobile-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="El comprobador enumera lo que hay que corregir y aplica las correcciones que marques." data-img="/img/mwbfa-checker-es.webp" data-alt="El comprobador enumera lo que hay que corregir y aplica las correcciones que marques." data-cap="El comprobador enumera lo que hay que corregir y aplica las correcciones que marques."><img src="/img/mwbfa-checker-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Rellena la ficha del cliente y deja que la IA escriba la web (Business)." data-img="/img/mwbfa-writer-es.webp" data-alt="Rellena la ficha del cliente y deja que la IA escriba la web (Business)." data-cap="Rellena la ficha del cliente y deja que la IA escriba la web (Business)."><img src="/img/mwbfa-writer-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button><button class="thumb" type="button" aria-pressed="false" aria-label="Traduce el proyecto entero a otro idioma (Business)." data-img="/img/mwbfa-languages-es.webp" data-alt="Traduce el proyecto entero a otro idioma (Business)." data-cap="Traduce el proyecto entero a otro idioma (Business)."><img src="/img/mwbfa-languages-es-t.webp" alt="" width="360" height="242" loading="lazy" decoding="async"></button></div></div><div class="tool-body"><ul class="feat"><li><strong>12 plantillas por sector.</strong> Empresa, clínica, restaurante, tienda, despacho legal, inmobiliaria, hotel y más, cada una con variantes de color.</li><li><strong>Edita sobre la propia página.</strong> Haz clic en cualquier texto para cambiarlo; ordena, oculta o añade secciones; previsualiza en ordenador, tableta y móvil.</li><li><strong>Diseño y SEO.</strong> Colores, tipografías, título de la página, descripción y datos para compartir en redes.</li><li><strong>Redactor IA.</strong> Rellena la ficha del cliente y la IA escribe los textos de la web en el idioma que elijas. Solo usa lo que le das y no inventa cifras, premios ni opiniones.</li><li><strong>Comprobador en tu dispositivo.</strong> SEO, accesibilidad, privacidad, contraste y la vista en un móvil de 390 px, con correcciones que se aplican de verdad.</li><li><strong>Exportación.</strong> Un archivo HTML con Starter; HTML, un ZIP listo para subir y PDF con Business.</li><li><strong>Business además crea</strong> apps PWA instalables (carta digital, reservas, catálogo, servicios, tarjeta de fidelización) y escribe guiones para asistentes de voz que pegas en tu propia plataforma.</li></ul><p class="small-t">Funciona en 5 idiomas con Starter (español, inglés, francés, alemán y portugués) y en los 22 con Business.</p><div class="note"><b>Conviene saber</b><ul><li>MWBFA solo escribe guiones para asistentes de voz. No hace llamadas ni se conecta a esas plataformas, y tú eres responsable de cumplir la normativa de tu país sobre llamadas con IA y grabación.</li><li>La puntuación del comprobador cubre lo que se puede comprobar de forma automática. No garantiza posicionamiento ni cumplimiento legal.</li><li>Las funciones de IA usan tu propia clave de API de Anthropic.</li></ul></div><div class="tool-cta"><div class="from">Desde $39 al mes</div><a class="btn" href="#plans" data-tab="mwbfa">Ver planes</a></div><p class="open-line">¿Ya eres cliente? <a href="/mwbfa/">Abrir MWBFA</a></p></div></div></section>
+<section class="sec stone" id="how"><div class="wrap"><h2>Sencillo, privado y en tus manos.</h2><ol class="steps"><li><strong>Suscríbete</strong><span>Elige una herramienta y suscríbete. Cancela cuando quieras.</span></li><li><strong>Recibe tu código de licencia</strong><span>Tras el pago recibes tu código de licencia por correo electrónico.</span></li><li><strong>Abre la herramienta</strong><span>Funciona en tu navegador y se instala como una app en el ordenador o el móvil. Pega tu código de licencia en la primera pantalla.</span></li><li><strong>Conecta tu clave de IA</strong><span>Añade tu propia clave de API de Anthropic para usar las funciones de IA. Anthropic te factura ese uso.</span></li></ol><div class="privacy"><div><b>Tu trabajo se queda en tu dispositivo</b><p>Artículos, proyectos, clientes y documentos se guardan en tu propio navegador. BlogFort Agency LLC no tiene acceso a ellos.</p></div><div><b>Tu clave solo va a Anthropic</b><p>Tu clave de API se guarda en tu navegador y solo se envía a Anthropic cuando usas la IA.</p></div><div><b>Tu licencia se comprueba en tu dispositivo</b><p>El código de licencia se verifica en tu dispositivo, sin enviarlo a ningún servidor.</p></div></div></div></section>
+<section class="sec stone-2" id="languages"><div class="wrap"><h2>22 idiomas. Esto es lo que hace de verdad cada herramienta.</h2><p class="lead">Cada herramienta tiene dos ajustes de idioma: el de sus pantallas y el idioma en el que escribes.</p><table class="lang-table"><thead><tr><th scope="col">Herramienta</th><th scope="col">Pantallas</th><th scope="col">Redacción e IA</th></tr></thead><tbody><tr><th scope="row">BlogFort App</th><td data-h="Pantallas">22 idiomas</td><td data-h="Redacción e IA">Starter: 5 (español, inglés, portugués, francés, alemán). Business: los 22.</td></tr><tr><th scope="row">MATRIX</th><td data-h="Pantallas">22 idiomas</td><td data-h="Redacción e IA">Los 22, también en los informes y en las órdenes de informe.</td></tr><tr><th scope="row">MWBFA</th><td data-h="Pantallas">22 idiomas</td><td data-h="Redacción e IA">Starter: 5 (español, inglés, francés, alemán, portugués). Business: los 22.</td></tr></tbody></table><p class="small measure">Las pantallas en español y en inglés vienen incluidas. Las otras 20 las traduce la IA una sola vez, con tu propia clave de API, y se guardan en tu dispositivo.</p><ul class="wall" lang="mul" translate="no"><li>Español</li><li>English</li><li>Français</li><li>Deutsch</li><li>Português</li><li>Italiano</li><li>中文</li><li>العربية</li><li>日本語</li><li>Русский</li><li>한국어</li><li>Nederlands</li><li>Svenska</li><li>Polski</li><li>Türkçe</li><li>हिन्दी</li><li class="var">Português BR</li><li class="var">Español MX</li><li class="var">English AU</li><li class="var">English CA</li><li class="var">Deutsch CH</li><li class="var">Français BE</li></ul><p class="wall-note">Las seis últimas, en gris, son variantes regionales.</p></div></section>
+<section class="sec stone" id="plans"><div class="wrap"><div class="plans-head"><div><h2>Elige la herramienta que necesitas.</h2><p class="lead">Precios en dólares estadounidenses, sin impuestos aplicables. Paga al año y ahorra un 15 %.</p></div><div class="bill" role="group" aria-label="Periodo de pago"><button type="button" data-bill="m" aria-pressed="true">Mensual</button><button type="button" data-bill="a" aria-pressed="false">Anual <small>(ahorra 15 %)</small></button></div></div><div class="plans" id="plansbox" data-bill="m"><div class="tabs" role="tablist" aria-label="Herramienta"><button class="tab" type="button" role="tab" id="tab-app" aria-controls="panel-app" data-tool="app" aria-selected="true">BlogFort App</button><button class="tab" type="button" role="tab" id="tab-matrix" aria-controls="panel-matrix" data-tool="matrix" aria-selected="false">MATRIX</button><button class="tab" type="button" role="tab" id="tab-mwbfa" aria-controls="panel-mwbfa" data-tool="mwbfa" aria-selected="false">MWBFA</button></div><div class="panel" data-tool="app" id="panel-app" role="tabpanel" aria-labelledby="tab-app"><h3 class="panel-title">BlogFort App</h3><div class="plan-grid"><div class="plan"><h4>Starter</h4><p class="who">Para freelancers y profesionales independientes</p><p class="price"><span class="p-m">$39<small>/mes</small></span><span class="p-a">$396<small>/año</small></span></p><p class="alt"><span class="p-m">o $396 al año (ahorras un 15 %)</span><span class="p-a">o $39 al mes</span></p><ul><li>Editor SEO + asistente de IA (con tu propia clave de API)</li><li>Análisis SEO y metadatos sugeridos</li><li>Indicador de tono natural y corrector de tono</li><li>Exportación a PDF y HTML para WordPress</li><li>Traductor: 11 idiomas y 22 dialectos</li><li>Editor, corrector y asistente en 5 idiomas (ES, EN, PT, FR, DE)</li><li>Pantallas de la App en 22 idiomas</li><li>Plantillas base listas para usar</li><li>Uso individual · soporte por correo</li></ul><a class="btn buy-m" href="https://buy.stripe.com/00w6oHakN4Fk6Yb0MfgMw00" target="_blank" rel="noopener">Suscribirme por $39/mes</a><a class="btn buy-a" href="https://buy.stripe.com/6oU28rakN4FkeqD66zgMw01" target="_blank" rel="noopener">Suscribirme por $396/año</a></div><div class="plan"><h4>Business</h4><p class="who">Para agencias y equipos de contenido</p><p class="price"><span class="p-m">$99<small>/mes</small></span><span class="p-a">$1,008<small>/año</small></span></p><p class="alt"><span class="p-m">o $1,008 al año (ahorras un 15 %)</span><span class="p-a">o $99 al mes</span></p><ul><li>Todo lo de Starter</li><li>Editor, corrector y asistente en los 22 idiomas</li><li>Traductor: 17 idiomas y 31 dialectos</li><li>Modo Médico/Científico, con fuentes citadas para que las verifiques</li><li>Editor y compresor de imágenes</li><li>Plantillas con IA y biblioteca de plantillas guardadas</li><li>Exportación a Word (.docx)</li><li>Para equipos de una misma organización · soporte por correo</li></ul><a class="btn buy-m" href="https://buy.stripe.com/cNi00jeB34FkfuH66zgMw02" target="_blank" rel="noopener">Suscribirme por $99/mes</a><a class="btn buy-a" href="https://buy.stripe.com/cNi00j9gJb3Iciv3YrgMw03" target="_blank" rel="noopener">Suscribirme por $1,008/año</a></div><div class="plan"><h4>Enterprise</h4><p class="who">Para corporaciones y marca blanca</p><p class="price">A medida</p><p class="alt">&nbsp;</p><ul><li>Todo lo de Business</li><li>Marca blanca personalizada</li><li>Clientes y usuarios ilimitados</li><li>Onboarding dedicado y formación</li><li>Condiciones y soporte acordados por contrato</li><li>Integración WordPress/CMS a medida</li></ul><a class="btn btn-outline" href="mailto:hello@blogfort.agency?subject=Quote%20request%20-%20BlogFort%20App%20Enterprise">Pedir presupuesto</a></div></div></div><div class="panel" data-tool="matrix" id="panel-matrix" role="tabpanel" aria-labelledby="tab-matrix"><h3 class="panel-title">MATRIX</h3><div class="plan-grid"><div class="plan"><h4>MATRIX Solo</h4><p class="who">Todo para gestionar tu agencia</p><p class="price"><span class="p-m">$49<small>/mes</small></span><span class="p-a">$499<small>/año</small></span></p><p class="alt"><span class="p-m">o $499 al año (ahorras un 15 %)</span><span class="p-a">o $49 al mes</span></p><ul><li>CRM de leads y clientes</li><li>Calculadoras financieras</li><li>Cámaras Alfa y Beta (documentos legales y contratos)</li><li>Muro de contención y semáforo de alertas</li><li>Informes sellados en 22 idiomas</li><li>Registro de auditoría</li><li>Copia de seguridad (JSON) con un clic</li><li>BlogFort App y MWBFA no incluidas</li></ul><a class="btn buy-m" href="https://buy.stripe.com/3cI6oH3WpfjY1DR7aDgMw04" target="_blank" rel="noopener">Suscribirme por $49/mes</a><a class="btn buy-a" href="https://buy.stripe.com/9B614n64xgo24Q3amPgMw05" target="_blank" rel="noopener">Suscribirme por $499/año</a></div><div class="plan"><h4>MATRIX + App + MWBFA</h4><p class="who">El ecosistema completo</p><p class="price"><span class="p-m">$121<small>/mes</small></span><span class="p-a">$1,234<small>/año</small></span></p><p class="alt"><span class="p-m">o $1,234 al año (ahorras un 15 %)</span><span class="p-a">o $121 al mes</span></p><ul><li>Todo lo de MATRIX Solo</li><li>BlogFort App (plan Starter)</li><li>MWBFA (plan Starter)</li><li>Soporte por correo</li></ul><a class="btn buy-m" href="https://buy.stripe.com/6oU3cv78B9ZE0zN7aDgMw0a" target="_blank" rel="noopener">Suscribirme por $121/mes</a><a class="btn buy-a" href="https://buy.stripe.com/4gM28r78B0p46Yb66zgMw0b" target="_blank" rel="noopener">Suscribirme por $1,234/año</a></div><div class="plan"><h4>Enterprise</h4><p class="who">Para corporaciones</p><p class="price">A medida</p><p class="alt">&nbsp;</p><ul><li>Todo el ecosistema</li><li>Personalización e integración a medida</li><li>Condiciones y soporte acordados por contrato</li></ul><a class="btn btn-outline" href="mailto:hello@blogfort.agency?subject=Quote%20request%20-%20MATRIX%20Enterprise">Pedir presupuesto</a></div></div></div><div class="panel" data-tool="mwbfa" id="panel-mwbfa" role="tabpanel" aria-labelledby="tab-mwbfa"><h3 class="panel-title">MWBFA</h3><div class="plan-grid"><div class="plan"><h4>Starter</h4><p class="who">Para empezar a construir</p><p class="price"><span class="p-m">$39<small>/mes</small></span><span class="p-a">$396<small>/año</small></span></p><p class="alt"><span class="p-m">o $396 al año (ahorras un 15 %)</span><span class="p-a">o $39 al mes</span></p><ul><li>Hasta 3 proyectos web</li><li>6 plantillas base</li><li>IA para redactar bloque a bloque</li><li>Exportación en un solo archivo HTML</li><li>5 idiomas (ES, EN, FR, DE, PT)</li><li>Comprobador de webs en tu dispositivo</li></ul><a class="btn buy-m" href="https://buy.stripe.com/aFa28rdwZefU82f8eHgMw06" target="_blank" rel="noopener">Suscribirme por $39/mes</a><a class="btn buy-a" href="https://buy.stripe.com/eVqfZh8cFgo2gyL52vgMw07" target="_blank" rel="noopener">Suscribirme por $396/año</a></div><div class="plan"><h4>Business</h4><p class="who">El constructor completo</p><p class="price"><span class="p-m">$99<small>/mes</small></span><span class="p-a">$1,008<small>/año</small></span></p><p class="alt"><span class="p-m">o $1,008 al año (ahorras un 15 %)</span><span class="p-a">o $99 al mes</span></p><ul><li>Proyectos ilimitados</li><li>Las 12 plantillas</li><li>IA completa: web entera, reescritura y traducción del proyecto</li><li>Exportación HTML, ZIP listo para subir y PDF</li><li>22 idiomas y variantes</li><li>Importar la ficha de cliente de MATRIX</li><li>Constructor de apps PWA</li><li>Guiones para asistentes de voz</li><li>Comprobador completo con opinión de la IA</li></ul><a class="btn buy-m" href="https://buy.stripe.com/5kQeVd2Sl7Rw1DR8eHgMw08" target="_blank" rel="noopener">Suscribirme por $99/mes</a><a class="btn buy-a" href="https://buy.stripe.com/00w00jcsVfjY5U7fH9gMw09" target="_blank" rel="noopener">Suscribirme por $1,008/año</a></div><div class="plan"><h4>Enterprise</h4><p class="who">Personalización completa</p><p class="price">A medida</p><p class="alt">&nbsp;</p><ul><li>Todo lo de Business</li><li>Varias licencias de usuario (por contrato)</li><li>Incorporación y condiciones acordadas por contrato</li><li>Trabajo a medida, con presupuesto aparte</li></ul><a class="btn btn-outline" href="mailto:hello@blogfort.agency?subject=Quote%20request%20-%20MWBFA%20Enterprise">Pedir presupuesto</a></div></div></div></div><div class="fine"><p><strong>Pago seguro con Stripe.</strong> BlogFort no ve los datos de tu tarjeta.</p><p><strong>Cancela cuando quieras.</strong> Las suscripciones se renuevan automáticamente hasta que las canceles.</p><p><strong>Reembolso en los primeros 14 días del primer pago.</strong></p><p><strong>¿Necesitas ayuda?</strong> En caso de algún problema, le atenderemos a través de nuestro correo electrónico hello@blogfort.agency lo antes posible.</p><p>Cada herramienta incluye su propio agente de ejecución, un asistente de IA que funciona con tu propia clave de Anthropic. Lo recibes con tu suscripción.</p></div></div></section>
+<section class="sec night" id="services"><div class="wrap"><h2>¿Prefieres que lo redactemos o lo construyamos por ti?</h2><p class="lead">Además de las suscripciones, entregamos trabajo terminado. Cada proyecto se presupuesta por separado, porque el precio depende del alcance, el volumen, los idiomas y de quién se ocupe después.</p><div class="svc"><div><h3>Contenido SEO</h3><p>Artículos SEO, textos de marca, contenido en varios idiomas y auditorías de contenido.</p><p class="how">Por proyecto o con una cuota mensual.</p></div><div><h3>Webs y apps</h3><p>Webs profesionales y apps instalables creadas con nuestras propias herramientas. Lo construimos y tú lo gestionas, o nos encargamos también del mantenimiento y las actualizaciones con un plan mensual.</p><p class="how">Presupuesto único, más un plan mensual opcional.</p></div><div><h3>Agentes de llamadas con IA</h3><p>Agentes de voz que atienden y hacen llamadas para tu negocio, diseñados a partir de tus propios procesos.</p><p class="how">Presupuesto de puesta en marcha, más una gestión mensual opcional.</p></div></div><p class="svc-note">Los clientes habituales, como talleres y empresas de transporte y logística, pueden acceder a condiciones preferentes en SEO, marketing, creación de apps y agentes de llamadas, acordadas caso por caso.</p><a class="btn btn-gold" href="mailto:hello@blogfort.agency?subject=Quote%20request">Pedir presupuesto</a><div class="ahead"><h3>Mirando al futuro</h3><p>BlogFort Agency se expande a nuevos sectores y aplica el mismo enfoque tecnológico a nuevos mercados e industrias. Hay proyectos nuevos en desarrollo que todavía no están a la venta. Escríbenos para saber hacia dónde vamos.</p></div></div></section>
+<section class="sec stone" id="contact"><div class="wrap contact-grid"><div><h2>Hablemos.</h2><p class="lead">¿Dudas sobre los planes o necesitas un presupuesto a medida? Escríbenos.</p><div class="contact-cta"><a class="btn btn-dark" href="mailto:hello@blogfort.agency">Escríbenos</a><a class="btn btn-outline" href="#plans">Ver planes</a></div></div><dl class="cdl"><div><dt>Correo electrónico</dt><dd><a href="mailto:hello@blogfort.agency">hello@blogfort.agency</a></dd></div><div><dt>Soporte</dt><dd>En caso de algún problema, le atenderemos a través de nuestro correo electrónico hello@blogfort.agency lo antes posible.</dd></div><div><dt>Empresa</dt><dd>BlogFort Agency LLC</dd></div><div><dt>Domicilio social</dt><dd>30 N Gould St, Ste N, Sheridan, WY 82801, USA</dd></div><div><dt>N.º de registro en Wyoming (Filing ID)</dt><dd>2026-001954197</dd></div></dl></div></section>
+</main>
+<footer class="foot"><div class="wrap foot-in"><p>&copy; 2026 BlogFort Agency LLC. Todos los derechos reservados.</p><nav aria-label="Legal"><a href="/terms.html">Términos del Servicio</a><a href="/privacy.html">Política de Privacidad</a><a href="/refunds.html">Política de Reembolsos y Cancelación</a></nav></div></footer>
+<script>(function(){
+  var d=document,h=d.documentElement;
+  try{localStorage.setItem('blogfort-lang',h.lang)}catch(e){}
+
+  /* menú del móvil */
+  var bg=d.querySelector('.burger'),nav=d.getElementById('nav');
+  if(bg&&nav){
+    bg.addEventListener('click',function(){var o=nav.classList.toggle('open');bg.setAttribute('aria-expanded',o?'true':'false')});
+    nav.addEventListener('click',function(e){if(e.target.closest('a')){nav.classList.remove('open');bg.setAttribute('aria-expanded','false')}});
+  }
+
+  /* galerías: cada miniatura cambia la captura grande y su pie */
+  d.querySelectorAll('.gallery').forEach(function(g){
+    var big=g.querySelector('.frame img'),cap=g.querySelector('figcaption'),th=g.querySelectorAll('.thumb');
+    th.forEach(function(b){
+      b.addEventListener('click',function(){
+        th.forEach(function(x){x.setAttribute('aria-pressed','false')});
+        b.setAttribute('aria-pressed','true');
+        big.src=b.dataset.img;big.alt=b.dataset.alt||'';cap.textContent=b.dataset.cap||'';
+      });
+    });
+  });
+
+  /* ampliar captura */
+  var lb,lbOpener;
+  var closeLB=function(){if(!lb||lb.hidden)return;lb.hidden=true;d.body.style.overflow='';if(lbOpener)lbOpener.focus()};
+  var openLB=function(img,cap,opener){
+    if(!lb){
+      lb=d.createElement('div');lb.className='lb';lb.hidden=true;lb.setAttribute('role','dialog');lb.setAttribute('aria-modal','true');
+      lb.innerHTML='<button class="lb-x" type="button" aria-label="'+(h.lang==='es'?'Cerrar':'Close')+'">&times;</button><div class="lb-scroll"><img alt=""></div><p class="lb-cap"></p>';
+      d.body.appendChild(lb);
+      lb.addEventListener('click',function(e){if(e.target===lb||e.target.closest('.lb-x'))closeLB()});
+      d.addEventListener('keydown',function(e){
+        if(lb.hidden)return;
+        if(e.key==='Escape')closeLB();
+        if(e.key==='Tab'){e.preventDefault();lb.querySelector('.lb-x').focus()}
+      });
+    }
+    var im=lb.querySelector('img');
+    im.src=img.currentSrc||img.src;im.alt=img.alt||'';
+    lb.style.setProperty('--lbr',(img.naturalWidth&&img.naturalHeight)?(img.naturalWidth/img.naturalHeight).toFixed(3):'1.49');
+    lb.querySelector('.lb-cap').textContent=cap||'';
+    lbOpener=opener;lb.hidden=false;d.body.style.overflow='hidden';lb.querySelector('.lb-x').focus();
+  };
+  d.querySelectorAll('.shot').forEach(function(f){
+    var fr=f.querySelector('.frame'),img=f.querySelector('.frame img'),cap=f.querySelector('figcaption'),zb=f.querySelector('.zoom');
+    var go=function(o){openLB(img,cap.textContent,o)};
+    if(zb)zb.addEventListener('click',function(){go(zb)});
+    if(fr)fr.addEventListener('click',function(){go(zb||fr)});
+  });
+
+  /* planes: pestañas por herramienta y mensual/anual */
+  var plans=d.getElementById('plansbox');
+  if(plans){
+    var tabs=plans.querySelectorAll('.tab'),panels=plans.querySelectorAll('.panel');
+    var pick=function(tool){
+      tabs.forEach(function(t){var on=t.dataset.tool===tool;t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1});
+      panels.forEach(function(p){p.hidden=p.dataset.tool!==tool});
+    };
+    tabs.forEach(function(t,i){
+      t.addEventListener('click',function(){pick(t.dataset.tool)});
+      t.addEventListener('keydown',function(e){
+        var k=e.key,n=-1;
+        if(k==='ArrowRight')n=(i+1)%tabs.length;else if(k==='ArrowLeft')n=(i+tabs.length-1)%tabs.length;
+        if(n>=0){e.preventDefault();tabs[n].focus();pick(tabs[n].dataset.tool)}
+      });
+    });
+    d.querySelectorAll('a[data-tab]').forEach(function(a){a.addEventListener('click',function(){pick(a.dataset.tab)})});
+    pick('app');
+    var bb=d.querySelectorAll('.bill button');
+    bb.forEach(function(b){b.addEventListener('click',function(){
+      bb.forEach(function(x){x.setAttribute('aria-pressed','false')});
+      b.setAttribute('aria-pressed','true');plans.dataset.bill=b.dataset.bill;
+    })});
+  }
+})();
+</script>
+</body>
+</html>
