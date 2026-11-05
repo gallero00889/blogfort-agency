@@ -1,19 +1,21 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Verificar autenticidad — BlogFort Agency</title>
+<link rel="canonical" href="https://blogfort.agency/verificar/"><link rel="alternate" hreflang="es" href="https://blogfort.agency/verificar/"><link rel="alternate" hreflang="en" href="https://blogfort.agency/verify/">
 <style>
 body{margin:0;background:#0A1628;color:#e8eef8;font:15px/1.55 Arial,sans-serif;padding:16px}.w{max-width:720px;margin:0 auto}
 h1{font-size:20px;letter-spacing:2px;margin:6px 0}p{color:#9fb0c9}.c{background:#101f38;border:1px solid #1B4F8A;border-radius:12px;padding:16px;margin:12px 0}
 textarea,input{width:100%;box-sizing:border-box;background:#0A1628;color:#e8eef8;border:1px solid #2b4a78;border-radius:8px;padding:10px;font:12px monospace}textarea{min-height:120px}
 button{background:#1B4F8A;color:#fff;border:0;border-radius:8px;padding:12px 16px;font-weight:700;cursor:pointer;margin-top:8px}
 .ok{border-color:#1e9e6a;background:rgba(30,158,106,.12)}.bad{border-color:#c0392b;background:rgba(192,57,43,.14)}.warn{border-color:#d4a017;background:rgba(212,160,23,.12)}
+.lg{float:right;font-size:13px}.lg a{color:#9fb0c9}a:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid #ecc872;outline-offset:2px}
 td{padding:4px 8px 4px 0;vertical-align:top;font-size:14px}td:first-child{color:#9fb0c9;white-space:nowrap}label{font-size:12px;color:#9fb0c9}
-</style></head><body><div class="w">
-<h1>VERIFICAR AUTENTICIDAD</h1><p>BlogFort Agency LLC · Comprueba si un documento o un email con firma de BlogFort es genuino. La comprobación se hace en tu navegador; no se envía nada.</p>
-<div class="c"><label>Pega aquí la firma completa (empieza por BF1.)</label><textarea id="t" spellcheck="false" placeholder="BF1.…"></textarea>
-<label style="display:block;margin-top:10px">Huella del contenido impresa en el documento (opcional, para comparar)</label><input id="h" placeholder="Huella SHA-256">
+</style></head><body><main class="w">
+<p class="lg"><a href="/verify/" hreflang="en" lang="en">English</a></p><h1>VERIFICAR AUTENTICIDAD</h1><p><span translate="no">BlogFort Agency LLC</span> · Comprueba si un documento o un email con firma de BlogFort es genuino. La comprobación se hace en tu navegador; no se envía nada.</p>
+<div class="c"><label for="t">Pega aquí la firma completa (empieza por BF1.)</label><textarea id="t" spellcheck="false" placeholder="BF1.…"></textarea>
+<label for="h" style="display:block;margin-top:10px">Huella del contenido impresa en el documento (opcional, para comparar)</label><input id="h" placeholder="Huella SHA-256">
 <button id="b">VERIFICAR</button></div>
-<div id="r"></div>
+<div id="r" role="status" aria-live="polite"></div>
 <p style="font-size:12px">Qué demuestra y qué no: confirma que la firma fue creada con una licencia emitida por BlogFort (o directamente por BlogFort, en el caso de emails) y que el contenido firmado no se ha alterado. No impide que alguien edite un PDF en otro programa: por eso, compara siempre la huella impresa con la de esta página.</p>
-</div>
+</main>
 <script>
 var PUB={"kty":"EC","crv":"P-256","x":"2SMR8WAsGLuzqpG7p5oAhZoftAptruKlu9-5XG8UD_c","y":"mgfi2M2_FLECMHL4ajIl6xH6G_xk3xcUQ7kDreq4A7M"};
 function b64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}

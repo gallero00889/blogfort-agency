@@ -1,9 +1,10 @@
-/* MATRIX · service worker v7 (MATRIX v3.3)
+/* MATRIX · service worker v8 (MATRIX v3.3.1)
    Red primero; con conexión se guarda copia; sin conexión se sirve la copia.
    Cambio respecto a v6: al activarse borra SOLO las cachés antiguas de MATRIX (prefijo «matrix-»); antes borraba todas las demás,
-   también las de BlogFort App y MWBFA, que comparten el mismo dominio. */
+   también las de BlogFort App y MWBFA, que comparten el mismo dominio.
+   v8 (3.3.1): solo cambia el número para que los navegadores renueven la copia guardada (logo, franja de almacenamiento y tarjeta de margen). */
 const CACHE_PREFIX = 'matrix-';
-const CACHE_NAME = CACHE_PREFIX + 'v7';
+const CACHE_NAME = CACHE_PREFIX + 'v8';
 const urlsToCache = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', event => {

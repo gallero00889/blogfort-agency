@@ -3863,7 +3863,6 @@ const META_TPL = {
   tr: [(t, k) => t + '. ' + k + ' hakkında her şey: temel noktalar, örnekler ve pratik öneriler.', t => t + ': temel noktalar, örnekler ve pratik öneriler.'],
   hi: [(t, k) => t + '। ' + k + ' के बारे में सब कुछ: मुख्य बातें, उदाहरण और व्यावहारिक सुझाव।', t => t + ': मुख्य बातें, उदाहरण और व्यावहारिक सुझाव।']
 };
-const ALT_PRE = { es: 'Imagen sobre ', en: 'Image about ', pt: 'Imagem sobre ', fr: 'Image sur ', de: 'Bild zu ', it: 'Immagine su ', zh: '图片：', ar: 'صورة عن ', ja: '画像：', ru: 'Изображение: ', ko: '이미지: ', nl: 'Afbeelding over ', sv: 'Bild om ', pl: 'Obraz: ', tr: 'Görsel: ', hi: 'छवि: ' };
 const byLang = (tbl, lang) => tbl[String(lang || 'es').toLowerCase()] || tbl[baseLang(String(lang || 'es').toLowerCase())] || tbl.es;
 // Longitud máxima de la metadescripción: el chino, el japonés y el coreano ocupan más ancho por carácter en el buscador
 const metaMax = lang => { const b = baseLang(String(lang || 'es').toLowerCase()); return (b === 'zh' || b === 'ja' || b === 'ko') ? 120 : 155; };
@@ -3896,8 +3895,8 @@ function _upd() {
     const mx = metaMax(lang);
     mc.textContent = desc.length + '/' + mx;
     mc.className = 'meta-seo-count ' + (desc.length >= Math.round(mx * 0.45) && desc.length <= mx ? 'ok' : 'warn');
-    const altBase = title ? title.toLowerCase().replace(/[¿¡?!？！؟]/g, '').trim() : kwRaw;
-    $id('altTextAuto').textContent = clip(byLang(ALT_PRE, lang) + altBase, 100);
+    const altBase = title ? title.replace(/[¿¡?!？！؟]/g, '').replace(/[.\s。]+$/, '').trim() : kwRaw;
+    $id('altTextAuto').textContent = clip(altBase, 100);
     $id('slugAuto').textContent = slugify(title || kwRaw, 'articulo');
   } else {
     panel.style.display = 'none';
@@ -5984,7 +5983,7 @@ window.BFH_TIP = 'Tus artículos viven en este dispositivo. Haz una copia en Con
     pct = s.quota ? Math.min(100, Math.round(s.usage / s.quota * 100)) : 0;
     $('bfh-fill').style.width = Math.max(pct, 1) + '%';
     $('bfh-use').textContent = s.quota ? T('{0} de {1} ({2}%)', fmt(s.usage), fmt(s.quota), pct) : 'No disponible en este navegador';
-    $('bfh-ls').textContent = T('{0} registros · {1}', s.lsKeys, fmt(s.lsBytes));
+    $('bfh-ls').textContent = s.lsKeys === 1 ? fmt(s.lsBytes) : T('{0} registros · {1}', s.lsKeys, fmt(s.lsBytes));
     $('bfh-per').textContent = s.persisted ? 'Sí, protegido' : 'No (el navegador podría borrarlo si falta espacio)';
     $('bfh-cache').textContent = (s.sw || s.caches) ? T('Activa ({0})', s.caches || 1) : 'No activa todavía';
     var lb = parseInt(lsGet(NS + 'lastBackup') || '0', 10);
